@@ -23,13 +23,19 @@ export class ServiceType {
   @Column({ type: 'text', nullable: true })
   description: string;
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ length: 50, nullable: true })
+  category: string;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'base_price' })
+  basePrice: number;
+
+  @Column({ type: 'jsonb', nullable: true, name: 'required_documents' })
   requiredDocuments: any;
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'jsonb', nullable: true, name: 'form_schema' })
   formSchema: any;
 
-  @Column({ default: true })
+  @Column({ default: true, name: 'is_active' })
   isActive: boolean;
 
   @OneToMany(() => ServiceRequest, (request) => request.serviceType)
@@ -38,9 +44,9 @@ export class ServiceType {
   @OneToMany(() => Appointment, (appointment) => appointment.serviceType)
   appointments: Appointment[];
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }

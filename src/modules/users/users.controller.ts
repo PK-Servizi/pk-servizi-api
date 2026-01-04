@@ -4,122 +4,196 @@ import {
   Post,
   Body,
   Param,
-  Patch,
+  Put,
   Delete,
+  Patch,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { CreateUserWithPermissionsDto } from './dto/create-user-with-permissions.dto';
+import { FamilyMembersService } from './family-members.service';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { AssignPermissionsDto } from './dto/assign-permissions.dto';
-import { RolesGuard } from '../../common/guards/roles.guard';
-import { PermissionsGuard } from '../../common/guards/permissions.guard';
+import { CreateFamilyMemberDto } from './dto/create-family-member.dto';
+import { UpdateFamilyMemberDto } from './dto/update-family-member.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { Permissions } from '../../common/decorators/permissions.decorator';
-import { SecurityUtil } from '../../common/utils/security.util';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
-@UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
 @ApiTags('Users')
 @Controller('users')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  @UseGuards(JwtAuthGuard)
+  // Customer Routes
+  @Get('profile')
+  @Permissions('users:read_own')
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'create users' })
-  @Permissions('users.create')
-  create(@Body() dto: CreateUserDto) {
-    return this.usersService.create(dto);
+  @ApiOperation({ summary: 'Get own profile' })
+  getProfile(@CurrentUser() user: any) {
+    return this.usersService.getProfile(user.id);
   }
 
-  @Post('with-permissions')
-  @UseGuards(JwtAuthGuard)
+  @Put('profile')
+  @Permissions('users:write_own')
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'create user with permissions' })
-  @Permissions('users.create')
-  createWithPermissions(@Body() dto: CreateUserWithPermissionsDto) {
-    return this.usersService.createWithPermissions(dto);
+  @ApiOperation({ summary: 'Update own profile' })
+  updateProfile(@CurrentUser() user: any, @Body() dto: UpdateUserDto) {
+    return this.usersService.updateProfile(user.id, dto);
   }
 
-  @Post(':id/permissions')
-  @UseGuards(JwtAuthGuard)
+  @Get('profile/extended')
+  @Permissions('users:read_own')
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'assign permissions to user by id' })
-  @Permissions('users.update')
-  assignPermissions(
-    @Param('id') id: string,
-    @Body() dto: AssignPermissionsDto,
-  ) {
-    const validId = SecurityUtil.validateId(id);
-    return this.usersService.assignPermissions(validId, dto);
+  @ApiOperation({ summary: 'Get extended profile' })
+  getExtendedProfile(@CurrentUser() user: any) {
+    return this.usersService.getExtendedProfile(user.id);
   }
 
-  @Get(':id/permissions')
-  @UseGuards(JwtAuthGuard)
+  @Put('profile/extended')
+  @Permissions('users:write_own')
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'get user permissions by id' })
-  @Permissions('users.read')
-  getUserPermissions(@Param('id') id: string) {
-    const validId = SecurityUtil.validateId(id);
-    return this.usersService.getUserPermissions(validId);
-  }
-  @Get('available-features')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'get all features' })
-  @Permissions('users.read')
-  getAvailableFeatures() {
-    return this.usersService.getAvailableFeatures();
+  @ApiOperation({ summary: 'Update extended profile' })
+  updateExtendedProfile(@CurrentUser() user: any, @Body() dto: any) {
+    return this.usersService.updateExtendedProfile(user.id, dto);
   }
 
-  @Get('available-features/:feature/actions')
-  @UseGuards(JwtAuthGuard)
+  @Post('avatar')
+  @Permissions('users:write_own')
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Get permidssion of any feature' })
-  @Permissions('users.read')
-  getAvailableActionsForFeature(@Param('feature') feature: string) {
-    return this.usersService.getAvailableActionsForFeature(feature);
+  @ApiOperation({ summary: 'Upload avatar' })
+  uploadAvatar(@CurrentUser() user: any, @Body() dto: any) {
+    return this.usersService.uploadAvatar(user.id, dto);
   }
 
+  @Delete('avatar')
+  @Permissions('users:write_own')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Delete avatar' })
+  deleteAvatar(@CurrentUser() user: any) {
+    return this.usersService.deleteAvatar(user.id);
+  }
+
+  // Admin Routes
   @Get()
-  @UseGuards(JwtAuthGuard)
+  @Permissions('users:read')
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Get users' })
-  @Permissions('users.read')
+  @ApiOperation({ summary: 'List all users' })
   findAll() {
     return this.usersService.findAll();
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard)
+  @Permissions('users:read')
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'get user by id' })
-  @Permissions('users.read')
+  @ApiOperation({ summary: 'Get user by ID' })
   findOne(@Param('id') id: string) {
-    const validId = SecurityUtil.validateId(id);
-    return this.usersService.findOne(validId);
+    return this.usersService.findOne(id);
   }
 
-  @Patch(':id')
-  @UseGuards(JwtAuthGuard)
+  @Put(':id')
+  @Permissions('users:write')
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'update user by id' })
-  @Permissions('users.update')
+  @ApiOperation({ summary: 'Update user' })
   update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
-    const validId = SecurityUtil.validateId(id);
-    return this.usersService.update(validId, dto);
+    return this.usersService.update(id, dto);
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @Permissions('users:delete')
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'delete user by id' })
-  @Permissions('users.delete')
+  @ApiOperation({ summary: 'Delete user' })
   remove(@Param('id') id: string) {
-    const validId = SecurityUtil.validateId(id);
-    return this.usersService.remove(validId);
+    return this.usersService.remove(id);
+  }
+
+  @Patch(':id/activate')
+  @Permissions('users:write')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Activate user' })
+  activate(@Param('id') id: string) {
+    return this.usersService.activate(id);
+  }
+
+  @Patch(':id/deactivate')
+  @Permissions('users:write')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Deactivate user' })
+  deactivate(@Param('id') id: string) {
+    return this.usersService.deactivate(id);
+  }
+
+  @Get(':id/activity')
+  @Permissions('users:read')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Get user activity' })
+  getUserActivity(@Param('id') id: string) {
+    return this.usersService.getUserActivity(id);
+  }
+
+  @Get(':id/subscriptions')
+  @Permissions('subscriptions:read')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Get user subscriptions' })
+  getUserSubscriptions(@Param('id') id: string) {
+    return this.usersService.getUserSubscriptions(id);
+  }
+}
+
+@ApiTags('Family Members')
+@Controller('family-members')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
+export class FamilyMembersController {
+  constructor(private readonly familyMembersService: FamilyMembersService) {}
+
+  // Customer Routes
+  @Get()
+  @Permissions('family_members:read_own')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'List own family members' })
+  findMy(@CurrentUser() user: any) {
+    return this.familyMembersService.findByUser(user.id);
+  }
+
+  @Post()
+  @Permissions('family_members:write_own')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Add family member' })
+  create(@Body() dto: CreateFamilyMemberDto, @CurrentUser() user: any) {
+    return this.familyMembersService.create(dto, user.id);
+  }
+
+  @Get(':id')
+  @Permissions('family_members:read_own')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Get family member' })
+  findOne(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.familyMembersService.findOne(id, user.id);
+  }
+
+  @Put(':id')
+  @Permissions('family_members:write_own')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Update family member' })
+  update(@Param('id') id: string, @Body() dto: UpdateFamilyMemberDto, @CurrentUser() user: any) {
+    return this.familyMembersService.update(id, dto, user.id);
+  }
+
+  @Delete(':id')
+  @Permissions('family_members:delete_own')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Delete family member' })
+  remove(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.familyMembersService.remove(id, user.id);
+  }
+
+  // Admin Routes
+  @Get('user/:userId')
+  @Permissions('family_members:read')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'List user\'s family members' })
+  findByUser(@Param('userId') userId: string) {
+    return this.familyMembersService.findByUser(userId);
   }
 }

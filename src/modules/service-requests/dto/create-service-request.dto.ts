@@ -36,6 +36,7 @@ export class CreateServiceRequestDto {
       'draft',
       'submitted',
       'in_review',
+      'in_progress',
       'missing_documents',
       'completed',
       'rejected',

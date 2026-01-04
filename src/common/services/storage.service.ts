@@ -1,32 +1,32 @@
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Storage } from '@google-cloud/storage';
+import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { v4 as uuidv4 } from 'uuid';
 import { extname } from 'path';
 
 @Injectable()
 export class StorageService {
-  private storage: Storage;
+  private s3Client: S3Client;
   private bucket: string;
   private readonly logger = new Logger(StorageService.name);
 
   constructor(private readonly configService: ConfigService) {
-    const projectId = this.configService.get<string>('GOOGLE_CLOUD_PROJECT_ID');
-    const keyFilename = this.configService.get<string>(
-      'GOOGLE_APPLICATION_CREDENTIALS',
-    );
-    this.bucket = this.configService.get<string>('GOOGLE_CLOUD_STORAGE_BUCKET');
+    const region = this.configService.get<string>('AWS_REGION');
+    const accessKeyId = this.configService.get<string>('AWS_ACCESS_KEY_ID');
+    const secretAccessKey = this.configService.get<string>('AWS_SECRET_ACCESS_KEY');
+    this.bucket = this.configService.get<string>('AWS_S3_BUCKET_NAME');
 
-    if (!projectId || !keyFilename || !this.bucket) {
-      this.logger.error('Google Cloud Storage configuration is missing');
-      // Warning only to allow app to start even if GCS is somehow misconfigured initially,
-      // but methods will fail. Ideally should be strict, but user faced crash loop.
-      // throw new InternalServerErrorException('Storage configuration missing');
+    if (!region || !accessKeyId || !secretAccessKey || !this.bucket) {
+      this.logger.error('AWS S3 configuration is missing');
     }
 
-    this.storage = new Storage({
-      projectId,
-      keyFilename,
+    this.s3Client = new S3Client({
+      region,
+      credentials: {
+        accessKeyId,
+        secretAccessKey,
+      },
     });
   }
 
@@ -39,22 +39,22 @@ export class StorageService {
       const fileName = `${uuidv4()}${fileExt}`;
       const filePath = `${pathPrefix}/${fileName}`;
 
-      const bucket = this.storage.bucket(this.bucket);
-      const blob = bucket.file(filePath);
-
-      await blob.save(file.buffer, {
-        contentType: file.mimetype,
-        resumable: false,
+      const command = new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: filePath,
+        Body: file.buffer,
+        ContentType: file.mimetype,
+        Metadata: {
+          originalName: file.originalname,
+          uploadedAt: new Date().toISOString(),
+        },
       });
 
-      // Usually GCS buckets are private. publicUrl is only valid if object is public.
-      // For private objects, we usually don't return a permanent publicUrl but depend on signed URLs.
-      // However, to keep interface compatible, we can return the GS URI or a placeholder.
-      // Or if the bucket is public: `https://storage.googleapis.com/${this.bucket}/${filePath}`
+      await this.s3Client.send(command);
 
       return {
         path: filePath,
-        publicUrl: `https://storage.googleapis.com/${this.bucket}/${filePath}`,
+        publicUrl: `https://${this.bucket}.s3.${this.configService.get('AWS_REGION')}.amazonaws.com/${filePath}`,
       };
     } catch (error) {
       this.logger.error(`Error uploading file: ${error.message}`, error.stack);
@@ -64,17 +64,12 @@ export class StorageService {
 
   async getSignedUrl(path: string, expiresIn = 3600): Promise<string> {
     try {
-      const options = {
-        version: 'v4' as const,
-        action: 'read' as const,
-        expires: Date.now() + expiresIn * 1000,
-      };
+      const command = new GetObjectCommand({
+        Bucket: this.bucket,
+        Key: path,
+      });
 
-      const [url] = await this.storage
-        .bucket(this.bucket)
-        .file(path)
-        .getSignedUrl(options);
-      return url;
+      return getSignedUrl(this.s3Client, command, { expiresIn });
     } catch (error) {
       this.logger.error(`Error generating signed URL: ${error.message}`);
       throw new BadRequestException('Failed to generate secure link');
@@ -83,7 +78,11 @@ export class StorageService {
 
   async deleteFile(path: string): Promise<void> {
     try {
-      await this.storage.bucket(this.bucket).file(path).delete();
+      const command = new DeleteObjectCommand({
+        Bucket: this.bucket,
+        Key: path,
+      });
+      await this.s3Client.send(command);
     } catch (error) {
       this.logger.error(`Error deleting file: ${error.message}`);
       throw new BadRequestException('Failed to delete file');

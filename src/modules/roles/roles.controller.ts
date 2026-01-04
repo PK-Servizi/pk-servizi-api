@@ -3,79 +3,107 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
+  Put,
   Delete,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { RolesService } from './roles.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
+import { AssignPermissionsDto } from './dto/assign-permissions.dto';
+import { AssignRoleDto } from './dto/assign-role.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../../common/guards/roles.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
-import { Roles } from '../../common/decorators/roles.decorator';
 import { Permissions } from '../../common/decorators/permissions.decorator';
-import { RoleEnum } from './role.enum';
-import { SecurityUtil } from '../../common/utils/security.util';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
-@UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
-@ApiTags('Roles')
-@Controller('roles')
+@ApiTags('Roles & Permissions')
+@Controller()
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
-  @Post()
-  @UseGuards(JwtAuthGuard)
+  // Roles Management
+  @Get('roles')
+  @Permissions('roles:read')
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Create a new role' })
-  @Roles(RoleEnum.ADMIN)
-  @Permissions('roles.create')
-  create(@Body() dto: CreateRoleDto) {
-    return this.rolesService.create(dto);
-  }
-
-  @Get()
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Retrieve all roles' })
-  @Roles(RoleEnum.ADMIN)
-  @Permissions('roles.read')
-  findAll() {
+  @ApiOperation({ summary: 'List all roles' })
+  findAllRoles() {
     return this.rolesService.findAll();
   }
 
-  @Get(':id')
-  @UseGuards(JwtAuthGuard)
+  @Post('roles')
+  @Permissions('roles:write')
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Retrieve a role by ID' })
-  @Permissions('roles.read')
-  @Roles(RoleEnum.ADMIN)
-  findOne(@Param('id') id: string) {
-    const validId = SecurityUtil.validateId(id);
-    return this.rolesService.findOne(validId);
+  @ApiOperation({ summary: 'Create role' })
+  createRole(@Body() dto: CreateRoleDto) {
+    return this.rolesService.create(dto);
   }
 
-  @Patch(':id')
-  @UseGuards(JwtAuthGuard)
+  @Get('roles/:id')
+  @Permissions('roles:read')
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Update a role by ID' })
-  @Roles(RoleEnum.ADMIN)
-  @Permissions('roles.update')
-  update(@Param('id') id: string, @Body() dto: UpdateRoleDto) {
-    const validId = SecurityUtil.validateId(id);
-    return this.rolesService.update(validId, dto);
+  @ApiOperation({ summary: 'Get role details' })
+  findOneRole(@Param('id') id: string) {
+    return this.rolesService.findOne(id);
   }
 
-  @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @Put('roles/:id')
+  @Permissions('roles:write')
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Remove a role by ID' })
-  @Roles(RoleEnum.ADMIN)
-  @Permissions('roles.delete')
-  remove(@Param('id') id: string) {
-    const validId = SecurityUtil.validateId(id);
-    return this.rolesService.remove(validId);
+  @ApiOperation({ summary: 'Update role' })
+  updateRole(@Param('id') id: string, @Body() dto: UpdateRoleDto) {
+    return this.rolesService.update(id, dto);
+  }
+
+  @Delete('roles/:id')
+  @Permissions('roles:delete')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Delete role' })
+  removeRole(@Param('id') id: string) {
+    return this.rolesService.remove(id);
+  }
+
+  // Permissions Management
+  @Get('permissions')
+  @Permissions('permissions:read')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'List all permissions' })
+  findAllPermissions() {
+    return this.rolesService.findAllPermissions();
+  }
+
+  @Post('roles/:id/permissions')
+  @Permissions('roles:write')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Assign permissions to role' })
+  assignPermissionsToRole(@Param('id') id: string, @Body() dto: AssignPermissionsDto) {
+    return this.rolesService.assignPermissions(id, dto);
+  }
+
+  @Delete('roles/:roleId/permissions/:permissionId')
+  @Permissions('roles:write')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Remove permission from role' })
+  removePermissionFromRole(@Param('roleId') roleId: string, @Param('permissionId') permissionId: string) {
+    return this.rolesService.removePermission(roleId, permissionId);
+  }
+
+  // User Role Assignment
+  @Post('users/:id/roles')
+  @Permissions('users:write')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Assign role to user' })
+  assignRoleToUser(@Param('id') id: string, @Body() dto: AssignRoleDto) {
+    return this.rolesService.assignRoleToUser(id, dto);
+  }
+
+  @Post('users/:id/permissions')
+  @Permissions('users:write')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Assign direct permission to user' })
+  assignPermissionToUser(@Param('id') id: string, @Body() dto: AssignPermissionsDto) {
+    return this.rolesService.assignPermissionToUser(id, dto);
   }
 }

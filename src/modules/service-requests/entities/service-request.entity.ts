@@ -18,34 +18,34 @@ export class ServiceRequest {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ name: 'user_id' })
   userId: string;
 
-  @Column()
+  @Column({ name: 'service_type_id' })
   serviceTypeId: string;
 
   @Column({ length: 20, default: 'draft' })
   status: string;
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'jsonb', nullable: true, name: 'form_data' })
   formData: any;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'text', nullable: true, name: 'internal_notes' })
   internalNotes: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'text', nullable: true, name: 'user_notes' })
   userNotes: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: 'assigned_operator_id' })
   assignedOperatorId: string;
 
   @Column({ length: 10, default: 'normal' })
   priority: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: 'submitted_at' })
   submittedAt: Date;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: 'completed_at' })
   completedAt: Date;
 
   @ManyToOne(() => User, (user) => user.serviceRequests)
@@ -66,9 +66,9 @@ export class ServiceRequest {
   @OneToMany(() => RequestStatusHistory, (history) => history.serviceRequest)
   statusHistory: RequestStatusHistory[];
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }

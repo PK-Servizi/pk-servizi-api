@@ -37,6 +37,34 @@ export class PermissionsGuard implements CanActivate {
     }
 
     try {
+      // Temporary: Allow customer role to access their own resources
+      if (user.role?.name === 'customer') {
+        const ownResourcePermissions = [
+          'users:read_own',
+          'users:write_own', 
+          'family_members:read_own',
+          'family_members:write_own',
+          'family_members:delete_own',
+          'service_requests:read_own',
+          'service_requests:write_own',
+          'documents:read_own',
+          'documents:write_own',
+          'appointments:read_own',
+          'appointments:write_own',
+          'notifications:read_own',
+          'courses:read_own',
+          'courses:write_own'
+        ];
+        
+        const hasPermission = requiredPermissions.some(permission => 
+          ownResourcePermissions.includes(permission)
+        );
+        
+        if (hasPermission) {
+          return true;
+        }
+      }
+
       const userPermissions = await this.userRepository.manager.query(
         `
         SELECT DISTINCT p.name 
@@ -74,7 +102,6 @@ export class PermissionsGuard implements CanActivate {
         );
       }
 
-      console.log('PERMISSION GRANTED');
       request.userPermissions = Array.from(permissionNames);
 
       return true;

@@ -92,6 +92,15 @@ export class CreateUserDto {
   birthDate?: string;
 
   @ApiPropertyOptional({
+    description: 'Birth place',
+    example: 'Milano',
+  })
+  @IsOptional()
+  @IsString({ message: 'Birth place must be a string' })
+  @MaxLength(100, { message: 'Birth place cannot exceed 100 characters' })
+  birthPlace?: string;
+
+  @ApiPropertyOptional({
     description: 'Address',
     example: 'Via Roma 123',
   })

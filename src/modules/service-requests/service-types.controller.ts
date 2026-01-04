@@ -2,87 +2,79 @@ import {
   Controller,
   Get,
   Post,
-  Body,
+  Put,
+  Delete,
   Patch,
   Param,
-  Delete,
+  Body,
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { PermissionsGuard } from '../../common/guards/permissions.guard';
+import { Permissions } from '../../common/decorators/permissions.decorator';
 import { ServiceTypesService } from './service-types.service';
 import { CreateServiceTypeDto } from './dto/create-service-type.dto';
 import { UpdateServiceTypeDto } from './dto/update-service-type.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
-@ApiTags('service-types')
+@ApiTags('Service Types')
 @Controller('service-types')
 export class ServiceTypesController {
   constructor(private readonly serviceTypesService: ServiceTypesService) {}
 
-  @Post()
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Create service type' })
-  create(@Body() createServiceTypeDto: CreateServiceTypeDto) {
-    return this.serviceTypesService.create(createServiceTypeDto);
-  }
-
+  // Public/Customer Routes
   @Get()
-  @ApiOperation({ summary: 'Get all service types' })
-  findAll() {
-    return this.serviceTypesService.findAll();
-  }
-
-  @Get('active')
-  @ApiOperation({ summary: 'Get active service types' })
+  @ApiOperation({ summary: 'List active service types' })
   findActive() {
-    return this.serviceTypesService.findAll();
-  }
-
-  @Get('category/:category')
-  @ApiOperation({ summary: 'Get service types by category' })
-  findByCategory() {
-    return { message: 'Feature not implemented yet' };
-  }
-
-  @Get('stats')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get service type statistics' })
-  getStats() {
-    return { message: 'Feature not implemented yet' };
+    return this.serviceTypesService.findActive();
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get service type by ID' })
+  @ApiOperation({ summary: 'Get service type details' })
   findOne(@Param('id') id: string) {
     return this.serviceTypesService.findOne(id);
   }
 
-  @Patch(':id')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Update service type' })
-  update(
-    @Param('id') id: string,
-    @Body() updateServiceTypeDto: UpdateServiceTypeDto,
-  ) {
-    return this.serviceTypesService.update(id, updateServiceTypeDto);
+  @Get(':id/schema')
+  @ApiOperation({ summary: 'Get form schema' })
+  getSchema(@Param('id') id: string) {
+    return this.serviceTypesService.getSchema(id);
   }
 
-  @Patch(':id/toggle')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Toggle service type active status' })
-  toggleActive() {
-    return { message: 'Feature not implemented yet' };
+  // Admin Routes
+  @Post()
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('service_types:write')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Create service type' })
+  create(@Body() dto: CreateServiceTypeDto) {
+    return this.serviceTypesService.create(dto);
+  }
+
+  @Put(':id')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('service_types:write')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Update service type' })
+  update(@Param('id') id: string, @Body() dto: UpdateServiceTypeDto) {
+    return this.serviceTypesService.update(id, dto);
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('service_types:delete')
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Delete service type' })
   remove(@Param('id') id: string) {
     return this.serviceTypesService.remove(id);
+  }
+
+  @Patch(':id/activate')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('service_types:write')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Activate service type' })
+  activate(@Param('id') id: string) {
+    return this.serviceTypesService.activate(id);
   }
 }

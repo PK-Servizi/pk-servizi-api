@@ -18,8 +18,8 @@ export class PaymentsService {
 
   async create(createPaymentDto: CreatePaymentDto): Promise<Payment> {
     const payment = this.paymentRepository.create({
-      ...createPaymentDto,
       status: 'pending',
+      ...createPaymentDto,
     });
     return this.paymentRepository.save(payment);
   }
@@ -142,6 +142,23 @@ export class PaymentsService {
       failed,
       totalAmount: parseFloat(totalAmount.sum) || 0,
     };
+  }
+
+  async recordStripePayment(data: {
+    stripeInvoiceId: string;
+    amount: number;
+    currency: string;
+    status: string;
+  }): Promise<Payment> {
+    const payment = this.paymentRepository.create({
+      amount: data.amount,
+      currency: data.currency,
+      status: data.status,
+      paymentMethod: 'stripe',
+      metadata: { stripeInvoiceId: data.stripeInvoiceId },
+      paidAt: data.status === 'succeeded' ? new Date() : null,
+    });
+    return this.paymentRepository.save(payment);
   }
 
   async processRefund(id: string, refundAmount?: number): Promise<Payment> {

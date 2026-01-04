@@ -2,9 +2,9 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  CreateDateColumn,
   ManyToOne,
   JoinColumn,
+  CreateDateColumn,
 } from 'typeorm';
 import { ServiceRequest } from './service-request.entity';
 import { User } from '../../users/entities/user.entity';
@@ -14,29 +14,29 @@ export class RequestStatusHistory {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ name: 'service_request_id' })
   serviceRequestId: string;
-
-  @Column({ length: 20, nullable: true })
-  fromStatus: string;
-
-  @Column({ length: 20 })
-  toStatus: string;
-
-  @Column()
-  changedById: string;
-
-  @Column({ type: 'text', nullable: true })
-  notes: string;
 
   @ManyToOne(() => ServiceRequest, (request) => request.statusHistory)
   @JoinColumn({ name: 'service_request_id' })
   serviceRequest: ServiceRequest;
 
-  @ManyToOne(() => User)
+  @Column({ length: 20, nullable: true, name: 'from_status' })
+  fromStatus: string;
+
+  @Column({ length: 20, name: 'to_status' })
+  toStatus: string;
+
+  @Column({ name: 'changed_by_id' })
+  changedById: string;
+
+  @ManyToOne(() => User, (user) => user.statusChanges)
   @JoinColumn({ name: 'changed_by_id' })
   changedBy: User;
 
-  @CreateDateColumn()
+  @Column({ type: 'text', nullable: true })
+  notes: string;
+
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 }

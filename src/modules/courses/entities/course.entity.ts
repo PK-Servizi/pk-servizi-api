@@ -25,16 +25,16 @@ export class Course {
   @Column({ type: 'text', nullable: true })
   content: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: 'instructor_id' })
   instructorId: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: 'max_participants' })
   maxParticipants: number;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: 'start_date' })
   startDate: Date;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: 'end_date' })
   endDate: Date;
 
   @Column({ length: 255, nullable: true })
@@ -53,9 +53,9 @@ export class Course {
   @OneToMany(() => CourseEnrollment, (enrollment) => enrollment.course)
   enrollments: CourseEnrollment[];
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }

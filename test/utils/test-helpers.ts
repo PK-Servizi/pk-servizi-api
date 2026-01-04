@@ -30,7 +30,7 @@ export const createMockUser = () => ({
   password: 'hashedPassword',
   role: {
     id: 'role-id',
-    name: RoleEnum.CLIENT,
+    name: RoleEnum.CUSTOMER,
     description: 'User role',
     createdAt: new Date(),
     updatedAt: new Date(),

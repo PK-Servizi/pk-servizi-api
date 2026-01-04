@@ -4,9 +4,9 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  CreateDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
-import { Permission } from '../../../modules/permissions/entities/permission.entity';
 
 @Entity('user_permissions')
 export class UserPermission {
@@ -19,22 +19,10 @@ export class UserPermission {
   @Column({ name: 'permission_id' })
   permissionId: string;
 
-  @ManyToOne(() => User, (user) => user.userPermissions, {
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @ManyToOne(() => Permission, (permission) => permission.userPermissions, {
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'permission_id' })
-  permission: Permission;
-
-  @Column({
-    name: 'created_at',
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-  })
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 }

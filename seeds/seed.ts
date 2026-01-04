@@ -8,6 +8,7 @@ import { SecurityUtil } from '../src/common/utils/security.util';
 
 // Import the permissions seeding function
 import { seedPermissions } from './permissions-seed';
+import { seedServiceTypes } from './service-types-seed';
 
 async function seed() {
   await AppDataSource.initialize(); // Initialize connection once
@@ -16,21 +17,29 @@ async function seed() {
     const roleRepo = AppDataSource.getRepository(Role);
     const userRepo = AppDataSource.getRepository(User);
 
+    // Clean up existing data
+    console.log('🧹 Cleaning up database...');
+    await userRepo.query('TRUNCATE TABLE users CASCADE;');
+    await roleRepo.query('TRUNCATE TABLE roles CASCADE;');
+
     // Seed roles...
-    // ... (Your roles seeding logic) ...
     const rolesToSeed = [
-      { name: RoleEnum.ADMIN, description: 'Administrator with full access' },
-      { name: RoleEnum.GUEST, description: 'Guest user with limited access' },
-      { name: RoleEnum.CLIENT, description: 'Client user with limited access' },
       {
-        name: RoleEnum.EMPLOYEE,
-        description: 'Employee user with limited access',
+        name: RoleEnum.ADMIN,
+        description: 'Administrator with full system access',
       },
       {
-        name: RoleEnum.PROJECT_MANAGER,
-        description: 'Project manager with project access',
+        name: RoleEnum.CUSTOMER,
+        description: 'End user/Customer of the platform',
       },
-      { name: RoleEnum.SUPPORT, description: 'Support user for tickets' },
+      {
+        name: RoleEnum.OPERATOR,
+        description: 'CAF Consultant/Operator handling requests',
+      },
+      {
+        name: RoleEnum.FINANCE,
+        description: 'Finance manager handling payments and subscriptions',
+      },
     ];
     for (const roleData of rolesToSeed) {
       let role = await roleRepo.findOne({ where: { name: roleData.name } });
@@ -48,7 +57,6 @@ async function seed() {
     }
 
     // Seed admin user...
-    // ... (Your admin user seeding logic) ...
     const adminEmail = 'admin_labverse@gmail.com';
     let adminUser = await userRepo.findOne({ where: { email: adminEmail } });
     if (!adminUser) {
@@ -70,8 +78,11 @@ async function seed() {
       console.log(`Admin user "${adminEmail}" already exists.`);
     }
 
-    // Now, run the permissions seed function, which will use the existing connection
-    await seedPermissions();
+    // Now, run the permissions seed function, passing the dataSource
+    await seedPermissions(AppDataSource);
+
+    // Run service types seed
+    await seedServiceTypes();
 
     console.log('✅ All seeding tasks completed successfully!');
   } catch (e) {

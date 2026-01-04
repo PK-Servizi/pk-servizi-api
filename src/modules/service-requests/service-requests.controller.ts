@@ -2,80 +2,215 @@ import {
   Controller,
   Get,
   Post,
-  Body,
+  Put,
+  Delete,
   Patch,
   Param,
-  Query,
+  Body,
   UseGuards,
-  Request,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ServiceRequestsService } from './service-requests.service';
+import { ServiceTypesService } from './service-types.service';
 import { CreateServiceRequestDto } from './dto/create-service-request.dto';
 import { UpdateServiceRequestDto } from './dto/update-service-request.dto';
-import { UpdateServiceRequestStatusDto } from './dto/update-service-request-status.dto';
-import { ServiceRequestQueryDto } from '../../common/dto/query.dto';
+import { CreateServiceTypeDto } from './dto/create-service-type.dto';
+import { UpdateServiceTypeDto } from './dto/update-service-type.dto';
+import { UpdateServiceRequestStatusDto } from './dto/update-status.dto';
+import { AssignOperatorDto } from './dto/assign-operator.dto';
+import { UpdatePriorityDto } from './dto/update-priority.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../../common/guards/roles.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { Permissions } from '../../common/decorators/permissions.decorator';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
-import { SubscriptionGuard } from '../../common/guards/subscription.guard';
+@ApiTags('Service Types')
+@Controller('service-types')
+export class ServiceTypesController {
+  constructor(private readonly serviceTypesService: ServiceTypesService) {}
 
-@ApiTags('Service Requests')
-@Controller('service-requests')
-@UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
-@ApiBearerAuth('JWT-auth')
-export class ServiceRequestsController {
-  constructor(private readonly service: ServiceRequestsService) {}
-
-  @Post()
-  @ApiOperation({ summary: 'Create service request' })
-  @Permissions('service-requests.create')
-  @UseGuards(SubscriptionGuard)
-  create(@Body() dto: CreateServiceRequestDto) {
-    return this.service.create(dto);
-  }
-
+  // Public Routes
   @Get()
-  @ApiOperation({ summary: 'Get all service requests' })
-  @Permissions('service-requests.read')
-  findAll(@Query() query: ServiceRequestQueryDto) {
-    return this.service.findAll(query);
+  @ApiOperation({ summary: 'List active service types' })
+  findActive() {
+    return this.serviceTypesService.findActive();
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get service request by ID' })
-  @Permissions('service-requests.read')
+  @ApiOperation({ summary: 'Get service type details' })
   findOne(@Param('id') id: string) {
-    return this.service.findOne(id);
+    return this.serviceTypesService.findOne(id);
   }
 
-  @Patch(':id')
-  @ApiOperation({ summary: 'Update service request' })
-  @Permissions('service-requests.update')
-  update(@Param('id') id: string, @Body() dto: UpdateServiceRequestDto) {
-    return this.service.update(id, dto);
+  @Get(':id/schema')
+  @ApiOperation({ summary: 'Get form schema' })
+  getSchema(@Param('id') id: string) {
+    return this.serviceTypesService.getSchema(id);
+  }
+
+  // Admin Routes
+  @Post()
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('service_types:write')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Create service type' })
+  create(@Body() dto: CreateServiceTypeDto) {
+    return this.serviceTypesService.create(dto);
+  }
+
+  @Put(':id')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('service_types:write')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Update service type' })
+  update(@Param('id') id: string, @Body() dto: UpdateServiceTypeDto) {
+    return this.serviceTypesService.update(id, dto);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('service_types:delete')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Delete service type' })
+  remove(@Param('id') id: string) {
+    return this.serviceTypesService.remove(id);
+  }
+
+  @Patch(':id/activate')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('service_types:write')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Activate service type' })
+  activate(@Param('id') id: string) {
+    return this.serviceTypesService.activate(id);
+  }
+}
+
+@ApiTags('Service Requests')
+@Controller('service-requests')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
+export class ServiceRequestsController {
+  constructor(private readonly serviceRequestsService: ServiceRequestsService) {}
+
+  // Customer Routes
+  @Get('my')
+  @Permissions('service_requests:read_own')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'List my service requests' })
+  findMy(@CurrentUser() user: any) {
+    return this.serviceRequestsService.findByUser(user.id);
+  }
+
+  @Post()
+  @Permissions('service_requests:write_own')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Create service request' })
+  create(@Body() dto: CreateServiceRequestDto, @CurrentUser() user: any) {
+    return this.serviceRequestsService.create(dto);
+  }
+
+  @Get(':id')
+  @Permissions('service_requests:read_own')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Get request details' })
+  findOne(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.serviceRequestsService.findOne(id);
+  }
+
+  @Put(':id')
+  @Permissions('service_requests:write_own')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Update draft request' })
+  update(@Param('id') id: string, @Body() dto: UpdateServiceRequestDto, @CurrentUser() user: any) {
+    return this.serviceRequestsService.update(id, dto);
+  }
+
+  @Post(':id/submit')
+  @Permissions('service_requests:write_own')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Submit request' })
+  submit(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.serviceRequestsService.submit(id, user.id);
+  }
+
+  @Delete(':id')
+  @Permissions('service_requests:delete_own')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Delete draft request' })
+  remove(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.serviceRequestsService.remove(id, user.id);
+  }
+
+  @Get(':id/status-history')
+  @Permissions('service_requests:read_own')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Get status history' })
+  getStatusHistory(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.serviceRequestsService.getStatusHistory(id, user.id);
+  }
+
+  @Post(':id/notes')
+  @Permissions('service_requests:write_own')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Add user note' })
+  addNote(@Param('id') id: string, @Body() dto: any, @CurrentUser() user: any) {
+    return this.serviceRequestsService.addNote(id, dto, user.id);
+  }
+
+  // Admin/Operator Routes
+  @Get()
+  @Permissions('service_requests:read')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'List all requests (filtered)' })
+  findAll() {
+    return this.serviceRequestsService.findAll({});
+  }
+
+  @Get('assigned-to-me')
+  @Permissions('service_requests:read_assigned')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'List assigned requests' })
+  findAssignedToMe(@CurrentUser() user: any) {
+    return this.serviceRequestsService.findAssignedTo(user.id);
   }
 
   @Patch(':id/status')
-  @ApiOperation({ summary: 'Update service request status' })
-  @Permissions('service-requests.update')
-  updateStatus(
-    @Param('id') id: string,
-    @Body() dto: UpdateServiceRequestStatusDto,
-    @Request() req: any,
-  ) {
-    return this.service.updateStatus(id, dto, req.user.id);
+  @Permissions('service_requests:write')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Update status' })
+  updateStatus(@Param('id') id: string, @Body() dto: UpdateServiceRequestStatusDto) {
+    return this.serviceRequestsService.updateStatus(id, dto, 'admin');
   }
 
-  @Patch(':id/assign/:operatorId')
-  @ApiOperation({ summary: 'Assign operator to service request' })
-  @Permissions('service-requests.assign')
-  assignOperator(
-    @Param('id') id: string,
-    @Param('operatorId') operatorId: string,
-  ) {
-    return this.service.assignOperator(id, operatorId);
+  @Post(':id/assign')
+  @Permissions('service_requests:assign')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Assign to operator' })
+  assign(@Param('id') id: string, @Body() dto: AssignOperatorDto) {
+    return this.serviceRequestsService.assign(id, dto);
+  }
+
+  @Put(':id/internal-notes')
+  @Permissions('service_requests:write')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Update internal notes' })
+  updateInternalNotes(@Param('id') id: string, @Body() dto: any) {
+    return this.serviceRequestsService.updateInternalNotes(id, dto);
+  }
+
+  @Patch(':id/priority')
+  @Permissions('service_requests:write')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Change priority' })
+  changePriority(@Param('id') id: string, @Body() dto: UpdatePriorityDto) {
+    return this.serviceRequestsService.changePriority(id, dto);
+  }
+
+  @Post(':id/request-documents')
+  @Permissions('service_requests:write')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Request additional documents' })
+  requestDocuments(@Param('id') id: string, @Body() dto: any) {
+    return this.serviceRequestsService.requestDocuments(id, dto);
   }
 }

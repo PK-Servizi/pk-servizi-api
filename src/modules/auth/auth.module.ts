@@ -10,13 +10,14 @@ import { UsersModule } from '../users/users.module';
 import { RolesModule } from '../roles/roles.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RefreshToken } from './entities/refresh-token.entity';
+import { BlacklistedToken } from './entities/blacklisted-token.entity';
 
 @Module({
   imports: [
     UsersModule,
     RolesModule,
     PassportModule,
-    TypeOrmModule.forFeature([RefreshToken]),
+    TypeOrmModule.forFeature([RefreshToken, BlacklistedToken]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

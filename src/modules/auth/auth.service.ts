@@ -12,14 +12,18 @@ import { UsersService } from '../users/users.service';
 import { RolesService } from '../roles/roles.service';
 import { RegisterDto } from './dto/register.dto';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
+import { LoginDto } from './dto/login.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import {
   RefreshTokenDto,
   PasswordResetDto,
-  ResetPasswordDto,
 } from './dto/refresh-token.dto';
 import { User } from '../users/entities/user.entity';
 import { RefreshToken } from './entities/refresh-token.entity';
+import { BlacklistedToken } from './entities/blacklisted-token.entity';
 
 import { SafeLogger } from '../../common/utils/logger.util';
 import { ValidationUtil } from '../../common/utils/validation.util';
@@ -33,6 +37,8 @@ export class AuthService {
     private readonly jwtService: JwtService,
     @InjectRepository(RefreshToken)
     private readonly refreshTokenRepository: Repository<RefreshToken>,
+    @InjectRepository(BlacklistedToken)
+    private readonly blacklistedTokenRepository: Repository<BlacklistedToken>,
   ) {}
 
   async register(
@@ -46,11 +52,11 @@ export class AuthService {
       throw new ConflictException('Email is already registered');
     }
 
-    // Find the default "client" role
-    const clientRole = await this.rolesService.findByName('client');
-    if (!clientRole) {
+    // Find the default "customer" role
+    const customerRole = await this.rolesService.findByName('customer');
+    if (!customerRole) {
       throw new NotFoundException(
-        'Default client role not found. Please contact administrator.',
+        'Default customer role not found. Please contact administrator.',
       );
     }
 
@@ -67,7 +73,7 @@ export class AuthService {
       province: dto.province,
       gdprConsent: dto.gdprConsent,
       privacyConsent: dto.marketingConsent,
-      roleId: clientRole.id, // Assign default client role
+      roleId: customerRole.id, // Assign default customer role
     });
 
     SafeLogger.log(`User registered successfully: ${dto.email}`, 'AuthService');
@@ -92,7 +98,7 @@ export class AuthService {
   }
 
   async login(
-    dto: AuthCredentialsDto,
+    dto: LoginDto | AuthCredentialsDto,
   ): Promise<{ success: boolean; message: string; data: LoginResponseDto }> {
     ValidationUtil.validateEmail(dto.email);
     ValidationUtil.validateString(dto.password, 'password', 1);
@@ -111,6 +117,12 @@ export class AuthService {
     if (!isMatch) {
       throw new UnauthorizedException('Invalid email or password');
     }
+
+    // Revoke all existing refresh tokens for this user
+    await this.refreshTokenRepository.update(
+      { userId: user.id, isRevoked: false },
+      { isRevoked: true }
+    );
 
     const userSafe = {
       id: user.id,
@@ -152,7 +164,7 @@ export class AuthService {
   async refreshToken(dto: RefreshTokenDto): Promise<{
     success: boolean;
     message: string;
-    data: { accessToken: string };
+    data: { accessToken: string; refreshToken: string };
   }> {
     ValidationUtil.validateString(dto.refreshToken, 'refreshToken');
 
@@ -165,6 +177,12 @@ export class AuthService {
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
 
+    // Revoke all existing refresh tokens for this user to force re-login on other devices
+    await this.refreshTokenRepository.update(
+      { userId: refreshToken.user.id, isRevoked: false },
+      { isRevoked: true }
+    );
+
     const payload = {
       sub: refreshToken.user.id,
       email: refreshToken.user.email,
@@ -173,6 +191,9 @@ export class AuthService {
       expiresIn: '15m',
     });
 
+    // Generate new refresh token
+    const newRefreshToken = await this.generateRefreshToken(refreshToken.user.id);
+
     SafeLogger.log(
       `Token refreshed for user: ${refreshToken.user.email}`,
       'AuthService',
@@ -180,33 +201,34 @@ export class AuthService {
     return {
       success: true,
       message: 'Token refreshed successfully',
-      data: { accessToken },
+      data: { accessToken, refreshToken: newRefreshToken.token },
     };
   }
 
   async logout(
-    refreshToken: string,
+    userId: string,
+    accessToken?: string,
   ): Promise<{ success: boolean; message: string }> {
-    ValidationUtil.validateString(refreshToken, 'refreshToken');
+    // Blacklist the current access token
+    if (accessToken) {
+      await this.blacklistToken(accessToken);
+    }
 
-    const result = await this.refreshTokenRepository.update(
-      { token: refreshToken },
+    // Revoke all refresh tokens for this user
+    await this.refreshTokenRepository.update(
+      { userId, isRevoked: false },
       { isRevoked: true },
     );
 
-    if (result.affected === 0) {
-      throw new UnauthorizedException('Invalid refresh token');
-    }
-
-    SafeLogger.log('User logged out successfully', 'AuthService');
+    SafeLogger.log(`User logged out successfully: ${userId}`, 'AuthService');
     return {
       success: true,
       message: 'Logged out successfully',
     };
   }
 
-  async requestPasswordReset(
-    dto: PasswordResetDto,
+  async forgotPassword(
+    dto: ForgotPasswordDto,
   ): Promise<{ success: boolean; message: string; token?: string }> {
     ValidationUtil.validateEmail(dto.email);
 
@@ -234,6 +256,12 @@ export class AuthService {
         'Password reset token generated successfully. Check server logs for token.',
       token: resetToken, // Remove in production
     };
+  }
+
+  async requestPasswordReset(
+    dto: PasswordResetDto,
+  ): Promise<{ success: boolean; message: string; token?: string }> {
+    return this.forgotPassword(dto);
   }
 
   async resetPassword(
@@ -272,9 +300,36 @@ export class AuthService {
     }
   }
 
-  async getCurrentUser(
+  async changePassword(
     userId: string,
-  ): Promise<{ success: boolean; message: string; data: any }> {
+    dto: ChangePasswordDto,
+  ): Promise<{ success: boolean; message: string }> {
+    const user = await this.usersService.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Get user with password for comparison
+    const userWithPassword = await this.usersService.findByIdWithPassword(userId);
+    if (!userWithPassword) {
+      throw new NotFoundException('User not found');
+    }
+
+    const isMatch = await bcrypt.compare(dto.currentPassword, userWithPassword.password);
+    if (!isMatch) {
+      throw new UnauthorizedException('Current password is incorrect');
+    }
+
+    const hashedPassword = await bcrypt.hash(dto.newPassword, 10);
+    await this.usersService.updatePassword(userId, hashedPassword);
+
+    return {
+      success: true,
+      message: 'Password changed successfully',
+    };
+  }
+
+  async getMe(userId: string): Promise<{ success: boolean; message: string; data: any }> {
     const user = await this.usersService.findOne(userId);
     const { ...userWithoutPassword } = user as any;
     return {
@@ -282,6 +337,12 @@ export class AuthService {
       message: 'User details retrieved successfully',
       data: userWithoutPassword,
     };
+  }
+
+  async getCurrentUser(
+    userId: string,
+  ): Promise<{ success: boolean; message: string; data: any }> {
+    return this.getMe(userId);
   }
 
   async getCurrentUserByEmail(email: string): Promise<any> {
@@ -310,5 +371,30 @@ export class AuthService {
 
   async getUserWithDetails(userId: string) {
     return this.usersService.findOneWithPermissions(userId);
+  }
+
+  private async blacklistToken(token: string): Promise<void> {
+    try {
+      const decoded = this.jwtService.decode(token) as any;
+      if (decoded && decoded.exp) {
+        const expiresAt = new Date(decoded.exp * 1000);
+        
+        const blacklistedToken = this.blacklistedTokenRepository.create({
+          token,
+          expiresAt,
+        });
+        
+        await this.blacklistedTokenRepository.save(blacklistedToken);
+      }
+    } catch (error) {
+      // Token might be invalid, ignore
+    }
+  }
+
+  async isTokenBlacklisted(token: string): Promise<boolean> {
+    const blacklisted = await this.blacklistedTokenRepository.findOne({
+      where: { token },
+    });
+    return !!blacklisted;
   }
 }

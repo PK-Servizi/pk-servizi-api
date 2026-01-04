@@ -1,442 +1,270 @@
-# 📚 PK SERVIZI - Quick Reference Guide
+# 🚀 PK SERVIZI Backend API
 
-## 🎯 Project Overview
+A clean, optimized NestJS backend API for the PK SERVIZI service management system.
 
-**PK SERVIZI** is a comprehensive CAF (Centro di Assistenza Fiscale) services platform consisting of:
-- **Mobile App** (Flutter) - Customer-facing application
-- **Admin Portal** (React) - Internal operations management
-- **Backend API** (NestJS) - Central business logic and data layer
+## 📋 Features
 
----
+- **Authentication & Authorization** - JWT-based auth with role-based permissions
+- **User Management** - Complete user and family member management
+- **Service Requests** - ISEE, 730, IMU service request processing
+- **Document Management** - Secure file upload and processing
+- **Appointments** - Booking and scheduling system
+- **Courses** - Course enrollment and certificate management
+- **Subscriptions** - Stripe-powered subscription management
+- **Notifications** - Real-time notification system
+- **CMS** - Content management for pages, news, and FAQs
+- **Reports & Analytics** - Comprehensive reporting system
+- **Audit Logs** - Complete audit trail
 
-## 📁 Key Documentation Files
+## 🛠️ Tech Stack
 
-| File | Purpose | When to Use |
-|------|---------|-------------|
-| `IMPLEMENTATION_TASKS.md` | Complete task catalog with priorities and steps | Planning development, tracking progress |
-| `.env.example` | Environment configuration template | Setting up new environments, onboarding developers |
-| `README.md` (this file) | Quick reference and navigation | Getting started, finding information |
-| `test/README.md` | Testing documentation | Writing and running tests |
-| `insomnia-collection.json` | API endpoint collection | Testing API endpoints manually |
-
----
+- **Framework**: NestJS
+- **Database**: PostgreSQL with TypeORM
+- **Authentication**: JWT (Access + Refresh tokens)
+- **Payments**: Stripe
+- **File Storage**: AWS S3
+- **Email**: Nodemailer
+- **Documentation**: Swagger/OpenAPI
+- **Security**: Helmet, Rate limiting, CORS
 
 ## 🚀 Quick Start
 
-### 1. Initial Setup
+### Prerequisites
 
-```bash
-# Clone repository
-git clone <repository-url>
-cd "PK SERVIZI"
+- Node.js 18+
+- PostgreSQL 14+
+- npm or yarn
 
-# Install dependencies
-npm install
+### Installation
 
-# Setup environment
-cp .env.example .env
-# Edit .env with your actual values
+1. **Clone and install dependencies**
+   ```bash
+   git clone <repository-url>
+   cd pk-servizi-backend
+   npm install
+   ```
+
+2. **Environment setup**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
+
+3. **Database setup**
+   ```bash
+   # Run migrations
+   npm run migration:run
+   
+   # Seed initial data
+   npm run seed:all
+   ```
+
+4. **Start development server**
+   ```bash
+   npm run start:dev
+   ```
+
+The API will be available at `http://localhost:3000`
+Swagger documentation at `http://localhost:3000/api/docs`
+
+## 📁 Project Structure
+
+```
+src/
+├── common/                 # Shared utilities
+│   ├── decorators/        # Custom decorators
+│   ├── filters/           # Exception filters
+│   ├── guards/            # Auth guards
+│   ├── interceptors/      # Response interceptors
+│   └── pipes/             # Validation pipes
+├── config/                # Configuration files
+├── modules/               # Feature modules
+│   ├── auth/             # Authentication
+│   ├── users/            # User management
+│   ├── roles/            # Roles & permissions
+│   ├── service-requests/ # Service requests
+│   ├── documents/        # Document management
+│   ├── appointments/     # Appointments
+│   ├── courses/          # Courses
+│   ├── subscriptions/    # Subscriptions & payments
+│   ├── notifications/    # Notifications
+│   ├── cms/              # Content management
+│   ├── reports/          # Reports & analytics
+│   ├── audit/            # Audit logs
+│   └── webhooks/         # Webhook handlers
+├── app.module.ts         # Root module
+└── main.ts               # Application entry point
 ```
 
-### 2. Database Setup
+## 🔐 Authentication
 
+The API uses JWT-based authentication with role-based access control (RBAC).
+
+### Roles
+- **SUPER_ADMIN** - Full system access
+- **ADMIN** - Administrative access
+- **OPERATOR** - Assigned requests management
+- **CUSTOMER** - Own data access
+
+### Usage
 ```bash
-# Run migrations
-npm run migration:run
+# Login
+POST /api/v1/auth/login
+{
+  "email": "user@example.com",
+  "password": "password"
+}
 
-# Seed initial data (roles, admin user, permissions)
-npm run seed:all
+# Use the returned access_token in Authorization header
+Authorization: Bearer <access_token>
 ```
 
-### 3. Start Development Server
+## 📚 API Documentation
 
-```bash
-# Start in watch mode
-npm run start:dev
-
-# Application runs on http://localhost:3001
-# Swagger docs available at http://localhost:3001/api/docs
+### Base URL
+```
+http://localhost:3000/api/v1
 ```
 
----
+### Key Endpoints
 
-## 📊 Current Project Status
+#### Authentication
+- `POST /auth/register` - Register new user
+- `POST /auth/login` - User login
+- `POST /auth/refresh` - Refresh token
+- `GET /auth/me` - Get current user
 
-**Overall Completion:** 65%
+#### Users
+- `GET /users/profile` - Get own profile
+- `PUT /users/profile` - Update profile
+- `GET /users` - List all users (Admin)
 
-### ✅ Completed Modules
-- Authentication & Authorization (90%)
-- User Management (90%)
-- Roles & Permissions (85%)
-- Audit Logging (100%)
-- CMS Content (100%)
-- Courses Management (100%)
-- Notifications (80%)
+#### Service Requests
+- `GET /service-requests/my` - My requests
+- `POST /service-requests` - Create request
+- `POST /service-requests/:id/submit` - Submit request
 
-### ⚠️ Partially Complete Modules
-- Service Requests (40%)
-- Documents (35%)
-- Appointments (60%)
-- Subscriptions (20%)
-- Payments (20%)
+#### Documents
+- `POST /documents/upload` - Upload document
+- `GET /documents/request/:id` - List request documents
 
-### ❌ Missing Modules
-- Stripe Integration
-- Document Upload/Download
-- Appointment Booking Flow
-- Service Type Configurations (ISEE, 730, IMU)
-- Admin Dashboard Aggregations
-- Email Notifications
+#### Appointments
+- `GET /appointments/available-slots` - Available slots
+- `POST /appointments` - Book appointment
 
----
+For complete API documentation, visit `/api/docs` when the server is running.
 
-## 🔴 Critical Tasks (Start Here)
+## 🗄️ Database
 
-Before the app can be used in production, complete these tasks in order:
-
-1. **TASK 1:** Register Missing Modules (30 min)
-   - See: `IMPLEMENTATION_TASKS.md` → TASK 1
-   - Creates module files and imports them
-
-2. **TASK 2:** Implement Stripe Integration (2-3 days)
-   - See: `IMPLEMENTATION_TASKS.md` → TASK 2
-   - Required env vars: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
-   - Enables payment processing and subscription management
-
-3. **TASK 3:** Implement Document Upload/Download (2 days)
-   - See: `IMPLEMENTATION_TASKS.md` → TASK 3
-   - Required env vars: `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`
-   - Enables document management for service requests
-
-4. **TASK 4:** Update Role System (4 hours)
-   - See: `IMPLEMENTATION_TASKS.md` → TASK 4
-   - Aligns roles with PK SERVIZI requirements
-
-5. **TASK 5:** Create Service Type Configurations (1 day)
-   - See: `IMPLEMENTATION_TASKS.md` → TASK 5
-   - Configures ISEE, 730/PF, and IMU service types
-
----
-
-## 🔧 Environment Configuration
-
-### Required Variables (Minimum to Run)
-
+### Migrations
 ```bash
-# Database
-DB_HOST=localhost
-DB_PORT=5432
-DB_USERNAME=postgres
-DB_PASSWORD=your_password
-DB_DATABASE=pk_servizi
-
-# JWT
-JWT_SECRET=your_jwt_secret_minimum_32_chars
-JWT_REFRESH_SECRET=your_refresh_secret_minimum_32_chars
-
-# Application
-PORT=3001
-NODE_ENV=development
-```
-
-### Critical for Production
-
-```bash
-# Stripe (TASK 2)
-STRIPE_SECRET_KEY=sk_live_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-
-# Supabase (TASK 3)
-SUPABASE_URL=https://...
-SUPABASE_SERVICE_KEY=...
-
-# Email (TASK 8)
-SENDGRID_API_KEY=SG...
-EMAIL_FROM_ADDRESS=noreply@pkservizi.it
-```
-
-See `.env.example` for complete list with descriptions.
-
----
-
-## 📋 Development Workflow
-
-### Daily Development
-
-```bash
-# Start development server
-npm run start:dev
-
-# Run linter
-npm run lint
-
-# Run tests
-npm run test
-
-# Run specific module tests
-npm run test:modules -- --testPathPattern=auth
-```
-
-### Database Changes
-
-```bash
-# Generate migration after entity changes
+# Generate migration
 npm run migration:generate
 
 # Run migrations
 npm run migration:run
 
-# Revert last migration
+# Revert migration
 npm run migration:revert
+```
 
-# Reset database (careful!)
+### Seeding
+```bash
+# Seed all data
+npm run seed:all
+
+# Reset database
 npm run db:reset
 ```
 
-### Code Quality
+## 🔧 Configuration
 
-```bash
-# Check all (lint + test + build)
-npm run check:all
+Key environment variables:
 
-# Format code
-npm run format
-```
-
----
-
-## 🗂️ Project Structure
-
-```
-PK SERVIZI/
-├── src/
-│   ├── modules/              # Feature modules
-│   │   ├── auth/            # ✅ Authentication
-│   │   ├── users/           # ✅ User management
-│   │   ├── roles/           # ✅ Role management
-│   │   ├── permissions/     # ✅ Permission management
-│   │   ├── service-requests/ # ⚠️ Service requests (needs module file)
-│   │   ├── documents/       # ⚠️ Documents (needs implementation)
-│   │   ├── appointments/    # ⚠️ Appointments (needs module file)
-│   │   ├── subscriptions/   # ⚠️ Subscriptions (needs module file)
-│   │   ├── payments/        # ⚠️ Payments (needs implementation)
-│   │   ├── courses/         # ✅ Courses
-│   │   ├── notifications/   # ✅ Notifications
-│   │   ├── cms/             # ✅ CMS content
-│   │   └── audit/           # ✅ Audit logs
-│   ├── common/              # Shared utilities
-│   │   ├── guards/          # Auth guards
-│   │   ├── decorators/      # Custom decorators
-│   │   ├── filters/         # Exception filters
-│   │   ├── interceptors/    # Response interceptors
-│   │   └── utils/           # Utility functions
-│   ├── config/              # Configuration files
-│   └── main.ts              # Application entry point
-├── migrations/              # Database migrations
-├── seeds/                   # Database seed files
-├── test/                    # Test files
-├── IMPLEMENTATION_TASKS.md  # 📋 Complete task list
-├── .env.example             # 🔧 Environment template
-└── package.json             # Dependencies
-```
-
----
-
-## 🔍 Finding Information
-
-### "How do I...?"
-
-| Question | Answer |
-|----------|--------|
-| Add a new feature? | Check `IMPLEMENTATION_TASKS.md` for similar tasks |
-| Configure environment? | See `.env.example` for all variables |
-| Test an endpoint? | Import `insomnia-collection.json` into Insomnia/Postman |
-| Understand the database? | Check entity files in `src/modules/*/entities/` |
-| See what's missing? | Read the analysis at the top of `IMPLEMENTATION_TASKS.md` |
-| Run tests? | See `test/README.md` |
-
-### "What needs to be done?"
-
-1. **Critical Priority:** See `IMPLEMENTATION_TASKS.md` → "CRITICAL PRIORITY TASKS"
-2. **High Priority:** See `IMPLEMENTATION_TASKS.md` → "HIGH PRIORITY TASKS"
-3. **Medium/Low Priority:** See `IMPLEMENTATION_TASKS.md` → Later sections
-
----
-
-## 🎯 Module Status Reference
-
-### Legend
-- ✅ **Complete** - Fully implemented and tested
-- ⚠️ **Partial** - Basic structure exists, needs completion
-- ❌ **Missing** - Not implemented yet
-- 🔴 **Critical** - Blocks production launch
-
-| Module | Status | Priority | Task Reference |
-|--------|--------|----------|----------------|
-| Authentication | ✅ Complete | - | - |
-| Users | ✅ Complete | - | - |
-| Roles | ⚠️ Partial | 🔴 High | TASK 4 |
-| Permissions | ✅ Complete | - | - |
-| Service Requests | ⚠️ Partial | 🔴 Critical | TASK 1, 5, 9 |
-| Documents | ⚠️ Partial | 🔴 Critical | TASK 1, 3, 10 |
-| Appointments | ⚠️ Partial | 🔴 High | TASK 1, 6 |
-| Subscriptions | ⚠️ Partial | 🔴 Critical | TASK 1, 2, 12 |
-| Payments | ⚠️ Partial | 🔴 Critical | TASK 2 |
-| Courses | ✅ Complete | - | - |
-| Notifications | ⚠️ Partial | High | TASK 8 |
-| CMS | ✅ Complete | - | - |
-| Audit | ✅ Complete | - | - |
-
----
-
-## 🔐 Security Checklist
-
-Before deploying to production:
-
-- [ ] All JWT secrets are strong and unique
-- [ ] Database credentials are secure
-- [ ] Stripe keys are production keys (not test)
-- [ ] CORS is configured for production domains only
-- [ ] Rate limiting is enabled
-- [ ] Helmet security headers are active
-- [ ] HTTPS is enforced
-- [ ] Environment variables are not committed to git
-- [ ] Sensitive data is encrypted at rest
-- [ ] GDPR compliance features are enabled
-- [ ] Backup strategy is implemented
-- [ ] Error tracking (Sentry) is configured
-- [ ] Logs don't contain sensitive information
-
----
-
-## 📞 Support & Resources
-
-### Documentation
-- **NestJS:** https://docs.nestjs.com/
-- **TypeORM:** https://typeorm.io/
-- **Stripe:** https://stripe.com/docs/api
-- **Supabase:** https://supabase.com/docs
-
-### Tools
-- **Swagger UI:** http://localhost:3001/api/docs (when running)
-- **Database Client:** pgAdmin, DBeaver, or TablePlus
-- **API Testing:** Insomnia or Postman
-
-### Common Commands
-
-```bash
-# Development
-npm run start:dev          # Start dev server
-npm run build              # Build for production
-npm run start:prod         # Run production build
-
+```env
 # Database
-npm run migration:run      # Run migrations
-npm run seed:all          # Seed database
-npm run db:reset          # Reset database
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=pk_servizi
+DB_USER=postgres
+DB_PASSWORD=your_password
 
-# Testing
-npm run test              # Run unit tests
-npm run test:modules      # Run module tests
-npm run test:e2e          # Run E2E tests
-npm run test:cov          # Run with coverage
+# JWT
+JWT_SECRET=your_jwt_secret
+JWT_EXPIRES_IN=15m
 
-# Code Quality
-npm run lint              # Check code
-npm run lint:fix          # Fix linting issues
-npm run format            # Format code
-npm run check:all         # Lint + test + build
+# Stripe
+STRIPE_API_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+
+# AWS S3
+AWS_ACCESS_KEY_ID=your_key
+AWS_SECRET_ACCESS_KEY=your_secret
+AWS_S3_BUCKET=pk-servizi-documents
 ```
 
----
+## 🧪 Testing
 
-## 🎓 Learning Path for New Developers
+```bash
+# Unit tests
+npm run test
 
-### Week 1: Understanding the Codebase
-1. Read this README
-2. Review `IMPLEMENTATION_TASKS.md` overview
-3. Set up local environment using `.env.example`
-4. Run the application and explore Swagger docs
-5. Review entity files to understand data model
+# E2E tests
+npm run test:e2e
 
-### Week 2: First Contributions
-1. Pick a MEDIUM priority task from `IMPLEMENTATION_TASKS.md`
-2. Read the task's step-by-step guide
-3. Implement the feature
-4. Write tests
-5. Submit PR
+# Test coverage
+npm run test:cov
+```
 
-### Week 3: Critical Features
-1. Work on HIGH or CRITICAL priority tasks
-2. Collaborate with team on complex features
-3. Review others' code
+## 📦 Deployment
 
----
+### Production Build
+```bash
+npm run build
+npm run start:prod
+```
 
-## 📈 Roadmap
+### Docker (Optional)
+```dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY dist ./dist
+EXPOSE 3000
+CMD ["node", "dist/main"]
+```
 
-### Phase 1: Foundation (Week 1) - CURRENT
-- Complete critical module registration
-- Implement Stripe integration
-- Implement document management
-- Update role system
+## 🔒 Security Features
 
-### Phase 2: Core Features (Week 2-3)
-- Service type configurations
-- Appointment booking
-- Email notifications
-- Admin dashboard
+- **Helmet** - Security headers
+- **Rate Limiting** - Request throttling
+- **CORS** - Cross-origin protection
+- **Input Validation** - Request validation
+- **JWT Security** - Secure token handling
+- **File Upload Security** - Safe file handling
 
-### Phase 3: Polish (Week 4)
-- Advanced features
-- Testing
-- Documentation
-- Performance optimization
+## 📊 Monitoring
 
-### Phase 4: Launch Prep (Week 5)
-- Security audit
-- GDPR compliance
-- Backup & recovery
-- Monitoring setup
+- **Health Checks** - `/health` endpoint
+- **Metrics** - Performance monitoring
+- **Logging** - Structured logging
+- **Error Tracking** - Exception monitoring
 
----
+## 🤝 Contributing
 
-## 🐛 Troubleshooting
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
 
-### Common Issues
+## 📄 License
 
-**Problem:** Database connection fails  
-**Solution:** Check DB credentials in `.env`, ensure PostgreSQL is running
+Proprietary - © 2024 PK SERVIZI. All rights reserved.
 
-**Problem:** Migrations fail  
-**Solution:** Run `npm run migration:revert` then `npm run migration:run`
+## 📞 Support
 
-**Problem:** Module not found errors  
-**Solution:** Run `npm install`, check imports in `app.module.ts`
-
-**Problem:** Swagger docs not loading  
-**Solution:** Check `SWAGGER_ENABLED=true` in `.env`
-
-**Problem:** Tests failing  
-**Solution:** Check test database configuration, run `npm run test:modules -- --verbose`
-
----
-
-## 📝 Notes
-
-- **Default Admin User:** 
-  - Email: `admin_labverse@gmail.com`
-  - Password: `Admin@12345`
-  - (Created by seed script)
-
-- **API Documentation:** Available at `/api/docs` when server is running
-
-- **Database Naming:** Uses snake_case (handled by SnakeNamingStrategy)
-
-- **Time Zone:** Europe/Rome (configurable in `.env`)
-
----
-
-**Last Updated:** 2026-01-03  
-**Version:** 1.0.0  
-**Maintainer:** PK SERVIZI Development Team
+- **Email**: dev@pkservizi.com
+- **Documentation**: https://docs.pkservizi.com
+- **Issues**: Create an issue in this repository

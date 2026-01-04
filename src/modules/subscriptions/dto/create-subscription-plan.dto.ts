@@ -1,68 +1,81 @@
-import {
-  IsString,
-  IsOptional,
-  IsNumber,
-  IsBoolean,
-  IsObject,
-  MinLength,
-  MaxLength,
-  Min,
-} from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsNumber, IsOptional } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateSubscriptionPlanDto {
-  @ApiProperty({ description: 'Plan name', example: 'Premium' })
-  @IsString({ message: 'Plan name must be a string' })
-  @MinLength(2, { message: 'Plan name must be at least 2 characters long' })
-  @MaxLength(100, { message: 'Plan name cannot exceed 100 characters' })
+  @ApiProperty()
+  @IsString()
   name: string;
 
-  @ApiPropertyOptional({ description: 'Plan description' })
+  @ApiProperty()
+  @IsString()
+  description: string;
+
+  @ApiProperty()
+  @IsNumber()
+  price: number;
+
+  @ApiProperty()
+  @IsString()
+  interval: string; // 'month' | 'year'
+
+  @ApiProperty({ required: false })
   @IsOptional()
-  @IsString({ message: 'Description must be a string' })
-  @MaxLength(500, { message: 'Description cannot exceed 500 characters' })
+  @IsString()
+  stripePriceId?: string;
+}
+
+export class UpdateSubscriptionPlanDto {
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
   description?: string;
 
-  @ApiPropertyOptional({ description: 'Monthly price in EUR', example: 19.99 })
+  @ApiProperty({ required: false })
   @IsOptional()
-  @IsNumber(
-    { maxDecimalPlaces: 2 },
-    {
-      message: 'Monthly price must be a valid number with max 2 decimal places',
-    },
-  )
-  @Min(0, { message: 'Monthly price cannot be negative' })
-  priceMonthly?: number;
+  @IsNumber()
+  price?: number;
+}
 
-  @ApiPropertyOptional({ description: 'Annual price in EUR', example: 199.99 })
-  @IsOptional()
-  @IsNumber(
-    { maxDecimalPlaces: 2 },
-    {
-      message: 'Annual price must be a valid number with max 2 decimal places',
-    },
-  )
-  @Min(0, { message: 'Annual price cannot be negative' })
-  priceAnnual?: number;
+export class CreateCheckoutDto {
+  @ApiProperty()
+  @IsString()
+  planId: string;
 
-  @ApiPropertyOptional({
-    description: 'Plan features',
-    example: ['isee', '730_complete', 'imu'],
-  })
+  @ApiProperty({ required: false })
   @IsOptional()
-  @IsObject({ message: 'Features must be a valid object' })
-  features?: any;
+  @IsString()
+  successUrl?: string;
 
-  @ApiPropertyOptional({
-    description: 'Service limits',
-    example: { max_requests_per_month: 10 },
-  })
+  @ApiProperty({ required: false })
   @IsOptional()
-  @IsObject({ message: 'Service limits must be a valid object' })
-  serviceLimits?: any;
+  @IsString()
+  cancelUrl?: string;
+}
 
-  @ApiPropertyOptional({ description: 'Is plan active', default: true })
+export class UpgradeSubscriptionDto {
+  @ApiProperty()
+  @IsString()
+  newPlanId: string;
+}
+
+export class UpdateSubscriptionStatusDto {
+  @ApiProperty({ enum: ['active', 'cancelled', 'past_due', 'unpaid'] })
+  @IsString()
+  status: string;
+}
+
+export class ProcessRefundDto {
+  @ApiProperty()
+  @IsNumber()
+  amount: number;
+
+  @ApiProperty({ required: false })
   @IsOptional()
-  @IsBoolean({ message: 'Active status must be a boolean' })
-  isActive?: boolean;
+  @IsString()
+  reason?: string;
 }

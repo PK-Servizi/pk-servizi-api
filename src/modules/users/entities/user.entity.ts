@@ -4,22 +4,15 @@ import {
   Column,
   ManyToOne,
   OneToMany,
-  ManyToMany,
-  JoinTable,
+  OneToOne,
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Role } from '../../roles/entities/role.entity';
-import { Permission } from '../../permissions/entities/permission.entity';
-import { UserPermission } from './user-permission.entity';
-import { UserSubscription } from '../../subscriptions/entities/user-subscription.entity';
-import { ServiceRequest } from '../../service-requests/entities/service-request.entity';
-import { Appointment } from '../../appointments/entities/appointment.entity';
-import { Course } from '../../courses/entities/course.entity';
-import { CourseEnrollment } from '../../courses/entities/course-enrollment.entity';
-import { Payment } from '../../payments/entities/payment.entity';
-import { Notification } from '../../notifications/entities/notification.entity';
+import { UserProfile } from './user-profile.entity';
+import { FamilyMember } from './family-member.entity';
+import { RefreshToken } from '../../auth/entities/refresh-token.entity';
 
 @Entity('users')
 export class User {
@@ -81,45 +74,29 @@ export class User {
   @JoinColumn({ name: 'role_id' })
   role: Role;
 
-  @OneToMany(() => UserPermission, (userPermission) => userPermission.user)
-  userPermissions: UserPermission[];
+  @OneToOne(() => UserProfile, (profile) => profile.user)
+  profile: UserProfile;
 
-  @ManyToMany(() => Permission, (permission) => permission.users, {
-    cascade: true,
-  })
-  @JoinTable({
-    name: 'user_permissions',
-    joinColumn: { name: 'user_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'permission_id', referencedColumnName: 'id' },
-  })
-  permissions: Permission[];
+  @OneToMany(() => FamilyMember, (familyMember) => familyMember.user)
+  familyMembers: FamilyMember[];
 
-  @OneToMany(() => UserSubscription, (subscription) => subscription.user)
-  subscriptions: UserSubscription[];
+  @OneToMany(() => RefreshToken, (token) => token.user)
+  refreshTokens: RefreshToken[];
 
-  @OneToMany(() => ServiceRequest, (request) => request.user)
-  serviceRequests: ServiceRequest[];
-
-  @OneToMany(() => ServiceRequest, (request) => request.assignedOperator)
-  assignedRequests: ServiceRequest[];
-
-  @OneToMany(() => Appointment, (appointment) => appointment.user)
-  appointments: Appointment[];
-
-  @OneToMany(() => Appointment, (appointment) => appointment.operator)
-  operatorAppointments: Appointment[];
-
-  @OneToMany(() => Course, (course) => course.instructor)
-  instructedCourses: Course[];
-
-  @OneToMany(() => CourseEnrollment, (enrollment) => enrollment.user)
-  courseEnrollments: CourseEnrollment[];
-
-  @OneToMany(() => Payment, (payment) => payment.user)
-  payments: Payment[];
-
-  @OneToMany(() => Notification, (notification) => notification.user)
-  notifications: Notification[];
+  // Virtual properties for relationships that don't exist yet
+  permissions?: any[];
+  appointments?: any[];
+  operatorAppointments?: any[];
+  auditLogs?: any[];
+  authoredContent?: any[];
+  courseEnrollments?: any[];
+  instructedCourses?: any[];
+  notifications?: any[];
+  payments?: any[];
+  serviceRequests?: any[];
+  assignedRequests?: any[];
+  statusChanges?: any[];
+  subscriptions?: any[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

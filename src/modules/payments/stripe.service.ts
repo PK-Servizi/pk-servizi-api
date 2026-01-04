@@ -1,117 +1,85 @@
-import { Injectable, Logger, BadRequestException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
 
 @Injectable()
 export class StripeService {
   private stripe: Stripe;
-  private readonly logger = new Logger(StripeService.name);
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(private configService: ConfigService) {
     this.stripe = new Stripe(
-      this.configService.get<string>('STRIPE_SECRET_KEY') || '',
+      this.configService.get<string>('STRIPE_SECRET_KEY'),
       {
-        apiVersion: '2023-10-16' as any,
+        apiVersion: '2025-12-15.clover',
       },
     );
   }
 
-  async createCustomer(user: {
-    email: string;
-    fullName: string;
-    id: string;
-  }): Promise<Stripe.Customer> {
-    try {
-      const customer = await this.stripe.customers.create({
-        email: user.email,
-        name: user.fullName,
-        metadata: {
-          userId: user.id,
-        },
-      });
-      return customer;
-    } catch (error) {
-      this.logger.error(`Error creating customer for user ${user.id}`, error);
-      throw new BadRequestException('Failed to create Stripe customer');
-    }
-  }
-
   async createCheckoutSession(
     userId: string,
-    userEmail: string,
-    priceId: string,
-    successUrl: string,
-    cancelUrl: string,
-  ): Promise<Stripe.Checkout.Session> {
-    try {
-      const session = await this.stripe.checkout.sessions.create({
-        payment_method_types: ['card'],
-        line_items: [
-          {
-            price: priceId,
-            quantity: 1,
-          },
-        ],
-        mode: 'subscription',
-        success_url: successUrl,
-        cancel_url: cancelUrl,
-        customer_email: userEmail,
-        metadata: {
-          userId,
+    planId: string,
+    billingCycle: 'monthly' | 'annual',
+  ) {
+    const priceId = billingCycle === 'monthly' 
+      ? this.configService.get<string>('STRIPE_PRICE_ID_MONTHLY')
+      : this.configService.get<string>('STRIPE_PRICE_ID_ANNUAL');
+
+    return this.stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
         },
-      });
-      return session;
-    } catch (error) {
-      this.logger.error(
-        `Error creating checkout session for user ${userId}`,
-        error,
-      );
-      throw new BadRequestException('Failed to create checkout session');
-    }
+      ],
+      mode: 'subscription',
+      success_url: `${this.configService.get('FRONTEND_URL')}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${this.configService.get('FRONTEND_URL')}/payment/cancel`,
+      metadata: {
+        userId,
+        planId,
+        billingCycle,
+      },
+    });
   }
 
-  async createPortalSession(
-    customerId: string,
-    returnUrl: string,
-  ): Promise<Stripe.BillingPortal.Session> {
-    try {
-      const session = await this.stripe.billingPortal.sessions.create({
-        customer: customerId,
-        return_url: returnUrl,
-      });
-      return session;
-    } catch (error) {
-      this.logger.error(
-        `Error creating portal session for customer ${customerId}`,
-        error,
-      );
-      throw new BadRequestException('Failed to create portal session');
-    }
+  async createCustomer(user: any) {
+    return this.stripe.customers.create({
+      email: user.email,
+      name: user.fullName,
+      metadata: {
+        userId: user.id,
+      },
+    });
   }
 
-  public constructEventFromPayload(
-    signature: string,
-    payload: Buffer,
-  ): Stripe.Event {
-    const webhookSecret = this.configService.get<string>(
-      'STRIPE_WEBHOOK_SECRET',
-    );
-    return this.stripe.webhooks.constructEvent(
-      payload,
-      signature,
-      webhookSecret,
-    );
+  async createSubscription(customerId: string, priceId: string) {
+    return this.stripe.subscriptions.create({
+      customer: customerId,
+      items: [{ price: priceId }],
+      payment_behavior: 'default_incomplete',
+      expand: ['latest_invoice.payment_intent'],
+    });
   }
 
-  async retrieveSubscription(
-    subscriptionId: string,
-  ): Promise<Stripe.Subscription> {
+  async cancelSubscription(subscriptionId: string) {
+    return this.stripe.subscriptions.cancel(subscriptionId);
+  }
+
+  async createPaymentIntent(amount: number, currency: string, metadata: any) {
+    return this.stripe.paymentIntents.create({
+      amount: amount * 100, // Convert to cents
+      currency,
+      metadata,
+    });
+  }
+
+  async retrieveSubscription(subscriptionId: string) {
     return this.stripe.subscriptions.retrieve(subscriptionId);
   }
 
-  async cancelSubscription(
-    subscriptionId: string,
-  ): Promise<Stripe.Subscription> {
-    return this.stripe.subscriptions.cancel(subscriptionId);
+  async constructWebhookEvent(payload: Buffer, signature: string) {
+    const webhookSecret = this.configService.get<string>('STRIPE_WEBHOOK_SECRET');
+    return this.stripe.webhooks.constructEvent(payload, signature, webhookSecret);
   }
 }

@@ -2,120 +2,91 @@ import {
   Controller,
   Get,
   Post,
-  Body,
+  Delete,
   Patch,
   Param,
-  Delete,
-  Query,
+  Body,
   UseGuards,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiBearerAuth,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { NotificationsService } from './notifications.service';
-import { CreateNotificationDto } from './dto/create-notification.dto';
-import { UpdateNotificationDto } from './dto/update-notification.dto';
-import { MarkNotificationReadDto } from './dto/mark-notification-read.dto';
+import { SendNotificationDto } from './dto/send-notification.dto';
+import { BroadcastNotificationDto } from './dto/broadcast-notification.dto';
+import { SendToRoleDto } from './dto/send-to-role.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { PermissionsGuard } from '../../common/guards/permissions.guard';
+import { Permissions } from '../../common/decorators/permissions.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
-@ApiTags('notifications')
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@ApiTags('Notifications')
 @Controller('notifications')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
-  @Post()
-  @ApiOperation({ summary: 'Create notification' })
-  create(@Body() createNotificationDto: CreateNotificationDto) {
-    return this.notificationsService.create(createNotificationDto);
-  }
-
-  @Post('bulk')
-  @ApiOperation({ summary: 'Create bulk notifications' })
-  createBulk(@Body() createNotificationDto: CreateNotificationDto) {
-    return this.notificationsService.sendBulkNotification(
-      [createNotificationDto.userId],
-      createNotificationDto.title,
-      createNotificationDto.message,
-      createNotificationDto.type,
-    );
-  }
-
-  @Get()
-  @ApiOperation({ summary: 'Get current user notifications' })
-  @ApiQuery({ name: 'unreadOnly', required: false, type: Boolean })
-  findAll(@CurrentUser() user: any, @Query('unreadOnly') unreadOnly?: boolean) {
-    return unreadOnly
-      ? this.notificationsService.findUnreadByUser(user.id)
-      : this.notificationsService.findByUser(user.id);
-  }
-
-  @Get('my-notifications')
-  @ApiOperation({ summary: 'Get current user notifications' })
-  @ApiQuery({ name: 'page', required: false, type: Number })
-  @ApiQuery({ name: 'limit', required: false, type: Number })
-  @ApiQuery({ name: 'unreadOnly', required: false, type: Boolean })
-  findMyNotifications(
-    @CurrentUser() user: any,
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
-    @Query('unreadOnly') unreadOnly?: boolean,
-  ) {
-    return unreadOnly
-      ? this.notificationsService.findUnreadByUser(user.id)
-      : this.notificationsService.findByUser(user.id);
+  // Customer Routes
+  @Get('my')
+  @Permissions('notifications:read_own')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'List my notifications' })
+  findMy(@CurrentUser() user: any) {
+    return this.notificationsService.findByUser(user.id);
   }
 
   @Get('unread-count')
-  @ApiOperation({ summary: 'Get unread notifications count for current user' })
+  @Permissions('notifications:read_own')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Get unread count' })
   getUnreadCount(@CurrentUser() user: any) {
     return this.notificationsService.getUnreadCount(user.id);
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Get notification by ID' })
-  findOne(@Param('id') id: string) {
-    return this.notificationsService.findOne(id);
-  }
-
-  @Patch(':id')
-  @ApiOperation({ summary: 'Update notification' })
-  update(
-    @Param('id') id: string,
-    @Body() updateNotificationDto: UpdateNotificationDto,
-  ) {
-    return this.notificationsService.update(id, updateNotificationDto);
-  }
-
   @Patch(':id/read')
-  @ApiOperation({ summary: 'Mark notification as read' })
-  markAsRead(
-    @Param('id') id: string,
-    @Body() markReadDto: MarkNotificationReadDto,
-  ) {
-    return this.notificationsService.markAsRead(id, markReadDto);
+  @Permissions('notifications:write_own')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Mark as read' })
+  markAsRead(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.notificationsService.markAsRead(id, user.id);
   }
 
-  @Post('mark-all-read')
-  @ApiOperation({ summary: 'Mark all notifications as read for current user' })
+  @Patch('mark-all-read')
+  @Permissions('notifications:write_own')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Mark all as read' })
   markAllAsRead(@CurrentUser() user: any) {
     return this.notificationsService.markAllAsRead(user.id);
   }
 
   @Delete(':id')
+  @Permissions('notifications:delete_own')
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Delete notification' })
-  remove(@Param('id') id: string) {
+  remove(@Param('id') id: string, @CurrentUser() user: any) {
     return this.notificationsService.remove(id);
   }
 
-  @Delete('user/clear-all')
-  @ApiOperation({ summary: 'Clear all notifications for current user' })
-  clearAllForUser() {
-    return { message: 'Feature not implemented yet' };
+  // Admin Routes
+  @Post('send')
+  @Permissions('notifications:write')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Send notification' })
+  send(@Body() dto: SendNotificationDto) {
+    return this.notificationsService.send(dto);
+  }
+
+  @Post('broadcast')
+  @Permissions('notifications:broadcast')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Broadcast to all users' })
+  broadcast(@Body() dto: BroadcastNotificationDto) {
+    return this.notificationsService.broadcast(dto);
+  }
+
+  @Post('send-to-role')
+  @Permissions('notifications:write')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Send to role' })
+  sendToRole(@Body() dto: SendToRoleDto) {
+    return this.notificationsService.sendToRole(dto);
   }
 }

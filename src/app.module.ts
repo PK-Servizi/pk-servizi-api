@@ -4,23 +4,20 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD, APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
 
+import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { RolesModule } from './modules/roles/roles.module';
-import { AuthModule } from './modules/auth/auth.module';
-import { PermissionsModule } from './modules/permissions/permissions.module';
-import { RolePermissionsModule } from './modules/role-permissions/role-permissions.module';
-import { AuditModule } from './modules/audit/audit.module';
-import { CmsModule } from './modules/cms/cms.module';
-import { CoursesModule } from './modules/courses/courses.module';
-import { PaymentsModule } from './modules/payments/payments.module';
-import { NotificationsModule } from './modules/notifications/notifications.module';
 import { ServiceRequestsModule } from './modules/service-requests/service-requests.module';
 import { DocumentsModule } from './modules/documents/documents.module';
 import { AppointmentsModule } from './modules/appointments/appointments.module';
+import { CoursesModule } from './modules/courses/courses.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { CmsModule } from './modules/cms/cms.module';
+import { ReportsModule } from './modules/reports/reports.module';
+import { AuditModule } from './modules/audit/audit.module';
+import { WebhooksModule } from './modules/webhooks/webhooks.module';
 
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import databaseConfig from './config/database.config';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { ResponseInterceptor } from './common/interceptor/response.interceptor';
@@ -53,22 +50,23 @@ import { ResponseInterceptor } from './common/interceptor/response.interceptor';
       }),
     }),
 
+    // Core modules
+    AuthModule,
     UsersModule,
     RolesModule,
-    AuthModule,
-    PermissionsModule,
-    RolePermissionsModule,
-    AuditModule,
-    CmsModule,
-    CoursesModule,
-    PaymentsModule,
-    NotificationsModule,
+
+    // Business modules
     ServiceRequestsModule,
     DocumentsModule,
     AppointmentsModule,
+    CoursesModule,
     SubscriptionsModule,
+    NotificationsModule,
+    CmsModule,
+    ReportsModule,
+    AuditModule,
+    WebhooksModule,
   ],
-  controllers: [AppController],
   providers: [
     {
       provide: APP_GUARD,
@@ -82,7 +80,6 @@ import { ResponseInterceptor } from './common/interceptor/response.interceptor';
       provide: APP_FILTER,
       useClass: GlobalExceptionFilter,
     },
-    AppService,
   ],
 })
 export class AppModule {}

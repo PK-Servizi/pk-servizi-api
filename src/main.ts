@@ -1,31 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-
 import { AppModule } from './app.module';
-import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { GlobalValidationPipe } from './common/pipes/global-validation.pipe';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 
-function getAllowedOrigins() {
-  const list = (process.env.FRONTEND_URLS || '')
-    .split(',')
-    .map((s) => s.trim())
-    .filter(Boolean);
-  const extra = [
-    'https://adminapi.labverse.org', // API+Swagger origin
-    'http://localhost:3000', // Local dev
-    'https://labverse.org',
-    'https://www.labverse.org',
-  ];
-  for (const e of extra) if (!list.includes(e)) list.push(e);
-  return list;
-}
-
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.getHttpAdapter().getInstance().set('trust proxy', 1);
+  // Security middleware
   app.use(
     helmet({
       contentSecurityPolicy: {
@@ -37,9 +21,10 @@ async function bootstrap() {
         },
       },
       crossOriginEmbedderPolicy: false,
-      crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
     }),
   );
+
+  // Rate limiting
   app.use(
     rateLimit({
       windowMs: 60 * 1000,
@@ -49,23 +34,27 @@ async function bootstrap() {
     }),
   );
 
-  const allowed = getAllowedOrigins();
+  // CORS configuration
   app.enableCors({
-    origin: (origin, cb) => {
-      if (!origin) return cb(null, true);
-      if (allowed.includes(origin)) return cb(null, true);
-      return cb(new Error(`CORS blocked for origin: ${origin}`), false);
-    },
+    origin: [
+      'https://app.pkservizi.com',
+      'https://admin.pkservizi.com',
+      'http://localhost:3000',
+      'http://localhost:3001',
+    ],
     credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     allowedHeaders: 'Content-Type, Authorization',
-    exposedHeaders: 'Authorization',
   });
+
+  // Global pipes and filters
   app.useGlobalPipes(new GlobalValidationPipe());
-  app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalFilters(new GlobalExceptionFilter());
+
+  // Swagger documentation
   const config = new DocumentBuilder()
-    .setTitle('LabVerse API')
-    .setDescription('Complete project management and CRM system API')
+    .setTitle('PK SERVIZI API')
+    .setDescription('Complete service management system API')
     .setVersion('1.0')
     .addBearerAuth(
       { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
@@ -80,9 +69,13 @@ async function bootstrap() {
     },
   });
 
-  const port = process.env.PORT || 3001;
+  // // Global prefix
+  // app.setGlobalPrefix('api/v1');
+
+  const port = process.env.PORT || 3000;
   await app.listen(port);
-  console.log(`Application is running on: http://localhost:${port}`);
-  console.log(`Swagger docs available at: http://localhost:${port}/api/docs`);
+  console.log(`🚀 PK SERVIZI API running on: http://localhost:${port}`);
+  console.log(`📚 API Documentation: http://localhost:${port}/api/docs`);
 }
+
 bootstrap();

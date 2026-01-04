@@ -15,10 +15,10 @@ export class Payment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ name: 'user_id' })
   userId: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: 'subscription_id' })
   subscriptionId: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
@@ -30,13 +30,13 @@ export class Payment {
   @Column({ length: 20, default: 'pending' })
   status: string;
 
-  @Column({ length: 50, nullable: true })
+  @Column({ length: 50, nullable: true, name: 'payment_method' })
   paymentMethod: string;
 
-  @Column({ length: 255, nullable: true })
+  @Column({ length: 255, nullable: true, name: 'stripe_payment_intent_id' })
   stripePaymentIntentId: string;
 
-  @Column({ length: 255, nullable: true })
+  @Column({ length: 255, nullable: true, name: 'stripe_charge_id' })
   stripeChargeId: string;
 
   @Column({ type: 'text', nullable: true })
@@ -45,7 +45,7 @@ export class Payment {
   @Column({ type: 'jsonb', nullable: true })
   metadata: any;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: 'paid_at' })
   paidAt: Date;
 
   @ManyToOne(() => User, (user) => user.payments)
@@ -56,9 +56,9 @@ export class Payment {
   @JoinColumn({ name: 'subscription_id' })
   subscription: UserSubscription;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }

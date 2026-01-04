@@ -17,28 +17,28 @@ export class UserSubscription {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ name: 'user_id' })
   userId: string;
 
-  @Column()
+  @Column({ name: 'plan_id' })
   planId: string;
 
   @Column({ length: 20, default: 'active' })
   status: string;
 
-  @Column({ length: 10, default: 'monthly' })
+  @Column({ length: 10, default: 'monthly', name: 'billing_cycle' })
   billingCycle: string;
 
-  @Column()
+  @Column({ name: 'start_date' })
   startDate: Date;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: 'end_date' })
   endDate: Date;
 
-  @Column({ default: true })
+  @Column({ default: true, name: 'auto_renew' })
   autoRenew: boolean;
 
-  @Column({ length: 255, nullable: true })
+  @Column({ length: 255, nullable: true, name: 'stripe_subscription_id' })
   stripeSubscriptionId: string;
 
   @ManyToOne(() => User, (user) => user.subscriptions)
@@ -52,9 +52,9 @@ export class UserSubscription {
   @OneToMany(() => Payment, (payment) => payment.subscription)
   payments: Payment[];
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }

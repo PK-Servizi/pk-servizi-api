@@ -5,6 +5,7 @@ import {
   IsIn,
   Min,
   Max,
+  IsDateString,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
@@ -65,4 +66,24 @@ export class ServiceRequestQueryDto extends PaginationDto {
   @IsOptional()
   @IsString({ message: 'User ID must be a string' })
   operatorId?: string;
+
+  @ApiPropertyOptional({ description: 'Filter by priority' })
+  @IsOptional()
+  @IsString()
+  priority?: string;
+
+  @ApiPropertyOptional({ description: 'Search term (name, fiscal code, ID)' })
+  @IsOptional()
+  @IsString()
+  search?: string;
+
+  @ApiPropertyOptional({ description: 'Start date (ISO)' })
+  @IsOptional()
+  @IsDateString()
+  startDate?: string;
+
+  @ApiPropertyOptional({ description: 'End date (ISO)' })
+  @IsOptional()
+  @IsDateString()
+  endDate?: string;
 }

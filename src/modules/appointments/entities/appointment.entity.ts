@@ -15,13 +15,13 @@ export class Appointment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ name: 'user_id' })
   userId: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: 'service_type_id' })
   serviceTypeId: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: 'operator_id' })
   operatorId: string;
 
   @Column({ length: 255 })
@@ -30,10 +30,10 @@ export class Appointment {
   @Column({ type: 'text', nullable: true })
   description: string;
 
-  @Column()
+  @Column({ name: 'appointment_date' })
   appointmentDate: Date;
 
-  @Column({ default: 60 })
+  @Column({ default: 60, name: 'duration_minutes' })
   durationMinutes: number;
 
   @Column({ length: 20, default: 'scheduled' })
@@ -57,9 +57,9 @@ export class Appointment {
   @JoinColumn({ name: 'operator_id' })
   operator: User;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }

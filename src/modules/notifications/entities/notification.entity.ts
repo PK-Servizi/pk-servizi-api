@@ -13,7 +13,7 @@ export class Notification {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ name: 'user_id' })
   userId: string;
 
   @Column({ length: 255 })
@@ -25,22 +25,22 @@ export class Notification {
   @Column({ length: 50, default: 'info' })
   type: string;
 
-  @Column({ default: false })
+  @Column({ default: false, name: 'is_read' })
   isRead: boolean;
 
-  @Column({ length: 500, nullable: true })
+  @Column({ length: 500, nullable: true, name: 'action_url' })
   actionUrl: string;
 
   @Column({ type: 'jsonb', nullable: true })
   metadata: any;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: 'read_at' })
   readAt: Date;
 
   @ManyToOne(() => User, (user) => user.notifications)
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 }

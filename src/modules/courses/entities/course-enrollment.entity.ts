@@ -17,22 +17,22 @@ export class CourseEnrollment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ name: 'course_id' })
   courseId: string;
 
-  @Column()
+  @Column({ name: 'user_id' })
   userId: string;
 
-  @Column({ default: () => 'CURRENT_TIMESTAMP' })
+  @Column({ default: () => 'CURRENT_TIMESTAMP', name: 'enrollment_date' })
   enrollmentDate: Date;
 
   @Column({ length: 20, default: 'enrolled' })
   status: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: 'completion_date' })
   completionDate: Date;
 
-  @Column({ default: false })
+  @Column({ default: false, name: 'certificate_issued' })
   certificateIssued: boolean;
 
   @ManyToOne(() => Course, (course) => course.enrollments)
@@ -43,9 +43,9 @@ export class CourseEnrollment {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }

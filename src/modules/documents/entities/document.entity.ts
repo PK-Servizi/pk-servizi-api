@@ -14,7 +14,7 @@ export class Document {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ name: 'service_request_id' })
   serviceRequestId: string;
 
   @Column({ length: 100 })
@@ -23,25 +23,25 @@ export class Document {
   @Column({ length: 255 })
   filename: string;
 
-  @Column({ length: 255 })
+  @Column({ length: 255, name: 'original_filename' })
   originalFilename: string;
 
-  @Column({ length: 500 })
+  @Column({ length: 500, name: 'file_path' })
   filePath: string;
 
-  @Column()
+  @Column({ name: 'file_size' })
   fileSize: number;
 
-  @Column({ length: 100 })
+  @Column({ length: 100, name: 'mime_type' })
   mimeType: string;
 
   @Column({ length: 20, default: 'pending' })
   status: string;
 
-  @Column({ default: false })
+  @Column({ default: false, name: 'is_required' })
   isRequired: boolean;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'text', nullable: true, name: 'admin_notes' })
   adminNotes: string;
 
   @Column({ default: 1 })
@@ -51,9 +51,9 @@ export class Document {
   @JoinColumn({ name: 'service_request_id' })
   serviceRequest: ServiceRequest;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }

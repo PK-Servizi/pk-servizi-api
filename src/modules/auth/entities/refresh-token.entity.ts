@@ -16,19 +16,19 @@ export class RefreshToken {
   @Column({ length: 500, unique: true })
   token: string;
 
-  @Column()
+  @Column({ name: 'user_id' })
   userId: string;
 
-  @Column()
+  @Column({ name: 'expires_at' })
   expiresAt: Date;
 
-  @Column({ default: false })
+  @Column({ default: false, name: 'is_revoked' })
   isRevoked: boolean;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, (user) => user.refreshTokens)
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 }

@@ -2,145 +2,134 @@ import {
   Controller,
   Get,
   Post,
-  Body,
+  Put,
+  Delete,
   Patch,
   Param,
-  Delete,
+  Body,
   UseGuards,
   UseInterceptors,
   UploadedFile,
-  ParseFilePipe,
-  MaxFileSizeValidator,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiBearerAuth,
-  ApiConsumes,
-  ApiBody,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 import { DocumentsService } from './documents.service';
-import { CreateDocumentDto } from './dto/create-document.dto';
+import { UploadDocumentDto } from './dto/upload-document.dto';
 import { UpdateDocumentDto } from './dto/update-document.dto';
 import { ApproveDocumentDto } from './dto/approve-document.dto';
+import { RejectDocumentDto } from './dto/reject-document.dto';
+import { AddNotesDto } from './dto/add-notes.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../../common/guards/roles.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { Permissions } from '../../common/decorators/permissions.decorator';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @ApiTags('Documents')
 @Controller('documents')
-@UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
-@ApiBearerAuth('JWT-auth')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class DocumentsController {
-  constructor(private readonly service: DocumentsService) {}
+  constructor(private readonly documentsService: DocumentsService) {}
 
+  // Customer Routes
   @Post('upload')
+  @Permissions('documents:write_own')
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Upload document' })
   @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        file: {
-          type: 'string',
-          format: 'binary',
-        },
-        serviceRequestId: { type: 'string' },
-        category: { type: 'string' },
-        mimeType: { type: 'string' }, // Optional, can be inferred
-        fileSize: { type: 'number' }, // Optional
-      },
-    },
-  })
-  @Permissions('documents.create')
   @UseInterceptors(FileInterceptor('file'))
-  upload(
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 10 * 1024 * 1024 }), // 10MB
-          // new FileTypeValidator({ fileType: '.(png|jpeg|jpg|pdf)' }), // Strict type check
-        ],
-      }),
-    )
-    file: Express.Multer.File,
-    @Body() dto: CreateDocumentDto,
+  uploadDocument(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() dto: UploadDocumentDto,
+    @CurrentUser() user: any,
   ) {
-    return this.service.uploadAndCreate(file, dto);
+    return this.documentsService.upload(file, dto, user.id);
   }
 
-  @Post()
-  @ApiOperation({ summary: 'Create document record only' })
-  @Permissions('documents.create')
-  create(@Body() dto: CreateDocumentDto) {
-    return this.service.create(dto);
-  }
-
-  @Get('service-request/:serviceRequestId')
-  @ApiOperation({ summary: 'Get documents by service request' })
-  @Permissions('documents.read')
-  findByServiceRequest(@Param('serviceRequestId') serviceRequestId: string) {
-    return this.service.findByServiceRequest(serviceRequestId);
-  }
-
-  @Get('service-request/:serviceRequestId/category/:category')
-  @ApiOperation({ summary: 'Get documents by category' })
-  @Permissions('documents.read')
-  getByCategory(
-    @Param('serviceRequestId') serviceRequestId: string,
-    @Param('category') category: string,
-  ) {
-    return this.service.getDocumentsByCategory(serviceRequestId, category);
-  }
-
-  @Get('service-request/:serviceRequestId/required')
-  @ApiOperation({ summary: 'Get required documents' })
-  @Permissions('documents.read')
-  getRequired(@Param('serviceRequestId') serviceRequestId: string) {
-    return this.service.getRequiredDocuments(serviceRequestId);
+  @Get('request/:requestId')
+  @Permissions('documents:read_own')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'List request documents' })
+  findByRequest(@Param('requestId') requestId: string, @CurrentUser() user: any) {
+    return this.documentsService.findByRequest(requestId, user.id);
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get document by ID' })
-  @Permissions('documents.read')
-  findOne(@Param('id') id: string) {
-    return this.service.findOne(id);
+  @Permissions('documents:read_own')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Get document details' })
+  findOne(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.documentsService.findOne(id);
   }
 
   @Get(':id/download')
-  @ApiOperation({ summary: 'Get download URL for document' })
-  @Permissions('documents.read')
-  getDownloadUrl(@Param('id') id: string) {
-    return this.service.getDownloadUrl(id);
+  @Permissions('documents:read_own')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Download document' })
+  download(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.documentsService.download(id, user.id);
   }
 
-  @Patch(':id')
-  @ApiOperation({ summary: 'Update document' })
-  @Permissions('documents.update')
-  update(@Param('id') id: string, @Body() dto: UpdateDocumentDto) {
-    return this.service.update(id, dto);
-  }
-
-  @Patch(':id/approve')
-  @ApiOperation({ summary: 'Approve or reject document' })
-  @Permissions('documents.approve')
-  approve(@Param('id') id: string, @Body() dto: ApproveDocumentDto) {
-    return this.service.approve(id, dto);
-  }
-
-  @Post(':id/replace')
-  @ApiOperation({ summary: 'Replace document with new version' })
-  @Permissions('documents.create')
-  replace(@Param('id') id: string, @Body() dto: CreateDocumentDto) {
-    return this.service.replace(id, dto);
+  @Put(':id')
+  @Permissions('documents:write_own')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Replace document' })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('file'))
+  replace(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+    @Body() dto: UpdateDocumentDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.documentsService.replace(id, file);
   }
 
   @Delete(':id')
+  @Permissions('documents:delete_own')
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Delete document' })
-  @Permissions('documents.delete')
-  remove(@Param('id') id: string) {
-    return this.service.remove(id);
+  remove(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.documentsService.remove(id);
+  }
+
+  // Admin/Operator Routes
+  @Get('request/:requestId/all')
+  @Permissions('documents:read')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'List all request documents' })
+  findAllByRequest(@Param('requestId') requestId: string) {
+    return this.documentsService.findAllByRequest(requestId);
+  }
+
+  @Patch(':id/approve')
+  @Permissions('documents:approve')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Approve document' })
+  approve(@Param('id') id: string, @Body() dto: ApproveDocumentDto) {
+    return this.documentsService.approve(id, dto);
+  }
+
+  @Patch(':id/reject')
+  @Permissions('documents:approve')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Reject document' })
+  reject(@Param('id') id: string, @Body() dto: RejectDocumentDto) {
+    return this.documentsService.reject(id, dto);
+  }
+
+  @Post(':id/notes')
+  @Permissions('documents:write')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Add admin notes' })
+  addNotes(@Param('id') id: string, @Body() dto: AddNotesDto) {
+    return this.documentsService.addNotes(id, dto);
+  }
+
+  @Get(':id/preview')
+  @Permissions('documents:read')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Preview document' })
+  preview(@Param('id') id: string) {
+    return this.documentsService.preview(id);
   }
 }

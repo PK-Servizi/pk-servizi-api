@@ -2,87 +2,103 @@ import {
   Controller,
   Get,
   Post,
-  Body,
+  Put,
+  Delete,
   Patch,
   Param,
-  Delete,
-  Query,
+  Body,
   UseGuards,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiBearerAuth,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { CmsService } from './cms.service';
-import { CreateCmsContentDto } from './dto/create-cms-content.dto';
-import { UpdateCmsContentDto } from './dto/update-cms-content.dto';
+import { CreateContentDto } from './dto/create-content.dto';
+import { UpdateContentDto } from './dto/update-content.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { PermissionsGuard } from '../../common/guards/permissions.guard';
+import { Permissions } from '../../common/decorators/permissions.decorator';
 
-@ApiTags('cms')
+@ApiTags('CMS Content')
 @Controller('cms')
 export class CmsController {
   constructor(private readonly cmsService: CmsService) {}
 
-  @Post()
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Create CMS content' })
-  create(@Body() createCmsContentDto: CreateCmsContentDto) {
-    return this.cmsService.create(createCmsContentDto);
+  // Public Routes
+  @Get('pages/:slug')
+  @ApiOperation({ summary: 'Get page by slug' })
+  getPageBySlug(@Param('slug') slug: string) {
+    return this.cmsService.getPageBySlug(slug);
   }
 
-  @Get()
-  @ApiOperation({ summary: 'Get all CMS content with pagination' })
-  @ApiQuery({ name: 'page', required: false, type: Number })
-  @ApiQuery({ name: 'limit', required: false, type: Number })
-  findAll(@Query('page') page?: number, @Query('limit') limit?: number) {
-    return this.cmsService.findAll(page, limit);
+  @Get('news')
+  @ApiOperation({ summary: 'List published news' })
+  getPublishedNews() {
+    return this.cmsService.getPublishedNews();
   }
 
-  @Get('type/:type')
-  @ApiOperation({ summary: 'Get CMS content by type' })
-  findByType(@Param('type') type: string) {
-    return this.cmsService.findByType(type);
+  @Get('news/:id')
+  @ApiOperation({ summary: 'Get news article' })
+  getNewsArticle(@Param('id') id: string) {
+    return this.cmsService.getNewsArticle(id);
   }
 
-  @Get('slug/:slug')
-  @ApiOperation({ summary: 'Get CMS content by slug' })
-  findBySlug(@Param('slug') slug: string) {
-    return this.cmsService.findBySlug(slug);
+  @Get('faqs')
+  @ApiOperation({ summary: 'List FAQs' })
+  getFaqs() {
+    return this.cmsService.getFaqs();
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Get CMS content by ID' })
-  findOne(@Param('id') id: string) {
-    return this.cmsService.findOne(id);
+  // Admin Routes
+  @Get('content')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('cms:read')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'List all content' })
+  findAllContent() {
+    return this.cmsService.findAllContent();
   }
 
-  @Patch(':id')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Update CMS content' })
-  update(
-    @Param('id') id: string,
-    @Body() updateCmsContentDto: UpdateCmsContentDto,
-  ) {
-    return this.cmsService.update(id, updateCmsContentDto);
+  @Post('content')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('cms:write')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Create content' })
+  createContent(@Body() dto: CreateContentDto) {
+    return this.cmsService.createContent(dto);
   }
 
-  @Patch(':id/toggle')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Toggle CMS content active status' })
-  toggleActive(@Param('id') id: string) {
-    return this.cmsService.toggleActive(id);
+  @Get('content/:id')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('cms:read')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Get content' })
+  getContent(@Param('id') id: string) {
+    return this.cmsService.getContent(id);
   }
 
-  @Delete(':id')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Delete CMS content' })
-  remove(@Param('id') id: string) {
-    return this.cmsService.remove(id);
+  @Put('content/:id')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('cms:write')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Update content' })
+  updateContent(@Param('id') id: string, @Body() dto: UpdateContentDto) {
+    return this.cmsService.updateContent(id, dto);
+  }
+
+  @Delete('content/:id')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('cms:delete')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Delete content' })
+  deleteContent(@Param('id') id: string) {
+    return this.cmsService.deleteContent(id);
+  }
+
+  @Patch('content/:id/publish')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('cms:write')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Publish content' })
+  publishContent(@Param('id') id: string) {
+    return this.cmsService.publishContent(id);
   }
 }

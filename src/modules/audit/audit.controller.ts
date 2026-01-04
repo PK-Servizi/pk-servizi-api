@@ -1,58 +1,42 @@
-import { Controller, Get, Post, Body, Query, UseGuards } from '@nestjs/common';
 import {
-  ApiTags,
-  ApiOperation,
-  ApiBearerAuth,
-  ApiQuery,
-} from '@nestjs/swagger';
+  Controller,
+  Get,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuditService } from './audit.service';
-import { CreateAuditLogDto } from './dto/create-audit-log.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { PermissionsGuard } from '../../common/guards/permissions.guard';
+import { Permissions } from '../../common/decorators/permissions.decorator';
 
-@ApiTags('audit')
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
-@Controller('audit')
+@ApiTags('Audit Logs')
+@Controller('audit-logs')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class AuditController {
   constructor(private readonly auditService: AuditService) {}
 
-  @Post()
-  @ApiOperation({ summary: 'Create audit log entry' })
-  create(@Body() createAuditLogDto: CreateAuditLogDto) {
-    return this.auditService.create(createAuditLogDto);
-  }
-
   @Get()
-  @ApiOperation({ summary: 'Get all audit logs with pagination' })
-  @ApiQuery({ name: 'page', required: false, type: Number })
-  @ApiQuery({ name: 'limit', required: false, type: Number })
-  findAll(@Query('page') page?: number, @Query('limit') limit?: number) {
-    return this.auditService.findAll(page, limit);
+  @Permissions('audit_logs:read')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'List audit logs' })
+  findAll() {
+    return this.auditService.findAll();
   }
 
-  @Get('user')
-  @ApiOperation({ summary: 'Get audit logs by user' })
-  @ApiQuery({ name: 'userId', required: true, type: String })
-  @ApiQuery({ name: 'page', required: false, type: Number })
-  @ApiQuery({ name: 'limit', required: false, type: Number })
-  findByUser(
-    @Query('userId') userId: string,
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
-  ) {
-    return this.auditService.findByUser(userId, page, limit);
+  @Get('user/:userId')
+  @Permissions('audit_logs:read')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Get user audit logs' })
+  findByUser(@Param('userId') userId: string) {
+    return this.auditService.findByUser(userId);
   }
 
-  @Get('action')
-  @ApiOperation({ summary: 'Get audit logs by action' })
-  @ApiQuery({ name: 'action', required: true, type: String })
-  @ApiQuery({ name: 'page', required: false, type: Number })
-  @ApiQuery({ name: 'limit', required: false, type: Number })
-  findByAction(
-    @Query('action') action: string,
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
-  ) {
-    return this.auditService.findByAction(action, page, limit);
+  @Get('resource/:type/:id')
+  @Permissions('audit_logs:read')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Get resource audit logs' })
+  findByResource(@Param('type') type: string, @Param('id') id: string) {
+    return this.auditService.findByResource(type, id);
   }
 }

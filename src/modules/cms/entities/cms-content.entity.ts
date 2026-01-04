@@ -2,10 +2,10 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  CreateDateColumn,
-  UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 
@@ -23,25 +23,25 @@ export class CmsContent {
   @Column({ type: 'text', nullable: true })
   content: string;
 
-  @Column({ length: 255, unique: true, nullable: true })
+  @Column({ length: 255, nullable: true, unique: true })
   slug: string;
 
   @Column({ length: 20, default: 'draft' })
   status: string;
 
-  @Column({ nullable: true })
+  @Column({ name: 'author_id', nullable: true })
   authorId: string;
 
-  @Column({ nullable: true })
-  publishedAt: Date;
-
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, (user) => user.authoredContent)
   @JoinColumn({ name: 'author_id' })
   author: User;
 
-  @CreateDateColumn()
+  @Column({ nullable: true, name: 'published_at' })
+  publishedAt: Date;
+
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }
