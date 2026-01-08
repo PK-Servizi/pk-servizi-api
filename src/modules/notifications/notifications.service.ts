@@ -2,12 +2,17 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThan } from 'typeorm';
 import { Notification } from './entities/notification.entity';
+import { EmailService } from './email.service';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class NotificationsService {
   constructor(
     @InjectRepository(Notification)
     private notificationRepository: Repository<Notification>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+    private emailService: EmailService,
   ) {}
 
   async findByUser(userId: string): Promise<any> {
@@ -48,6 +53,16 @@ export class NotificationsService {
   }
 
   async send(dto: any): Promise<any> {
+    // Validate user exists
+    const user = await this.userRepository.findOne({
+      where: { id: dto.userId },
+      select: ['id', 'email']
+    });
+    
+    if (!user) {
+      return { success: false, message: 'User not found' };
+    }
+
     const notification = this.notificationRepository.create({
       userId: dto.userId,
       title: dto.title,
@@ -56,18 +71,33 @@ export class NotificationsService {
       metadata: dto.data,
     });
     const saved = await this.notificationRepository.save(notification);
+
+    // Send email asynchronously (don't wait)
+    const userEmail = dto.userEmail || user.email;
+    if (userEmail) {
+      setImmediate(() => {
+        this.emailService.sendEmail(
+          userEmail,
+          dto.title,
+          `<p>${dto.message}</p>`,
+          dto.message
+        ).catch(error => {
+          console.error('Failed to send email:', error);
+        });
+      });
+    }
+
     return { success: true, message: 'Notification sent', data: saved };
   }
 
   async broadcast(dto: any): Promise<any> {
-    const users = await this.notificationRepository
-      .createQueryBuilder('notification')
-      .select('DISTINCT notification.userId')
-      .getRawMany();
+    const users = await this.userRepository.find({
+      select: ['id', 'email']
+    });
 
     const notifications = users.map((user) =>
       this.notificationRepository.create({
-        userId: user.notification_user_id,
+        userId: user.id,
         title: dto.title,
         message: dto.message,
         type: dto.type || 'info',
@@ -76,6 +106,23 @@ export class NotificationsService {
     );
 
     await this.notificationRepository.save(notifications);
+
+    // Send emails asynchronously
+    setImmediate(() => {
+      users.forEach(user => {
+        if (user.email) {
+          this.emailService.sendEmail(
+            user.email,
+            dto.title,
+            `<p>${dto.message}</p>`,
+            dto.message
+          ).catch(error => {
+            console.error(`Failed to send email to ${user.email}:`, error);
+          });
+        }
+      });
+    });
+
     return { success: true, message: 'Notification broadcasted', count: notifications.length };
   }
 

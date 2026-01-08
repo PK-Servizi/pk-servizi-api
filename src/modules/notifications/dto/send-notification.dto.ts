@@ -1,4 +1,4 @@
-import { IsString, IsArray, IsOptional } from 'class-validator';
+import { IsString, IsArray, IsOptional, IsEmail } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class SendNotificationDto {
@@ -18,6 +18,11 @@ export class SendNotificationDto {
   @IsOptional()
   @IsString()
   type?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsEmail()
+  userEmail?: string;
 }
 
 export class BroadcastNotificationDto {

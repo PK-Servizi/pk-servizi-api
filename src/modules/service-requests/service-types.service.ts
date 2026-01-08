@@ -13,55 +13,82 @@ export class ServiceTypesService {
   ) {}
 
   async findActive(): Promise<any> {
-    return { success: true, data: [] };
+    const serviceTypes = await this.serviceTypeRepository.find({
+      where: { isActive: true },
+      order: { name: 'ASC' }
+    });
+    return { success: true, data: serviceTypes };
   }
 
   async findOne(id: string): Promise<any> {
-    return { success: true, data: {} };
+    const serviceType = await this.serviceTypeRepository.findOne({
+      where: { id }
+    });
+    if (!serviceType) {
+      return { success: false, message: 'Service type not found' };
+    }
+    return { success: true, data: serviceType };
   }
 
   async getSchema(id: string): Promise<any> {
-    return { success: true, data: {} };
+    const serviceType = await this.serviceTypeRepository.findOne({
+      where: { id },
+      select: ['id', 'name', 'formSchema']
+    });
+    if (!serviceType) {
+      return { success: false, message: 'Service type not found' };
+    }
+    return { success: true, data: serviceType.formSchema };
   }
 
   async create(dto: CreateServiceTypeDto): Promise<any> {
-    return { success: true, message: 'Service type created' };
+    const serviceType = this.serviceTypeRepository.create(dto);
+    const saved = await this.serviceTypeRepository.save(serviceType);
+    return { success: true, message: 'Service type created', data: saved };
   }
 
   async update(id: string, dto: UpdateServiceTypeDto): Promise<any> {
-    return { success: true, message: 'Service type updated' };
+    const result = await this.serviceTypeRepository.update(id, dto);
+    if (result.affected === 0) {
+      return { success: false, message: 'Service type not found' };
+    }
+    const updated = await this.serviceTypeRepository.findOne({ where: { id } });
+    return { success: true, message: 'Service type updated', data: updated };
   }
 
   async remove(id: string): Promise<any> {
+    const result = await this.serviceTypeRepository.delete(id);
+    if (result.affected === 0) {
+      return { success: false, message: 'Service type not found' };
+    }
     return { success: true, message: 'Service type deleted' };
   }
 
   async activate(id: string): Promise<any> {
+    const result = await this.serviceTypeRepository.update(id, { isActive: true });
+    if (result.affected === 0) {
+      return { success: false, message: 'Service type not found' };
+    }
     return { success: true, message: 'Service type activated' };
   }
 
   // Extended Operations - Template Management
   async getRequiredDocuments(id: string): Promise<any> {
+    const serviceType = await this.serviceTypeRepository.findOne({
+      where: { id },
+      select: ['id', 'name', 'requiredDocuments']
+    });
+    
+    if (!serviceType) {
+      return { success: false, message: 'Service type not found' };
+    }
+
     return {
       success: true,
       data: {
         serviceTypeId: id,
-        requiredDocuments: [
-          {
-            id: 'doc_1',
-            name: 'Identity Document',
-            description: 'Valid ID card or passport',
-            required: true,
-            acceptedFormats: ['pdf', 'jpg', 'png']
-          },
-          {
-            id: 'doc_2',
-            name: 'Income Statement',
-            description: 'Latest income statement',
-            required: false,
-            acceptedFormats: ['pdf']
-          }
-        ]
+        serviceName: serviceType.name,
+        requiredDocuments: serviceType.requiredDocuments || []
       }
     };
   }

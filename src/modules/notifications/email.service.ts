@@ -16,12 +16,14 @@ export class EmailService {
         user: this.configService.get<string>('SMTP_USER'),
         pass: this.configService.get<string>('SMTP_PASS'),
       },
+      connectionTimeout: 60000,
+      greetingTimeout: 30000,
+      socketTimeout: 60000,
     });
   }
 
   async sendEmail(to: string, subject: string, html: string, text?: string) {
     if (!this.configService.get<boolean>('NOTIFICATION_ENABLED')) {
-      this.logger.log('Notifications disabled, skipping email');
       return;
     }
 
@@ -38,7 +40,7 @@ export class EmailService {
       };
 
       const result = await this.transporter.sendMail(mailOptions);
-      this.logger.log(`Email sent successfully to ${to}: ${result.messageId}`);
+      this.logger.log(`Email sent to ${to}: ${result.messageId}`);
       return result;
     } catch (error) {
       this.logger.error(`Failed to send email to ${to}: ${error.message}`);
