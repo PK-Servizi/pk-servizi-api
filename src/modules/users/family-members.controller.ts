@@ -9,13 +9,15 @@ import {
   UseGuards,
   UseInterceptors,
   UploadedFile,
+  UploadedFiles,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FileFieldsInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 import { FamilyMembersService } from './family-members.service';
 import { CreateFamilyMemberDto } from './dto/create-family-member.dto';
 import { UpdateFamilyMemberDto } from './dto/update-family-member.dto';
 import { UploadDocumentDto } from '../documents/dto/upload-document.dto';
+import { UploadFamilyMemberDocumentsDto } from './dto/upload-family-member-documents.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { Permissions } from '../../common/decorators/permissions.decorator';
@@ -82,14 +84,23 @@ export class FamilyMembersController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Upload document for family member' })
   @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: 'identityDocument', maxCount: 1 },
+    { name: 'fiscalCode', maxCount: 1 },
+    { name: 'birthCertificate', maxCount: 1 },
+    { name: 'marriageCertificate', maxCount: 1 },
+    { name: 'dependencyDocuments', maxCount: 1 },
+    { name: 'disabilityCertificates', maxCount: 1 },
+    { name: 'studentEnrollment', maxCount: 1 },
+    { name: 'incomeDocuments', maxCount: 1 },
+  ]))
   uploadFamilyMemberDocument(
     @Param('id') id: string,
-    @UploadedFile() file: Express.Multer.File,
-    @Body() dto: UploadDocumentDto,
+    @UploadedFiles() files: { [key: string]: Express.Multer.File[] },
+    @Body() dto: UploadFamilyMemberDocumentsDto,
     @CurrentUser() user: any,
   ) {
-    return this.familyMembersService.uploadFamilyMemberDocument(id, file, dto, user.id);
+    return this.familyMembersService.uploadFamilyMemberDocuments(id, files, dto, user.id);
   }
 
   // Admin Routes

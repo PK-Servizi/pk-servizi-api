@@ -2,35 +2,71 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Document } from './entities/document.entity';
+import { ServiceType } from '../service-requests/entities/service-type.entity';
+import { ServiceRequest } from '../service-requests/entities/service-request.entity';
+import { StorageService } from '../../common/services/storage.service';
 
 @Injectable()
 export class DocumentsService {
   constructor(
     @InjectRepository(Document)
     private documentRepository: Repository<Document>,
+    @InjectRepository(ServiceType)
+    private serviceTypeRepository: Repository<ServiceType>,
+    @InjectRepository(ServiceRequest)
+    private serviceRequestRepository: Repository<ServiceRequest>,
+    private storageService: StorageService,
   ) {}
 
-  async upload(file: Express.Multer.File, dto: any, userId: string): Promise<any> {
-    if (!file) {
-      throw new Error('File is required');
-    }
-    
-    const document = this.documentRepository.create({
-      serviceRequestId: dto.serviceRequestId,
-      category: dto.documentType || 'general',
-      filename: file.originalname,
-      originalFilename: file.originalname,
-      filePath: `/uploads/${file.originalname}`,
-      fileSize: file.size,
-      mimeType: file.mimetype,
-      status: 'pending',
-      isRequired: false,
-      version: 1,
-    });
-    
-    const saved = await this.documentRepository.save(document);
-    return { success: true, message: 'Document uploaded successfully', data: saved };
-  }
+  // async upload(
+  //   file: Express.Multer.File,
+  //   dto: any,
+  //   userId: string,
+  // ): Promise<any> {
+  //   if (!file) {
+  //     throw new Error('File is required');
+  //   }
+
+  //   // Validate service request exists
+  //   const serviceRequest = await this.serviceRequestRepository.findOne({
+  //     where: { id: dto.serviceRequestId },
+  //     relations: ['serviceType'],
+  //   });
+
+  //   if (!serviceRequest) {
+  //     return { success: false, message: 'Service request not found' };
+  //   }
+
+  //   // Get service type name for S3 path
+  //   const serviceTypeName = serviceRequest.serviceType?.name || 'General';
+  //   const s3PathPrefix = `users/${userId}/services/${serviceTypeName.replace(/[^a-zA-Z0-9]/g, '')}`;
+
+  //   // Upload to S3
+  //   const uploadResult = await this.storageService.uploadFile(
+  //     file,
+  //     s3PathPrefix,
+  //   );
+
+  //   const document = this.documentRepository.create({
+  //     serviceRequestId: dto.serviceRequestId,
+  //     category: dto.documentType || 'general',
+  //     filename: uploadResult.path.split('/').pop(),
+  //     originalFilename: file.originalname,
+  //     filePath: uploadResult.path,
+  //     fileSize: file.size,
+  //     mimeType: file.mimetype,
+  //     status: 'pending',
+  //     isRequired: false,
+  //     version: 1,
+  //   });
+
+  //   const saved = await this.documentRepository.save(document);
+  //   return {
+  //     success: true,
+  //     message: 'Document uploaded successfully',
+  //     data: saved,
+  //   };
+  // }
 
   async findByRequest(requestId: string, userId: string): Promise<any> {
     const documents = await this.documentRepository.find({
@@ -49,6 +85,58 @@ export class DocumentsService {
       where: { id },
     });
     return { success: true, message: 'Document downloaded', data: document };
+  }
+
+  async replaceMultiple(
+    id: string,
+    files: { [key: string]: Express.Multer.File[] },
+    dto: any,
+    userId: string,
+  ): Promise<any> {
+    const document = await this.documentRepository.findOne({ where: { id } });
+    if (!document) {
+      return { success: false, message: 'Document not found' };
+    }
+
+    // Get service request for S3 path
+    const serviceRequest = await this.serviceRequestRepository.findOne({
+      where: { id: document.serviceRequestId },
+      relations: ['serviceType'],
+    });
+
+    if (files && Object.keys(files).length > 0) {
+      const serviceTypeName = serviceRequest?.serviceType?.name || 'General';
+      const s3PathPrefix = `users/${userId}/services/${serviceTypeName.replace(/[^a-zA-Z0-9]/g, '')}`;
+
+      // Get first available file
+      const fileArray = Object.values(files)[0];
+      if (fileArray && fileArray.length > 0) {
+        const file = fileArray[0];
+
+        // Delete old file from S3
+        if (document.filePath) {
+          await this.storageService.deleteFile(document.filePath);
+        }
+
+        // Upload new file to S3
+        const uploadResult = await this.storageService.uploadFile(
+          file,
+          s3PathPrefix,
+        );
+
+        await this.documentRepository.update(id, {
+          filename: uploadResult.path.split('/').pop(),
+          originalFilename: file.originalname,
+          filePath: uploadResult.path,
+          fileSize: file.size,
+          mimeType: file.mimetype,
+          updatedAt: new Date(),
+        });
+      }
+    }
+
+    const updated = await this.documentRepository.findOne({ where: { id } });
+    return { success: true, message: 'Document replaced', data: updated };
   }
 
   async replace(id: string, file: Express.Multer.File): Promise<any> {
@@ -98,6 +186,102 @@ export class DocumentsService {
     });
     const updated = await this.documentRepository.findOne({ where: { id } });
     return { success: true, message: 'Admin notes added', data: updated };
+  }
+
+  async getRequiredDocuments(serviceTypeId: string): Promise<any> {
+    const serviceType = await this.serviceTypeRepository.findOne({
+      where: { id: serviceTypeId },
+      select: ['id', 'name', 'requiredDocuments'],
+    });
+
+    if (!serviceType) {
+      return { success: false, message: 'Service type not found' };
+    }
+
+    return {
+      success: true,
+      data: {
+        serviceTypeId,
+        serviceName: serviceType.name,
+        requiredDocuments: serviceType.requiredDocuments || [],
+      },
+    };
+  }
+
+  async uploadMultiple(
+    files: { [key: string]: Express.Multer.File[] },
+    dto: any,
+    userId: string,
+  ): Promise<any> {
+    if (!files || Object.keys(files).length === 0) {
+      return { success: false, message: 'No files provided' };
+    }
+
+    // Validate service request exists
+    const serviceRequest = await this.serviceRequestRepository.findOne({
+      where: { id: dto.serviceRequestId },
+      relations: ['serviceType'],
+    });
+
+    if (!serviceRequest) {
+      return { success: false, message: 'Service request not found' };
+    }
+
+    const documents = [];
+    const documentTypeMapping = {
+      identityDocument: 'IDENTITY',
+      fiscalCode: 'TAX_CODE',
+      incomeCertificate: 'INCOME',
+      bankStatement: 'ASSETS',
+      propertyDocument: 'PROPERTY',
+      visuraCatastale: 'PROPERTY',
+      propertyDeed: 'DEED',
+      cuCertificate: 'INCOME',
+      medicalReceipts: 'EXPENSES',
+      expenseReceipts: 'EXPENSES',
+      otherDocument: 'OTHER',
+    };
+
+    // Get service type name for S3 path
+    const serviceTypeName = serviceRequest.serviceType?.name || 'General';
+    const s3PathPrefix = `users/${userId}/services/${serviceTypeName.replace(/[^a-zA-Z0-9]/g, '')}`;
+
+    for (const [fieldName, fileArray] of Object.entries(files)) {
+      if (fileArray && fileArray.length > 0) {
+        const file = fileArray[0];
+
+        // Upload to S3
+        const uploadResult = await this.storageService.uploadFile(
+          file,
+          s3PathPrefix,
+        );
+
+        const document = this.documentRepository.create({
+          serviceRequestId: dto.serviceRequestId,
+          category: documentTypeMapping[fieldName] || 'OTHER',
+          filename: uploadResult.path.split('/').pop(),
+          originalFilename: file.originalname,
+          filePath: uploadResult.path,
+          fileSize: file.size,
+          mimeType: file.mimetype,
+          status: 'pending',
+          isRequired: true,
+          version: 1,
+        });
+        documents.push(document);
+      }
+    }
+
+    if (documents.length === 0) {
+      return { success: false, message: 'No valid files to upload' };
+    }
+
+    const saved = await this.documentRepository.save(documents);
+    return {
+      success: true,
+      message: `${documents.length} documents uploaded successfully`,
+      data: saved,
+    };
   }
 
   async preview(id: string): Promise<any> {

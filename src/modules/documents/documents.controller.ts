@@ -2,20 +2,23 @@ import {
   Controller,
   Get,
   Post,
-  Put,
   Delete,
   Patch,
   Param,
   Body,
   UseGuards,
   UseInterceptors,
-  UploadedFile,
+  UploadedFiles,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiConsumes,
+} from '@nestjs/swagger';
 import { DocumentsService } from './documents.service';
-import { UploadDocumentDto } from './dto/upload-document.dto';
-import { UpdateDocumentDto } from './dto/update-document.dto';
+import { UploadMultipleDocumentsDto } from './dto/upload-multiple-documents.dto';
 import { ApproveDocumentDto } from './dto/approve-document.dto';
 import { RejectDocumentDto } from './dto/reject-document.dto';
 import { AddNotesDto } from './dto/add-notes.dto';
@@ -30,26 +33,65 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 export class DocumentsController {
   constructor(private readonly documentsService: DocumentsService) {}
 
-  // Customer Routes
-  @Post('upload')
+  @Get('service-type/:serviceTypeId/required')
+  @Permissions('documents:read_own')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Get required documents for service type' })
+  getRequiredDocuments(@Param('serviceTypeId') serviceTypeId: string) {
+    return this.documentsService.getRequiredDocuments(serviceTypeId);
+  }
+
+  @Post('upload-multiple')
   @Permissions('documents:write_own')
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Upload document' })
+  @ApiOperation({ summary: 'Upload multiple documents by type' })
   @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('file'))
-  uploadDocument(
-    @UploadedFile() file: Express.Multer.File,
-    @Body() dto: UploadDocumentDto,
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'identityDocument', maxCount: 1 },
+      { name: 'fiscalCode', maxCount: 1 },
+      { name: 'incomeCertificate', maxCount: 1 },
+      { name: 'bankStatement', maxCount: 1 },
+      { name: 'propertyDocument', maxCount: 1 },
+      { name: 'visuraCatastale', maxCount: 1 },
+      { name: 'propertyDeed', maxCount: 1 },
+      { name: 'cuCertificate', maxCount: 1 },
+      { name: 'medicalReceipts', maxCount: 1 },
+      { name: 'expenseReceipts', maxCount: 1 },
+      { name: 'otherDocument', maxCount: 1 },
+    ]),
+  )
+  uploadMultiple(
+    @UploadedFiles() files: { [key: string]: Express.Multer.File[] },
+    @Body() dto: UploadMultipleDocumentsDto,
     @CurrentUser() user: any,
   ) {
-    return this.documentsService.upload(file, dto, user.id);
+    return this.documentsService.uploadMultiple(files, dto, user.id);
   }
+
+  // Customer Routes
+  // @Post('upload')
+  // @Permissions('documents:write_own')
+  // @ApiBearerAuth('JWT-auth')
+  // @ApiOperation({ summary: 'Upload document' })
+  // @ApiConsumes('multipart/form-data')
+  // @UseInterceptors(FileInterceptor('file'))
+  // uploadDocument(
+  //   @UploadedFile() file: Express.Multer.File,
+  //   @Body() dto: UploadDocumentDto,
+  //   @CurrentUser() user: any,
+  // ) {
+  //   return this.documentsService.upload(file, dto, user.id);
+  // }
 
   @Get('request/:requestId')
   @Permissions('documents:read_own')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'List request documents' })
-  findByRequest(@Param('requestId') requestId: string, @CurrentUser() user: any) {
+  findByRequest(
+    @Param('requestId') requestId: string,
+    @CurrentUser() user: any,
+  ) {
     return this.documentsService.findByRequest(requestId, user.id);
   }
 
@@ -69,19 +111,33 @@ export class DocumentsController {
     return this.documentsService.download(id, user.id);
   }
 
-  @Put(':id')
+  @Patch(':id')
   @Permissions('documents:write_own')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Replace document' })
   @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'identityDocument', maxCount: 1 },
+      { name: 'fiscalCode', maxCount: 1 },
+      { name: 'incomeCertificate', maxCount: 1 },
+      { name: 'bankStatement', maxCount: 1 },
+      { name: 'propertyDocument', maxCount: 1 },
+      { name: 'visuraCatastale', maxCount: 1 },
+      { name: 'propertyDeed', maxCount: 1 },
+      { name: 'cuCertificate', maxCount: 1 },
+      { name: 'medicalReceipts', maxCount: 1 },
+      { name: 'expenseReceipts', maxCount: 1 },
+      { name: 'otherDocument', maxCount: 1 },
+    ]),
+  )
   replace(
     @Param('id') id: string,
-    @UploadedFile() file: Express.Multer.File,
-    @Body() dto: UpdateDocumentDto,
+    @UploadedFiles() files: { [key: string]: Express.Multer.File[] },
+    @Body() dto: UploadMultipleDocumentsDto,
     @CurrentUser() user: any,
   ) {
-    return this.documentsService.replace(id, file);
+    return this.documentsService.replaceMultiple(id, files, dto, user.id);
   }
 
   @Delete(':id')

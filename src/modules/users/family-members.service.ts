@@ -14,8 +14,10 @@ export class FamilyMembersService {
 
   async create(dto: CreateFamilyMemberDto, userId: string) {
     const familyMember = this.familyMemberRepository.create({
-      ...dto,
       userId,
+      fullName: `${dto.firstName} ${dto.lastName}`,
+      fiscalCode: dto.fiscalCode,
+      relationship: dto.relationship,
       birthDate: dto.birthDate ? new Date(dto.birthDate) : null,
     });
 
@@ -106,11 +108,48 @@ export class FamilyMembersService {
     };
   }
 
-  async uploadFamilyMemberDocument(id: string, file: Express.Multer.File, dto: any, userId: string) {
+  async uploadFamilyMemberDocuments(id: string, files: { [key: string]: Express.Multer.File[] }, dto: any, userId: string) {
+    const familyMember = await this.familyMemberRepository.findOne({
+      where: { id, userId }
+    });
+    
+    if (!familyMember) {
+      throw new NotFoundException('Family member not found');
+    }
+
+    if (!files || Object.keys(files).length === 0) {
+      return { success: false, message: 'No files provided' };
+    }
+
+    const documentTypeMapping = {
+      identityDocument: 'FAMILY_IDENTITY',
+      fiscalCode: 'FAMILY_TAX_CODE',
+      birthCertificate: 'BIRTH_CERTIFICATE',
+      marriageCertificate: 'MARRIAGE_CERTIFICATE',
+      dependencyDocuments: 'DEPENDENCY_DOCS',
+      disabilityCertificates: 'DISABILITY_CERT',
+      studentEnrollment: 'STUDENT_ENROLLMENT',
+      incomeDocuments: 'FAMILY_INCOME'
+    };
+
+    const uploadedDocuments = [];
+    for (const [fieldName, fileArray] of Object.entries(files)) {
+      if (fileArray && fileArray.length > 0) {
+        const file = fileArray[0];
+        uploadedDocuments.push({
+          fileName: file.originalname,
+          fileSize: file.size,
+          mimeType: file.mimetype,
+          documentType: documentTypeMapping[fieldName] || 'OTHER',
+          familyMemberId: id
+        });
+      }
+    }
+
     return {
       success: true,
-      message: 'Document uploaded for family member',
-      data: { documentId: 'doc_123' },
+      message: `${uploadedDocuments.length} documents uploaded for family member`,
+      data: uploadedDocuments
     };
   }
 }
