@@ -8,7 +8,7 @@ import {
   UseGuards,
   Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { UserSubscriptionsService } from './user-subscriptions.service';
 import { SubscriptionsService } from './subscriptions.service';
 import { UpdateSubscriptionStatusDto } from './dto/update-subscription-status.dto';
@@ -73,6 +73,7 @@ export class UserSubscriptionsController {
   @Patch(':id/status')
   @Permissions('subscriptions:write')
   @ApiOperation({ summary: '[Admin] Update subscription status' })
+  @ApiBody({ type: UpdateSubscriptionStatusDto })
   async updateStatus(
     @Param('id') id: string,
     @Body() dto: UpdateSubscriptionStatusDto,
@@ -86,6 +87,7 @@ export class UserSubscriptionsController {
   @Post(':id/override-limits')
   @Permissions('subscriptions:write')
   @ApiOperation({ summary: '[Admin] Override subscription usage limits' })
+  @ApiBody({ type: OverrideLimitsDto })
   async overrideLimits(
     @Param('id') id: string,
     @Body() dto: OverrideLimitsDto,
@@ -99,6 +101,17 @@ export class UserSubscriptionsController {
   @Post('assign')
   @Permissions('subscriptions:write')
   @ApiOperation({ summary: '[Admin] Manually assign subscription to user' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        userId: { type: 'string', format: 'uuid' },
+        planId: { type: 'string', format: 'uuid' },
+        reason: { type: 'string' },
+      },
+      required: ['userId', 'planId'],
+    },
+  })
   async assignSubscription(
     @Body('userId') userId: string,
     @Body('planId') planId: string,

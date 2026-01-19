@@ -7,7 +7,7 @@ import {
   Get,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -26,12 +26,14 @@ export class AuthController {
 
   @Post('register')
   @ApiOperation({ summary: '[Public] Register new user' })
+  @ApiBody({ type: RegisterDto })
   register(@Body() dto: RegisterDto) {
     return this.authService.register(dto);
   }
 
   @Post('login')
   @ApiOperation({ summary: '[Public] User login' })
+  @ApiBody({ type: LoginDto })
   @HttpCode(HttpStatus.OK)
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
@@ -39,6 +41,7 @@ export class AuthController {
 
   @Post('refresh')
   @ApiOperation({ summary: '[Public] Refresh access token' })
+  @ApiBody({ type: RefreshTokenDto })
   @HttpCode(HttpStatus.OK)
   refresh(@Body() dto: RefreshTokenDto) {
     return this.authService.refreshToken(dto);
@@ -46,6 +49,7 @@ export class AuthController {
 
   @Post('forgot-password')
   @ApiOperation({ summary: '[Public] Request password reset' })
+  @ApiBody({ type: ForgotPasswordDto })
   @HttpCode(HttpStatus.OK)
   forgotPassword(@Body() dto: ForgotPasswordDto) {
     return this.authService.forgotPassword(dto);
@@ -53,6 +57,7 @@ export class AuthController {
 
   @Post('reset-password')
   @ApiOperation({ summary: '[Public] Reset password' })
+  @ApiBody({ type: ResetPasswordDto })
   @HttpCode(HttpStatus.OK)
   resetPassword(@Body() dto: ResetPasswordDto) {
     return this.authService.resetPassword(dto);
@@ -71,6 +76,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Change password' })
+  @ApiBody({ type: ChangePasswordDto })
   @HttpCode(HttpStatus.OK)
   changePassword(@CurrentUser() user: any, @Body() dto: ChangePasswordDto) {
     return this.authService.changePassword(user.id, dto);

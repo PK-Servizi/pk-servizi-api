@@ -9,7 +9,7 @@ import {
   Body,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { CoursesService } from './courses.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
@@ -94,6 +94,13 @@ export class CoursesController {
   @Permissions('courses:enroll')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Mark module/lesson complete' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: { moduleId: { type: 'string', format: 'uuid' } },
+      required: ['moduleId'],
+    },
+  })
   completeModule(
     @Param('id') id: string,
     @Body() dto: { moduleId: string },
@@ -117,6 +124,7 @@ export class CoursesController {
   @Permissions('courses:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Create course' })
+  @ApiBody({ type: CreateCourseDto })
   create(@Body() dto: CreateCourseDto) {
     return this.coursesService.create(dto);
   }
@@ -126,6 +134,7 @@ export class CoursesController {
   @Permissions('courses:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Update course' })
+  @ApiBody({ type: UpdateCourseDto })
   update(@Param('id') id: string, @Body() dto: UpdateCourseDto) {
     return this.coursesService.update(id, dto);
   }
@@ -162,6 +171,13 @@ export class CoursesController {
   @Permissions('courses:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Issue certificate' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: { userId: { type: 'string', format: 'uuid' } },
+      required: ['userId'],
+    },
+  })
   issueCertificate(@Param('id') id: string, @Body() dto: any) {
     return this.coursesService.issueCertificate(id, dto);
   }

@@ -9,7 +9,7 @@ import {
   Body,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { CmsService } from './cms.service';
 import { CreateContentDto } from './dto/create-content.dto';
 import { UpdateContentDto } from './dto/update-content.dto';
@@ -62,6 +62,7 @@ export class CmsController {
   @Permissions('cms:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Create content' })
+  @ApiBody({ type: CreateContentDto })
   createContent(@Body() dto: CreateContentDto) {
     return this.cmsService.createContent(dto);
   }
@@ -80,6 +81,7 @@ export class CmsController {
   @Permissions('cms:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Update content' })
+  @ApiBody({ type: UpdateContentDto })
   updateContent(@Param('id') id: string, @Body() dto: UpdateContentDto) {
     return this.cmsService.updateContent(id, dto);
   }
@@ -108,6 +110,7 @@ export class CmsController {
   @Permissions('cms:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Create new page' })
+  @ApiBody({ type: CreateContentDto })
   createPage(@Body() dto: CreateContentDto) {
     return this.cmsService.createPage(dto);
   }
@@ -117,6 +120,7 @@ export class CmsController {
   @Permissions('cms:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Update page' })
+  @ApiBody({ type: UpdateContentDto })
   updatePage(@Param('slug') slug: string, @Body() dto: UpdateContentDto) {
     return this.cmsService.updatePage(slug, dto);
   }
@@ -136,6 +140,7 @@ export class CmsController {
   @Permissions('cms:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Create news article' })
+  @ApiBody({ type: CreateContentDto })
   createNews(@Body() dto: CreateContentDto) {
     return this.cmsService.createNews(dto);
   }
@@ -145,6 +150,7 @@ export class CmsController {
   @Permissions('cms:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Update news' })
+  @ApiBody({ type: UpdateContentDto })
   updateNews(@Param('id') id: string, @Body() dto: UpdateContentDto) {
     return this.cmsService.updateNews(id, dto);
   }
@@ -164,6 +170,7 @@ export class CmsController {
   @Permissions('cms:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Create FAQ' })
+  @ApiBody({ type: CreateContentDto })
   createFaq(@Body() dto: CreateContentDto) {
     return this.cmsService.createFaq(dto);
   }
@@ -173,6 +180,7 @@ export class CmsController {
   @Permissions('cms:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Update FAQ' })
+  @ApiBody({ type: UpdateContentDto })
   updateFaq(@Param('id') id: string, @Body() dto: UpdateContentDto) {
     return this.cmsService.updateFaq(id, dto);
   }

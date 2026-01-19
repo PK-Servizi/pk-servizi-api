@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Param, Body, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { SubscriptionsService } from './subscriptions.service';
 import { SubscriptionPlansService } from './subscription-plans.service';
 import { UserRequest } from '../../common/interfaces/user-request.interface';
@@ -105,6 +105,7 @@ export class SubscriptionsController {
   @ApiOperation({
     summary: '[Customer] Create checkout session for subscription',
   })
+  @ApiBody({ type: CreateCheckoutDto })
   async createCheckout(
     @Body() dto: CreateCheckoutDto,
     @CurrentUser() user: UserRequest,
@@ -122,6 +123,7 @@ export class SubscriptionsController {
   @ApiOperation({
     summary: '[Customer] Upgrade or downgrade subscription plan',
   })
+  @ApiBody({ type: UpgradeSubscriptionDto })
   async upgradeSubscription(
     @Body() dto: UpgradeSubscriptionDto,
     @CurrentUser() user: any,

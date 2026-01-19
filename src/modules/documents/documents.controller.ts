@@ -16,6 +16,7 @@ import {
   ApiOperation,
   ApiBearerAuth,
   ApiConsumes,
+  ApiBody,
 } from '@nestjs/swagger';
 import { DocumentsService } from './documents.service';
 import { UploadMultipleDocumentsDto } from './dto/upload-multiple-documents.dto';
@@ -48,6 +49,7 @@ export class DocumentsController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Upload multiple documents by type' })
   @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: UploadMultipleDocumentsDto })
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'identityDocument', maxCount: 1 },
@@ -118,6 +120,7 @@ export class DocumentsController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Replace document' })
   @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: UploadMultipleDocumentsDto })
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'identityDocument', maxCount: 1 },
@@ -163,6 +166,7 @@ export class DocumentsController {
   @Permissions('documents:approve')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Approve document' })
+  @ApiBody({ type: ApproveDocumentDto })
   approve(@Param('id') id: string, @Body() dto: ApproveDocumentDto) {
     return this.documentsService.approve(id, dto);
   }
@@ -171,6 +175,7 @@ export class DocumentsController {
   @Permissions('documents:approve')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Reject document' })
+  @ApiBody({ type: RejectDocumentDto })
   reject(@Param('id') id: string, @Body() dto: RejectDocumentDto) {
     return this.documentsService.reject(id, dto);
   }
@@ -179,6 +184,7 @@ export class DocumentsController {
   @Permissions('documents:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Add admin notes' })
+  @ApiBody({ type: AddNotesDto })
   addNotes(@Param('id') id: string, @Body() dto: AddNotesDto) {
     return this.documentsService.addNotes(id, dto);
   }

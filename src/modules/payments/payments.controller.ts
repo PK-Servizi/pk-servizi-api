@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Param, UseGuards, Body } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { Permissions } from '../../common/decorators/permissions.decorator';
@@ -63,6 +63,16 @@ export class PaymentsController {
   @Permissions('payments:refund')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Process payment refund' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        reason: { type: 'string' },
+        amount: { type: 'number', description: 'Amount to refund (optional for partial)' },
+      },
+      required: ['reason'],
+    },
+  })
   processRefund(@Param('id') id: string, @Body() dto: any) {
     return { success: true, message: 'Refund processed' };
   }

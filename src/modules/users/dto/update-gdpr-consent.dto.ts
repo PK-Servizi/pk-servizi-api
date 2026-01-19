@@ -1,24 +1,14 @@
-import { IsBoolean, IsOptional, IsString } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsBoolean, IsOptional } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateGdprConsentDto {
-  @ApiProperty({ description: 'Marketing consent' })
+  @ApiPropertyOptional({ description: 'General GDPR Consent' })
   @IsBoolean()
   @IsOptional()
-  marketingConsent?: boolean;
+  gdprConsent?: boolean;
 
-  @ApiProperty({ description: 'Analytics consent' })
+  @ApiPropertyOptional({ description: 'Privacy Policy Consent' })
   @IsBoolean()
   @IsOptional()
-  analyticsConsent?: boolean;
-
-  @ApiProperty({ description: 'Data processing consent' })
-  @IsBoolean()
-  @IsOptional()
-  dataProcessingConsent?: boolean;
-
-  @ApiProperty({ description: 'Consent notes' })
-  @IsString()
-  @IsOptional()
-  notes?: string;
+  privacyConsent?: boolean;
 }

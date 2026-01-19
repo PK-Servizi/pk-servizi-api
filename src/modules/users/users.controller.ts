@@ -53,6 +53,7 @@ export class UsersController {
   @Permissions('profiles:update')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Update own profile' })
+  @ApiBody({ type: UpdateUserDto })
   updateProfile(@CurrentUser() user: UserRequest, @Body() dto: UpdateUserDto) {
     return this.usersService.updateProfile(user.id, dto);
   }
@@ -69,6 +70,7 @@ export class UsersController {
   @Permissions('profiles:update')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Update extended profile' })
+  @ApiBody({ type: UpdateUserProfileDto })
   updateExtendedProfile(
     @CurrentUser() user: any,
     @Body() dto: UpdateUserProfileDto,
@@ -115,6 +117,7 @@ export class UsersController {
   @Permissions('profiles:update')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Update consent preferences' })
+  @ApiBody({ type: UpdateGdprConsentDto })
   updateGdprConsent(
     @CurrentUser() user: UserRequest,
     @Body() dto: UpdateGdprConsentDto,
@@ -134,6 +137,7 @@ export class UsersController {
   @Permissions('profiles:update')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Request account deletion' })
+  @ApiBody({ type: AccountDeletionRequestDto })
   requestAccountDeletion(
     @CurrentUser() user: UserRequest,
     @Body() dto: AccountDeletionRequestDto,
@@ -154,6 +158,7 @@ export class UsersController {
   @Permissions('users:create')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Create new user' })
+  @ApiBody({ type: CreateUserDto })
   create(@Body() dto: CreateUserDto) {
     return this.usersService.create(dto);
   }
@@ -178,6 +183,7 @@ export class UsersController {
   @Permissions('users:update')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Update user' })
+  @ApiBody({ type: UpdateUserDto })
   update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
     return this.usersService.update(id, dto);
   }

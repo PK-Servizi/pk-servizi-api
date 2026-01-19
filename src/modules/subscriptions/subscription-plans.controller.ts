@@ -15,6 +15,7 @@ import {
   ApiOperation,
   ApiBearerAuth,
   ApiQuery,
+  ApiBody,
 } from '@nestjs/swagger';
 import { SubscriptionPlansService } from './subscription-plans.service';
 import { CreateSubscriptionPlanDto } from './dto/create-subscription-plan.dto';
@@ -67,6 +68,7 @@ export class SubscriptionPlansController {
   @Post()
   @Permissions('subscription_plans:write')
   @ApiOperation({ summary: '[Admin] Create new subscription plan' })
+  @ApiBody({ type: CreateSubscriptionPlanDto })
   async create(@Body() dto: CreateSubscriptionPlanDto) {
     return this.plansService.create(dto);
   }
@@ -77,6 +79,7 @@ export class SubscriptionPlansController {
   @Put(':id')
   @Permissions('subscription_plans:write')
   @ApiOperation({ summary: '[Admin] Update subscription plan' })
+  @ApiBody({ type: UpdateSubscriptionPlanDto })
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateSubscriptionPlanDto,
@@ -121,6 +124,7 @@ export class SubscriptionPlansController {
   @Post(':id/clone')
   @Permissions('subscription_plans:write')
   @ApiOperation({ summary: '[Admin] Clone subscription plan' })
+  @ApiBody({ schema: { type: 'object', properties: { name: { type: 'string' } } } })
   async clone(@Param('id') id: string, @Body('name') name: string) {
     return this.plansService.clone(id, name);
   }

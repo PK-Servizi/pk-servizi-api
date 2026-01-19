@@ -15,11 +15,9 @@ import { AwsS3FolderService } from '../aws/services/aws-s3-folder.service';
 import { AwsS3UploadService } from '../../common/services/aws-s3-upload.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import {
-  UpdateExtendedProfileDto,
-  UpdateGdprConsentDto,
-  AccountDeletionRequestDto,
-} from './dto/update-extended-profile.dto';
+import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
+import { UpdateGdprConsentDto } from './dto/update-gdpr-consent.dto';
+import { AccountDeletionRequestDto } from './dto/account-deletion-request.dto';
 import * as bcrypt from 'bcryptjs';
 
 @Injectable()
@@ -61,20 +59,9 @@ export class UsersService {
 
     const savedUser = await this.userRepository.save(user);
 
-    // Create user profile with additional fields
+    // Create empty user profile
     const profile = this.userProfileRepository.create({
       userId: savedUser.id,
-      fiscalCode: dto.fiscalCode,
-      address: dto.address,
-      city: dto.city,
-      postalCode: dto.postalCode,
-      province: dto.province,
-      birthDate: dto.birthDate,
-      birthPlace: dto.birthPlace,
-      gdprConsent: dto.gdprConsent || false,
-      gdprConsentDate: dto.gdprConsent ? new Date() : null,
-      privacyConsent: dto.privacyConsent || false,
-      privacyConsentDate: dto.privacyConsent ? new Date() : null,
     });
 
     await this.userProfileRepository.save(profile);
@@ -227,7 +214,6 @@ export class UsersService {
 
     // Separate user fields from profile fields
     const userFields: Partial<User> = {};
-    const profileFields: Partial<UserProfile> = {};
 
     // User table fields
     if (dto.email !== undefined) userFields.email = dto.email;
@@ -236,44 +222,9 @@ export class UsersService {
     if (dto.isActive !== undefined) userFields.isActive = dto.isActive;
     if (dto.roleId !== undefined) userFields.roleId = dto.roleId;
 
-    // Profile fields
-    if (dto.fiscalCode !== undefined) profileFields.fiscalCode = dto.fiscalCode;
-    if (dto.address !== undefined) profileFields.address = dto.address;
-    if (dto.city !== undefined) profileFields.city = dto.city;
-    if (dto.postalCode !== undefined) profileFields.postalCode = dto.postalCode;
-    if (dto.province !== undefined) profileFields.province = dto.province;
-    if (dto.birthDate !== undefined) profileFields.birthDate = new Date(dto.birthDate);
-    if (dto.birthPlace !== undefined) profileFields.birthPlace = dto.birthPlace;
-    if (dto.gdprConsent !== undefined) {
-      profileFields.gdprConsent = dto.gdprConsent;
-      profileFields.gdprConsentDate = dto.gdprConsent ? new Date() : null;
-    }
-    if (dto.privacyConsent !== undefined) {
-      profileFields.privacyConsent = dto.privacyConsent;
-      profileFields.privacyConsentDate = dto.privacyConsent ? new Date() : null;
-    }
-
     // Update user table
     if (Object.keys(userFields).length > 0) {
       await this.userRepository.update(id, userFields);
-    }
-
-    // Update or create profile
-    if (Object.keys(profileFields).length > 0) {
-      let profile = await this.userProfileRepository.findOne({
-        where: { userId: id },
-      });
-
-      if (profile) {
-        await this.userProfileRepository.update(profile.id, profileFields);
-      } else {
-        // Create profile if it doesn't exist
-        profile = this.userProfileRepository.create({
-          userId: id,
-          ...profileFields,
-        });
-        await this.userProfileRepository.save(profile);
-      }
     }
 
     return this.findOne(id);
@@ -471,7 +422,6 @@ export class UsersService {
   async updateProfile(userId: string, dto: UpdateUserDto) {
     const user = await this.userRepository.findOne({
       where: { id: userId },
-      relations: ['profile'],
     });
     if (!user) {
       throw new NotFoundException('User not found');
@@ -486,88 +436,19 @@ export class UsersService {
       }
     }
 
-    // Separate extended profile fields from user fields
-    const userUpdateData = {};
-    const profileUpdateData = {};
+    // Only update User entity fields
+    const userUpdateData: Partial<User> = {};
+    if (dto.email !== undefined) userUpdateData.email = dto.email;
+    if (dto.fullName !== undefined) userUpdateData.fullName = dto.fullName;
+    if (dto.phone !== undefined) userUpdateData.phone = dto.phone;
+    // Users updating their own profile usually can't change Role or Active status
+    // so we exclude those here, unlike in 'update' which is admin-facing.
 
-    // Define which fields go to which table
-    const profileFields = [
-      'fiscalCode',
-      'address',
-      'city',
-      'postalCode',
-      'province',
-      'birthDate',
-      'birthPlace',
-      'avatarUrl',
-      'bio',
-      'gdprConsent',
-      'privacyConsent',
-    ];
-
-    for (const key in dto) {
-      if (dto[key] !== undefined) {
-        if (profileFields.includes(key)) {
-          profileUpdateData[key] = dto[key];
-        } else {
-          userUpdateData[key] = dto[key];
-        }
-      }
+    if (Object.keys(userUpdateData).length > 0) {
+      await this.userRepository.update(userId, userUpdateData);
     }
 
-    // Merge user updates
-    Object.assign(user, userUpdateData);
-
-    // Handle consent dates in profile
-    if (dto.gdprConsent !== undefined || dto.privacyConsent !== undefined) {
-      // Get or create profile
-      let profile = await this.userProfileRepository.findOne({
-        where: { userId },
-      });
-
-      if (!profile) {
-        profile = this.userProfileRepository.create({ userId });
-      }
-
-      // Auto-populate consent dates when consent is set to true
-      if (dto.gdprConsent === true) {
-        profileUpdateData['gdprConsent'] = true;
-        profileUpdateData['gdprConsentDate'] = new Date();
-      }
-
-      if (dto.privacyConsent === true) {
-        profileUpdateData['privacyConsent'] = true;
-        profileUpdateData['privacyConsentDate'] = new Date();
-      }
-
-      // Default privacy consent to true if not explicitly set
-      if (dto.privacyConsent === undefined && !profile.privacyConsent) {
-        profileUpdateData['privacyConsent'] = true;
-        profileUpdateData['privacyConsentDate'] = new Date();
-      }
-    }
-
-    // Save user first
-    const updatedUser = await this.userRepository.save(user);
-
-    // Update or create extended profile if there are profile fields to update
-    if (Object.keys(profileUpdateData).length > 0) {
-      if (user.profile) {
-        // Update existing profile
-        Object.assign(user.profile, profileUpdateData);
-        await this.userRepository.save(user);
-      } else {
-        // Create new profile if it doesn't exist
-        const newProfile = this.userProfileRepository.create({
-          userId: userId,
-          ...profileUpdateData,
-        });
-        await this.userProfileRepository.save(newProfile);
-        updatedUser.profile = newProfile;
-      }
-    }
-
-    // Remove sensitive data
+    const updatedUser = await this.userRepository.findOne({ where: { id: userId } });
     delete updatedUser.password;
 
     return {
@@ -594,7 +475,7 @@ export class UsersService {
     };
   }
 
-  async updateExtendedProfile(userId: string, dto: UpdateExtendedProfileDto) {
+  async updateExtendedProfile(userId: string, dto: UpdateUserProfileDto) {
     const user = await this.userRepository.findOne({
       where: { id: userId },
       relations: ['profile'],

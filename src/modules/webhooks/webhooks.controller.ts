@@ -8,7 +8,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { WebhooksService } from './webhooks.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
@@ -35,6 +35,7 @@ export class WebhooksController {
   @Permissions('webhooks:test')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Test webhook (dev environment)' })
+  @ApiBody({ schema: { type: 'object', example: { id: 'evt_test_123', type: 'payment_intent.succeeded' } } })
   testStripeWebhook(@Body() testPayload: Record<string, unknown>) {
     return this.webhooksService.testStripeWebhook(testPayload);
   }

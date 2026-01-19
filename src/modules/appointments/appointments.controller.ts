@@ -14,6 +14,7 @@ import {
   ApiOperation,
   ApiBearerAuth,
   ApiQuery,
+  ApiBody,
 } from '@nestjs/swagger';
 import { AppointmentsService } from './appointments.service';
 import { UserRequest } from '../../common/interfaces/user-request.interface';
@@ -82,6 +83,7 @@ export class AppointmentsController {
   @Permissions('appointments:create')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Book a new appointment' })
+  @ApiBody({ type: CreateAppointmentDto })
   create(@Body() dto: CreateAppointmentDto, @CurrentUser() user: UserRequest) {
     return this.appointmentsService.create(dto, user.id);
   }
@@ -122,6 +124,7 @@ export class AppointmentsController {
   @Permissions('appointments:reschedule')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Reschedule appointment' })
+  @ApiBody({ type: RescheduleAppointmentDto })
   reschedule(
     @Param('id') id: string,
     @Body() dto: RescheduleAppointmentDto,
@@ -149,6 +152,7 @@ export class AppointmentsController {
   @Permissions('appointments:cancel')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Cancel appointment' })
+  @ApiBody({ schema: { type: 'object', properties: { reason: { type: 'string' } } } })
   cancel(
     @Param('id') id: string,
     @CurrentUser() user: UserRequest,
@@ -216,6 +220,7 @@ export class AppointmentsController {
   @Permissions('appointments:assign')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Assign operator to appointment' })
+  @ApiBody({ type: AssignOperatorDto })
   assign(
     @Param('id') id: string,
     @Body() dto: AssignOperatorDto,
@@ -229,6 +234,7 @@ export class AppointmentsController {
   @Permissions('appointments:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Update appointment status' })
+  @ApiBody({ type: UpdateStatusDto })
   updateStatus(
     @Param('id') id: string,
     @Body() dto: UpdateStatusDto,
@@ -273,6 +279,15 @@ export class AppointmentsController {
   @Permissions('appointments:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Add note to appointment' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        note: { type: 'string' },
+        isInternal: { type: 'boolean', default: false },
+      },
+    },
+  })
   addNote(
     @Param('id') id: string,
     @Body('note') note: string,
@@ -318,6 +333,7 @@ export class AppointmentsController {
   @Permissions('appointments:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Create time slots' })
+  @ApiBody({ type: CreateTimeSlotsDto })
   createSlots(@Body() dto: CreateTimeSlotsDto) {
     return this.appointmentsService.createSlots(dto);
   }

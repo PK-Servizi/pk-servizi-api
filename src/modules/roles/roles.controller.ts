@@ -8,7 +8,7 @@ import {
   Delete,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { RolesService } from './roles.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
@@ -37,6 +37,7 @@ export class RolesController {
   @Permissions('roles:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Create role' })
+  @ApiBody({ type: CreateRoleDto })
   createRole(@Body() dto: CreateRoleDto) {
     return this.rolesService.create(dto);
   }
@@ -53,6 +54,7 @@ export class RolesController {
   @Permissions('roles:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Update role' })
+  @ApiBody({ type: UpdateRoleDto })
   updateRole(@Param('id') id: string, @Body() dto: UpdateRoleDto) {
     return this.rolesService.update(id, dto);
   }
@@ -78,6 +80,7 @@ export class RolesController {
   @Permissions('roles:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Assign permissions to role' })
+  @ApiBody({ type: AssignPermissionsDto })
   assignPermissionsToRole(
     @Param('id') id: string,
     @Body() dto: AssignPermissionsDto,
@@ -101,6 +104,7 @@ export class RolesController {
   @Permissions('users:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Assign role to user' })
+  @ApiBody({ type: AssignRoleDto })
   assignRoleToUser(@Param('id') id: string, @Body() dto: AssignRoleDto) {
     return this.rolesService.assignRoleToUser(id, dto);
   }
@@ -109,6 +113,7 @@ export class RolesController {
   @Permissions('users:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Assign direct permission to user' })
+  @ApiBody({ type: AssignPermissionsDto })
   assignPermissionToUser(
     @Param('id') id: string,
     @Body() dto: AssignPermissionsDto,

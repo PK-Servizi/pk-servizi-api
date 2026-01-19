@@ -15,6 +15,7 @@ import {
   ApiOperation,
   ApiBearerAuth,
   ApiQuery,
+  ApiBody,
 } from '@nestjs/swagger';
 import { ServiceRequestsService } from './service-requests.service';
 import { ServiceTypesService } from './service-types.service';
@@ -74,6 +75,7 @@ export class ServiceTypesController {
   @Permissions('service-types:create')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Create new service type' })
+  @ApiBody({ type: CreateServiceTypeDto })
   create(@Body() dto: CreateServiceTypeDto) {
     return this.serviceTypesService.create(dto);
   }
@@ -83,6 +85,7 @@ export class ServiceTypesController {
   @Permissions('service-types:update')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Update service type' })
+  @ApiBody({ type: UpdateServiceTypeDto })
   update(@Param('id') id: string, @Body() dto: UpdateServiceTypeDto) {
     return this.serviceTypesService.update(id, dto);
   }
@@ -92,6 +95,7 @@ export class ServiceTypesController {
   @Permissions('service-types:update')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Update form schema' })
+  @ApiBody({ schema: { type: 'object', example: { type: 'object', properties: {} } } })
   updateSchema(
     @Param('id') id: string,
     @Body() schema: Record<string, unknown>,
@@ -175,6 +179,7 @@ export class ServiceRequestsController {
     required: true,
     description: 'ISEE | MODELLO_730 | IMU',
   })
+  @ApiBody({ type: CreateServiceRequestDto })
   create(
     @Body() dto: CreateServiceRequestDto,
     @CurrentUser() user: UserRequest,
@@ -204,6 +209,7 @@ export class ServiceRequestsController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Update draft request' })
   @ApiQuery({ name: 'serviceType', required: false })
+  @ApiBody({ type: UpdateServiceRequestDto })
   update(
     @Param('id') id: string,
     @Body() dto: UpdateServiceRequestDto,
@@ -222,6 +228,7 @@ export class ServiceRequestsController {
   @Permissions('service-requests:submit')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Submit request for processing' })
+  @ApiBody({ type: SubmitServiceRequestDto })
   submit(
     @Param('id') id: string,
     @Body() dto: SubmitServiceRequestDto,
@@ -263,6 +270,7 @@ export class ServiceRequestsController {
   @Permissions('service_requests:write_own')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Add note to request' })
+  @ApiBody({ type: AddNoteDto })
   addNote(
     @Param('id') id: string,
     @Body() dto: AddNoteDto,
@@ -317,6 +325,7 @@ export class ServiceRequestsController {
   @Permissions('service_requests:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Update request status' })
+  @ApiBody({ type: UpdateStatusDto })
   updateStatus(
     @Param('id') id: string,
     @Body() dto: UpdateStatusDto,
@@ -338,6 +347,7 @@ export class ServiceRequestsController {
   @Permissions('service_requests:assign')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Assign to operator' })
+  @ApiBody({ type: AssignOperatorDto })
   assign(
     @Param('id') id: string,
     @Body() dto: AssignOperatorDto,
@@ -358,6 +368,7 @@ export class ServiceRequestsController {
   @Permissions('service_requests:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Add internal note' })
+  @ApiBody({ type: AddNoteDto })
   addInternalNote(
     @Param('id') id: string,
     @Body() dto: AddNoteDto,
@@ -378,6 +389,7 @@ export class ServiceRequestsController {
   @Permissions('service_requests:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Change request priority' })
+  @ApiBody({ type: UpdatePriorityDto })
   changePriority(@Param('id') id: string, @Body() dto: UpdatePriorityDto) {
     // Implement priority update
     return { success: true, message: 'Priority updated' };
@@ -391,9 +403,10 @@ export class ServiceRequestsController {
   @Permissions('service_requests:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Request additional documents' })
+  @ApiBody({ type: ReuploadDocumentDto })
   requestDocuments(
     @Param('id') id: string,
-    @Body() dto: { categories: string[]; reason?: string },
+    @Body() dto: ReuploadDocumentDto,
     @CurrentUser() user: UserRequest,
   ) {
     // Implement document request

@@ -9,7 +9,7 @@ import {
   UseGuards,
   Res,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { NotificationsService } from './notifications.service';
 import { SendNotificationDto } from './dto/send-notification.dto';
 import { BroadcastNotificationDto } from './dto/broadcast-notification.dto';
@@ -104,6 +104,7 @@ export class NotificationsController {
   @Permissions('notifications:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Send notification' })
+  @ApiBody({ type: SendNotificationDto })
   send(@Body() dto: SendNotificationDto) {
     return this.notificationsService.send(dto);
   }
@@ -113,6 +114,7 @@ export class NotificationsController {
   @Permissions('notifications:broadcast')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Broadcast to all users' })
+  @ApiBody({ type: BroadcastNotificationDto })
   broadcast(@Body() dto: BroadcastNotificationDto) {
     return this.notificationsService.broadcast(dto);
   }
@@ -122,6 +124,7 @@ export class NotificationsController {
   @Permissions('notifications:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Send to role' })
+  @ApiBody({ type: SendToRoleDto })
   sendToRole(@Body() dto: SendToRoleDto) {
     return this.notificationsService.sendToRole(dto);
   }

@@ -60,18 +60,9 @@ export class AuthService {
     const userResponse = await this.usersService.create({
       email: ValidationUtil.sanitizeString(dto.email.toLowerCase()),
       password: dto.password,
-      fullName: `${ValidationUtil.sanitizeString(dto.firstName)} ${ValidationUtil.sanitizeString(dto.lastName)}`,
+      fullName: ValidationUtil.sanitizeString(dto.fullName),
       phone: dto.phone,
       roleId: customerRole.id,
-      // Profile fields
-      fiscalCode: dto.fiscalCode,
-      birthDate: dto.dateOfBirth,
-      address: dto.address,
-      city: dto.city,
-      postalCode: dto.postalCode,
-      province: dto.province,
-      gdprConsent: dto.gdprConsent,
-      privacyConsent: dto.marketingConsent,
     });
 
     SafeLogger.log(`User registered successfully: ${dto.email}`, 'AuthService');
