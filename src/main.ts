@@ -66,17 +66,40 @@ async function bootstrap() {
 
   app.use(rateLimit(rateLimitConfig));
 
-  // CORS configuration
-  const corsOrigins = configService
-    .get<string>('CORS_ORIGINS', 'http://localhost:3001')
-    .split(',');
-  app.enableCors({
-    origin: corsOrigins,
-    credentials: configService.get<boolean>('CORS_CREDENTIALS', true),
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: 'Content-Type, Authorization, X-Requested-With',
-    optionsSuccessStatus: 200,
-  });
+ // CORS configuration (robust)
+const corsOriginsRaw = configService.get<string>(
+  'CORS_ORIGINS',
+  'http://localhost:3001',
+);
+
+const corsOrigins = corsOriginsRaw
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+app.enableCors({
+  origin: (origin, callback) => {
+    // Allow server-to-server / Postman (no Origin header)
+    if (!origin) return callback(null, true);
+
+    // Exact match against allowed list
+    if (corsOrigins.includes(origin)) return callback(null, true);
+
+    return callback(new Error(`CORS blocked for origin: ${origin}`), false);
+  },
+  credentials: configService.get<boolean>('CORS_CREDENTIALS', true),
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Requested-With',
+    'Accept',
+    'Origin',
+  ],
+  exposedHeaders: ['Authorization'],
+  optionsSuccessStatus: 204,
+});
+
 
   // Global pipes and filters
   app.useGlobalPipes(new GlobalValidationPipe());
