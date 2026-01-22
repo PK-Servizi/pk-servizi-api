@@ -23,7 +23,8 @@ async function bootstrap() {
 
   // Trust reverse proxy (e.g. Nginx, load balancer) in production
   if (isProduction) {
-    app.set('trust proxy', 1); // trust first proxy
+    const server = app.getHttpAdapter().getInstance();
+    server.set('trust proxy', 1); // trust first proxy
   }
 
   // Compression middleware for faster response times
