@@ -16,9 +16,15 @@ async function bootstrap() {
     rawBody: true,
   });
 
+ 
   const configService = app.get(ConfigService);
   const isProduction = configService.get('NODE_ENV') === 'production';
   const port = configService.get<number>('API_PORT', 3000);
+
+  // Trust reverse proxy (e.g. Nginx, load balancer) in production
+  if (isProduction) {
+    app.set('trust proxy', 1); // trust first proxy
+  }
 
   // Compression middleware for faster response times
   app.use(
@@ -29,8 +35,8 @@ async function bootstrap() {
         }
         return compression.filter(req, res);
       },
-      threshold: 1024, // Only compress responses larger than 1KB
-      level: 6, // Balance between speed and compression ratio
+      threshold: 1024,
+      level: 6,
     }),
   );
 
@@ -66,40 +72,17 @@ async function bootstrap() {
 
   app.use(rateLimit(rateLimitConfig));
 
- // CORS configuration (robust)
-const corsOriginsRaw = configService.get<string>(
-  'CORS_ORIGINS',
-  'http://localhost:3001',
-);
-
-const corsOrigins = corsOriginsRaw
-  .split(',')
-  .map((o) => o.trim())
-  .filter(Boolean);
-
-app.enableCors({
-  origin: (origin, callback) => {
-    // Allow server-to-server / Postman (no Origin header)
-    if (!origin) return callback(null, true);
-
-    // Exact match against allowed list
-    if (corsOrigins.includes(origin)) return callback(null, true);
-
-    return callback(new Error(`CORS blocked for origin: ${origin}`), false);
-  },
-  credentials: configService.get<boolean>('CORS_CREDENTIALS', true),
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-  allowedHeaders: [
-    'Content-Type',
-    'Authorization',
-    'X-Requested-With',
-    'Accept',
-    'Origin',
-  ],
-  exposedHeaders: ['Authorization'],
-  optionsSuccessStatus: 204,
-});
-
+  // CORS configuration
+  const corsOrigins = configService
+    .get<string>('CORS_ORIGINS', 'http://localhost:3001')
+    .split(',');
+  app.enableCors({
+    origin: corsOrigins,
+    credentials: configService.get<boolean>('CORS_CREDENTIALS', true),
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type, Authorization, X-Requested-With',
+    optionsSuccessStatus: 200,
+  });
 
   // Global pipes and filters
   app.useGlobalPipes(new GlobalValidationPipe());
@@ -112,37 +95,37 @@ app.enableCors({
   });
 
   // Swagger documentation (only in development)
-  if (!isProduction) {
-    const config = new DocumentBuilder()
-      .setTitle('PK SERVIZI API')
-      .setDescription(
-        'Complete service management system API with optimized performance',
-      )
-      .setVersion('1.0')
-      .addBearerAuth(
-        { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
-        'JWT-auth',
-      )
-      .addTag('Authentication', 'User authentication and authorization')
-      .addTag('Users', 'User management operations')
-      .addTag('Appointments', 'Appointment booking and management')
-      .addTag('Service Requests', 'Service request processing')
-      .addTag('Documents', 'Document management')
-      .addTag('Payments', 'Payment processing')
-      .addTag('Admin', 'Administrative operations')
-      .build();
+  // if (!isProduction) {
+  const config = new DocumentBuilder()
+    .setTitle('PK SERVIZI API')
+    .setDescription(
+      'Complete service management system API with optimized performance',
+    )
+    .setVersion('1.0')
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      'JWT-auth',
+    )
+    .addTag('Authentication', 'User authentication and authorization')
+    .addTag('Users', 'User management operations')
+    .addTag('Appointments', 'Appointment booking and management')
+    .addTag('Service Requests', 'Service request processing')
+    .addTag('Documents', 'Document management')
+    .addTag('Payments', 'Payment processing')
+    .addTag('Admin', 'Administrative operations')
+    .build();
 
-    const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api/docs', app, document, {
-      swaggerOptions: {
-        persistAuthorization: true,
-        displayRequestDuration: true,
-        filter: true,
-        showExtensions: true,
-      },
-      customSiteTitle: 'PK SERVIZI API Documentation',
-    });
-  }
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document, {
+    swaggerOptions: {
+      persistAuthorization: true,
+      displayRequestDuration: true,
+      filter: true,
+      showExtensions: true,
+    },
+    customSiteTitle: 'PK SERVIZI API Documentation',
+  });
+  // }
 
   // Graceful shutdown
   process.on('SIGTERM', async () => {

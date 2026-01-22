@@ -6,7 +6,7 @@ import * as bcrypt from 'bcryptjs';
 import { RoleEnum } from '../src/modules/roles/role.enum';
 
 // Import the seeding functions
-import { seedPermissions } from './permissions-seed';
+
 import { seedServiceTypes } from './service-types-seed';
 import { seedRolePermissions } from './role-permission-seed';
 
