@@ -21,7 +21,9 @@ describe('Email Notification System (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+    app.useGlobalPipes(
+      new ValidationPipe({ whitelist: true, transform: true }),
+    );
     await app.init();
 
     dataSource = moduleFixture.get<DataSource>(DataSource);
@@ -32,7 +34,10 @@ describe('Email Notification System (e2e)', () => {
   });
 
   // Helper function to check notification in database
-  const checkNotificationInDB = async (userId: string, titleContains: string) => {
+  const checkNotificationInDB = async (
+    userId: string,
+    titleContains: string,
+  ) => {
     const notification = await dataSource.query(
       `SELECT * FROM notifications WHERE user_id = $1 AND title LIKE $2 ORDER BY created_at DESC LIMIT 1`,
       [userId, `%${titleContains}%`],
@@ -119,10 +124,15 @@ describe('Email Notification System (e2e)', () => {
       expect(submitResponse.body.success).toBe(true);
 
       // Check notification in database
-      const notification = await checkNotificationInDB(testUserId, 'Richiesta Inviata');
+      const notification = await checkNotificationInDB(
+        testUserId,
+        'Richiesta Inviata',
+      );
       expect(notification.type).toBe('success');
 
-      console.log('✅ Service request submission emails sent (customer + admin)');
+      console.log(
+        '✅ Service request submission emails sent (customer + admin)',
+      );
       console.log('✅ Notification saved to DB:', notification.id);
     });
 
@@ -151,7 +161,10 @@ describe('Email Notification System (e2e)', () => {
       expect(response.body.success).toBe(true);
 
       // Check notification
-      const notification = await checkNotificationInDB(testUserId, 'Aggiornamento Stato');
+      const notification = await checkNotificationInDB(
+        testUserId,
+        'Aggiornamento Stato',
+      );
       expect(notification.message).toContain('in_review');
 
       console.log('✅ Status update email sent to customer');
@@ -178,7 +191,10 @@ describe('Email Notification System (e2e)', () => {
         expect(response.body.success).toBe(true);
 
         // Check notification
-        const notification = await checkNotificationInDB(testUserId, 'Documento Approvato');
+        const notification = await checkNotificationInDB(
+          testUserId,
+          'Documento Approvato',
+        );
         expect(notification.type).toBe('success');
 
         console.log('✅ Document approved email sent');
@@ -196,7 +212,10 @@ describe('Email Notification System (e2e)', () => {
         expect(response.body.success).toBe(true);
 
         // Check notification
-        const notification = await checkNotificationInDB(testUserId, 'Documento Rifiutato');
+        const notification = await checkNotificationInDB(
+          testUserId,
+          'Documento Rifiutato',
+        );
         expect(notification.type).toBe('error');
         expect(notification.message).toContain('rifiutato');
 
@@ -227,7 +246,10 @@ describe('Email Notification System (e2e)', () => {
       testAppointmentId = response.body.data.id;
 
       // Check notification
-      const notification = await checkNotificationInDB(testUserId, 'Appuntamento Prenotato');
+      const notification = await checkNotificationInDB(
+        testUserId,
+        'Appuntamento Prenotato',
+      );
       expect(notification.type).toBe('info');
 
       console.log('✅ Appointment booking emails sent (customer + operator)');
@@ -250,7 +272,10 @@ describe('Email Notification System (e2e)', () => {
       expect(response.body.success).toBe(true);
 
       // Check notification
-      const notification = await checkNotificationInDB(testUserId, 'Riprogrammato');
+      const notification = await checkNotificationInDB(
+        testUserId,
+        'Riprogrammato',
+      );
       expect(notification.message).toContain('riprogrammato');
 
       console.log('✅ Appointment rescheduled email sent');
@@ -294,7 +319,10 @@ describe('Email Notification System (e2e)', () => {
         expect(response.body).toBeDefined();
 
         // Check notification
-        const notification = await checkNotificationInDB(testUserId, 'Iscrizione al Corso');
+        const notification = await checkNotificationInDB(
+          testUserId,
+          'Iscrizione al Corso',
+        );
         expect(notification.type).toBe('success');
 
         console.log('✅ Course enrollment email sent');
@@ -311,7 +339,10 @@ describe('Email Notification System (e2e)', () => {
         expect(response.body).toBeDefined();
 
         // Check notification
-        const notification = await checkNotificationInDB(testUserId, 'Disiscrizione');
+        const notification = await checkNotificationInDB(
+          testUserId,
+          'Disiscrizione',
+        );
 
         console.log('✅ Course unenrollment email sent');
       }
@@ -338,7 +369,10 @@ describe('Email Notification System (e2e)', () => {
       const newUserId = response.body.data.id;
 
       // Check notification
-      const notification = await checkNotificationInDB(newUserId, 'Account Creato');
+      const notification = await checkNotificationInDB(
+        newUserId,
+        'Account Creato',
+      );
       expect(notification.type).toBe('info');
 
       console.log('✅ Admin-created user welcome email sent with credentials');
@@ -370,7 +404,10 @@ describe('Email Notification System (e2e)', () => {
       expect(response.body.success).toBe(true);
 
       // Check notification
-      const notification = await checkNotificationInDB(testUserId, 'Esportazione Dati');
+      const notification = await checkNotificationInDB(
+        testUserId,
+        'Esportazione Dati',
+      );
       expect(notification.message).toContain('esportazione');
 
       console.log('✅ GDPR export request confirmation sent');
@@ -387,7 +424,7 @@ describe('Email Notification System (e2e)', () => {
       expect(notifications.length).toBeGreaterThan(0);
 
       console.log(`\n📊 Total notifications in DB: ${notifications.length}`);
-      
+
       notifications.forEach((notif: any) => {
         console.log(`  - ${notif.type.toUpperCase()}: ${notif.title}`);
         expect(notif.user_id).toBe(testUserId);
@@ -421,7 +458,9 @@ describe('Email Notification System (e2e)', () => {
   describe('9. Email Template Verification', () => {
     it('should verify single template is used for all emails', () => {
       // This is verified by the implementation - all emails use the same getEmailTemplate() method
-      console.log('✅ Single universal email template confirmed in email.service.ts');
+      console.log(
+        '✅ Single universal email template confirmed in email.service.ts',
+      );
       console.log('   - Professional gradient header (#2563eb to #1d4ed8)');
       console.log('   - Responsive design');
       console.log('   - Italian language');

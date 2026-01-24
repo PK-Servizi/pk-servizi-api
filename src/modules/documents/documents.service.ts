@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Document } from './entities/document.entity';
@@ -11,6 +11,8 @@ import { EmailService } from '../notifications/email.service';
 
 @Injectable()
 export class DocumentsService {
+  private readonly logger = new Logger(DocumentsService.name);
+
   constructor(
     @InjectRepository(Document)
     private documentRepository: Repository<Document>,
@@ -224,7 +226,7 @@ export class DocumentsService {
         });
       }
     } catch (error) {
-      console.error(`Failed to send email: ${error.message}`);
+      this.logger.error(`Failed to send email: ${error.message}`, error.stack);
     }
 
     return { success: true, message: 'Document approved', data: updated };
@@ -259,7 +261,7 @@ export class DocumentsService {
         });
       }
     } catch (error) {
-      console.error(`Failed to send email: ${error.message}`);
+      this.logger.error(`Failed to send email: ${error.message}`, error.stack);
     }
 
     return { success: true, message: 'Document rejected', data: updated };
@@ -374,7 +376,7 @@ export class DocumentsService {
         );
       }
     } catch (error) {
-      console.error(`Failed to send email: ${error.message}`);
+      this.logger.error(`Failed to send email: ${error.message}`, error.stack);
     }
 
     return {
