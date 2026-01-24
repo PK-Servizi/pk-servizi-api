@@ -5,6 +5,9 @@ import { BaseService } from '../../common/services/base.service';
 import { Course } from './entities/course.entity';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
+import { User } from '../users/entities/user.entity';
+import { NotificationsService } from '../notifications/notifications.service';
+import { EmailService } from '../notifications/email.service';
 
 /**
  * CoursesService
@@ -21,6 +24,10 @@ export class CoursesService extends BaseService<
   constructor(
     @InjectRepository(Course)
     protected readonly courseRepository: Repository<Course>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    private notificationsService: NotificationsService,
+    private emailService: EmailService,
   ) {
     super(courseRepository);
   }
@@ -75,6 +82,28 @@ export class CoursesService extends BaseService<
       throw new BadRequestException('Course not available');
     }
 
+    // Send email notification
+    try {
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+      if (user) {
+        await this.emailService.sendCourseEnrollment(
+          user.email,
+          user.fullName,
+          course.title,
+          course.description || '',
+        );
+        await this.notificationsService.send({
+          userId: user.id,
+          title: '🎓 Iscrizione al Corso',
+          message: `Ti sei iscritto con successo al corso "${course.title}".`,
+          type: 'success',
+          actionUrl: `/courses/${id}`,
+        });
+      }
+    } catch (error) {
+      this.logger.error(`Failed to send email: ${error.message}`);
+    }
+
     return {
       courseId: id,
       userId,
@@ -98,7 +127,28 @@ export class CoursesService extends BaseService<
    */
   async unenroll(id: string, userId: string): Promise<any> {
     this.logger.log(`User ${userId} unenrolling from course ${id}`);
-    await this.findById(id);
+    const course = await this.findById(id);
+
+    // Send email notification
+    try {
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+      if (user) {
+        await this.emailService.sendCourseEnrollmentCancelled(
+          user.email,
+          user.fullName,
+          course.title,
+        );
+        await this.notificationsService.send({
+          userId: user.id,
+          title: '❌ Disiscrizione dal Corso',
+          message: `Ti sei disiscritto dal corso "${course.title}".`,
+          type: 'info',
+        });
+      }
+    } catch (error) {
+      this.logger.error(`Failed to send email: ${error.message}`);
+    }
+
     // TODO: Implement enrollment removal
     return { courseId: id, userId };
   }

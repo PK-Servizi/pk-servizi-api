@@ -12,6 +12,8 @@ import { Appointment } from './entities/appointment.entity';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { User } from '../users/entities/user.entity';
 import { ServiceType } from '../service-requests/entities/service-type.entity';
+import { NotificationsService } from '../notifications/notifications.service';
+import { EmailService } from '../notifications/email.service';
 
 const APPOINTMENT_DURATIONS = [30, 60, 90];
 const APPOINTMENT_STATUSES = [
@@ -41,6 +43,8 @@ export class AppointmentsService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(ServiceType)
     private readonly serviceTypeRepository: Repository<ServiceType>,
+    private notificationsService: NotificationsService,
+    private emailService: EmailService,
   ) {}
 
   /**
@@ -132,6 +136,37 @@ export class AppointmentsService {
 
     const saved = await this.appointmentRepository.save(appointment);
     this.logger.log(`Appointment ${saved.id} created for user ${userId}`);
+
+    // Send email notifications
+    try {
+      // Customer confirmation
+      await this.emailService.sendAppointmentConfirmation(
+        user.email,
+        user.fullName,
+        saved.appointmentDate,
+        saved.title,
+        saved.id,
+      );
+      await this.notificationsService.send({
+        userId: user.id,
+        title: '📅 Appuntamento Prenotato',
+        message: `Il tuo appuntamento è stato prenotato per ${saved.appointmentDate.toLocaleString('it-IT')}.`,
+        type: 'info',
+        actionUrl: `/appointments/${saved.id}`,
+      });
+
+      // Admin/Operator notification
+      if (saved.operatorId) {
+        await this.emailService.sendAppointmentBookedToAdmin(
+          user.fullName,
+          saved.appointmentDate,
+          saved.title,
+          saved.id,
+        );
+      }
+    } catch (error) {
+      this.logger.error(`Failed to send email: ${error.message}`);
+    }
 
     return {
       success: true,
@@ -349,6 +384,37 @@ export class AppointmentsService {
     const updated = await this.appointmentRepository.save(appointment);
     this.logger.log(`Appointment ${id} cancelled by user ${userId}`);
 
+    // Send email notifications
+    try {
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+      if (user) {
+        // Customer confirmation
+        await this.emailService.sendAppointmentCancelled(
+          user.email,
+          user.fullName,
+          updated.appointmentDate,
+          updated.title,
+        );
+        await this.notificationsService.send({
+          userId: user.id,
+          title: '❌ Appuntamento Annullato',
+          message: 'Il tuo appuntamento è stato annullato con successo.',
+          type: 'info',
+        });
+
+        // Admin notification
+        if (updated.operatorId) {
+          await this.emailService.sendAppointmentCancelledToAdmin(
+            user.fullName,
+            updated.appointmentDate,
+            updated.title,
+          );
+        }
+      }
+    } catch (error) {
+      this.logger.error(`Failed to send email: ${error.message}`);
+    }
+
     return {
       success: true,
       message: 'Appointment cancelled successfully',
@@ -430,6 +496,29 @@ export class AppointmentsService {
 
     const updated = await this.appointmentRepository.save(appointment);
     this.logger.log(`Appointment ${id} rescheduled by user ${userId}`);
+
+    // Send email notification
+    try {
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+      if (user) {
+        await this.emailService.sendAppointmentRescheduled(
+          user.email,
+          user.fullName,
+          new Date(updated.notes?.previousDate || updated.appointmentDate),
+          updated.appointmentDate,
+          updated.title,
+        );
+        await this.notificationsService.send({
+          userId: user.id,
+          title: '🔄 Appuntamento Riprogrammato',
+          message: `Il tuo appuntamento è stato riprogrammato per ${updated.appointmentDate.toLocaleString('it-IT')}.`,
+          type: 'info',
+          actionUrl: `/appointments/${id}`,
+        });
+      }
+    } catch (error) {
+      this.logger.error(`Failed to send email: ${error.message}`);
+    }
 
     return {
       success: true,

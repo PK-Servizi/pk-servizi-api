@@ -124,7 +124,9 @@ export class SubscriptionPlansController {
   @Post(':id/clone')
   @Permissions('subscription_plans:write')
   @ApiOperation({ summary: '[Admin] Clone subscription plan' })
-  @ApiBody({ schema: { type: 'object', properties: { name: { type: 'string' } } } })
+  @ApiBody({
+    schema: { type: 'object', properties: { name: { type: 'string' } } },
+  })
   async clone(@Param('id') id: string, @Body('name') name: string) {
     return this.plansService.clone(id, name);
   }

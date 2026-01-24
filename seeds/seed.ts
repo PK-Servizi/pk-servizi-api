@@ -80,6 +80,10 @@ async function seed() {
     // Run service types seed
     await seedServiceTypes();
 
+    // Run subscription plans seed
+    const { seedSubscriptionPlans } = await import('./subscription-plans-seed');
+    await seedSubscriptionPlans();
+
     console.log('✅ All seeding tasks completed successfully!');
   } catch (e) {
     console.error('Seeding error:', e);

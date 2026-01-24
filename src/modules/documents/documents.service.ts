@@ -4,7 +4,10 @@ import { Repository } from 'typeorm';
 import { Document } from './entities/document.entity';
 import { ServiceType } from '../service-requests/entities/service-type.entity';
 import { ServiceRequest } from '../service-requests/entities/service-request.entity';
+import { User } from '../users/entities/user.entity';
 import { StorageService } from '../../common/services/storage.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { EmailService } from '../notifications/email.service';
 
 @Injectable()
 export class DocumentsService {
@@ -15,7 +18,11 @@ export class DocumentsService {
     private serviceTypeRepository: Repository<ServiceType>,
     @InjectRepository(ServiceRequest)
     private serviceRequestRepository: Repository<ServiceRequest>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
     private storageService: StorageService,
+    private notificationsService: NotificationsService,
+    private emailService: EmailService,
   ) {}
 
   /**
@@ -25,7 +32,7 @@ export class DocumentsService {
    */
   private extractS3Key(urlOrPath: string): string {
     if (!urlOrPath) return urlOrPath;
-    
+
     // If it's a full URL, extract the path after .amazonaws.com/bucket-name/
     if (urlOrPath.startsWith('http://') || urlOrPath.startsWith('https://')) {
       const parts = urlOrPath.split('.amazonaws.com/');
@@ -39,7 +46,7 @@ export class DocumentsService {
         return pathAfterDomain;
       }
     }
-    
+
     // Already a relative path
     return urlOrPath;
   }
@@ -194,7 +201,32 @@ export class DocumentsService {
       status: 'approved',
       adminNotes: dto.notes,
     });
-    const updated = await this.documentRepository.findOne({ where: { id } });
+    const updated = await this.documentRepository.findOne({
+      where: { id },
+      relations: ['serviceRequest', 'serviceRequest.user'],
+    });
+
+    // Send email notification
+    try {
+      const user = updated.serviceRequest?.user;
+      if (user) {
+        await this.emailService.sendDocumentApproved(
+          user.email,
+          user.fullName,
+          updated.originalFilename,
+        );
+        await this.notificationsService.send({
+          userId: user.id,
+          title: '✅ Documento Approvato',
+          message: `Il tuo documento "${updated.originalFilename}" è stato approvato.`,
+          type: 'success',
+          actionUrl: `/documents/${id}`,
+        });
+      }
+    } catch (error) {
+      console.error(`Failed to send email: ${error.message}`);
+    }
+
     return { success: true, message: 'Document approved', data: updated };
   }
 
@@ -203,7 +235,33 @@ export class DocumentsService {
       status: 'rejected',
       adminNotes: dto.reason,
     });
-    const updated = await this.documentRepository.findOne({ where: { id } });
+    const updated = await this.documentRepository.findOne({
+      where: { id },
+      relations: ['serviceRequest', 'serviceRequest.user'],
+    });
+
+    // Send email notification
+    try {
+      const user = updated.serviceRequest?.user;
+      if (user) {
+        await this.emailService.sendDocumentRejected(
+          user.email,
+          user.fullName,
+          updated.originalFilename,
+          dto.reason,
+        );
+        await this.notificationsService.send({
+          userId: user.id,
+          title: '❌ Documento Rifiutato',
+          message: `Il tuo documento "${updated.originalFilename}" è stato rifiutato. Motivo: ${dto.reason}`,
+          type: 'error',
+          actionUrl: `/documents/${id}`,
+        });
+      }
+    } catch (error) {
+      console.error(`Failed to send email: ${error.message}`);
+    }
+
     return { success: true, message: 'Document rejected', data: updated };
   }
 
@@ -304,6 +362,21 @@ export class DocumentsService {
     }
 
     const saved = await this.documentRepository.save(documents);
+
+    // Send admin notification for new documents
+    try {
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+      if (user && serviceRequest.status === 'missing_documents') {
+        await this.emailService.sendDocumentUploadedToAdmin(
+          await this.emailService.getAdminEmail(),
+          user.fullName,
+          saved[0].originalFilename,
+        );
+      }
+    } catch (error) {
+      console.error(`Failed to send email: ${error.message}`);
+    }
+
     return {
       success: true,
       message: `${documents.length} documents uploaded successfully`,

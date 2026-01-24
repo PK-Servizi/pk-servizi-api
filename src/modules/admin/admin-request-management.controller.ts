@@ -26,20 +26,35 @@ import { UpdateStatusDto } from '../service-requests/dto/update-status.dto';
 import { AssignOperatorDto } from '../service-requests/dto/assign-operator.dto';
 
 class AddInternalNoteDto {
-  @ApiProperty({ description: 'The internal note to add', example: 'Customer called and verified details.' })
+  @ApiProperty({
+    description: 'The internal note to add',
+    example: 'Customer called and verified details.',
+  })
   note: string;
 }
 
 class RequestDocumentsDto {
-  @ApiProperty({ description: 'List of document categories to request', type: [String], example: ['ID Card', 'Tax Return'] })
+  @ApiProperty({
+    description: 'List of document categories to request',
+    type: [String],
+    example: ['ID Card', 'Tax Return'],
+  })
   categories: string[];
 
-  @ApiProperty({ description: 'Reason for requesting documents', example: 'Uploaded documents were blurry', required: false })
+  @ApiProperty({
+    description: 'Reason for requesting documents',
+    example: 'Uploaded documents were blurry',
+    required: false,
+  })
   reason: string;
 }
 
 class BulkUpdateStatusDto {
-  @ApiProperty({ description: 'List of request IDs to update', type: [String], example: ['req_123', 'req_456'] })
+  @ApiProperty({
+    description: 'List of request IDs to update',
+    type: [String],
+    example: ['req_123', 'req_456'],
+  })
   requestIds: string[];
 
   @ApiProperty({ description: 'New status to apply', example: 'in_review' })

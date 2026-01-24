@@ -37,10 +37,25 @@ export class SubscriptionPlan {
   })
   priceAnnual: number;
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ 
+    type: 'jsonb', 
+    nullable: true,
+    transformer: {
+      to: (value: any) => value,
+      from: (value: any) => value,
+    },
+  })
   features: any;
 
-  @Column({ type: 'jsonb', nullable: true, name: 'service_limits' })
+  @Column({ 
+    type: 'jsonb', 
+    nullable: true, 
+    name: 'service_limits',
+    transformer: {
+      to: (value: any) => value,
+      from: (value: any) => value,
+    },
+  })
   serviceLimits: any;
 
   @Column({ default: true, name: 'is_active' })

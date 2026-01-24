@@ -8,6 +8,9 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In, ILike, Between } from 'typeorm';
+import { NotificationsService } from '../notifications/notifications.service';
+import { EmailService } from '../notifications/email.service';
+import { User } from '../users/entities/user.entity';
 import { ServiceRequest } from './entities/service-request.entity';
 import { IseeRequest } from './entities/isee-request.entity';
 import { Modello730Request } from './entities/modello-730-request.entity';
@@ -65,6 +68,10 @@ export class ServiceRequestsService {
     private userSubscriptionRepository: Repository<UserSubscription>,
     @InjectRepository(SubscriptionPlan)
     private subscriptionPlanRepository: Repository<SubscriptionPlan>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+    private notificationsService: NotificationsService,
+    private emailService: EmailService,
   ) {}
 
   // ============================================================================
@@ -389,7 +396,7 @@ export class ServiceRequestsService {
               where: { serviceRequestId: id },
             })) || {};
         }
-        
+
         // Exclude the type-specific 'id' field to prevent overwriting the main request ID
         if (typeData && typeData.id) {
           const { id: _typeId, ...restTypeData } = typeData;
@@ -563,6 +570,37 @@ export class ServiceRequestsService {
 
       this.logger.log(`Service request submitted: ${id}`);
 
+      // Send email notifications
+      try {
+        const user = await this.userRepository.findOne({ where: { id: userId } });
+        if (user) {
+          // Customer confirmation
+          await this.emailService.sendServiceRequestSubmitted(
+            user.email,
+            user.fullName,
+            request.id,
+            request.serviceType?.name || 'Servizio',
+          );
+          await this.notificationsService.send({
+            userId: user.id,
+            title: '✅ Richiesta Inviata',
+            message: `La tua richiesta di servizio ${request.serviceType?.name || 'servizio'} è stata inviata con successo.`,
+            type: 'success',
+            actionUrl: `/service-requests/${request.id}`,
+          });
+
+          // Admin notification
+          await this.emailService.sendServiceRequestSubmittedToAdmin(
+            await this.emailService.getAdminEmail(),
+            user.fullName,
+            request.id,
+            request.serviceType?.name || 'Servizio',
+          );
+        }
+      } catch (error) {
+        this.logger.error(`Failed to send email: ${error.message}`);
+      }
+
       return {
         success: true,
         message: 'Service request submitted successfully',
@@ -628,6 +666,30 @@ export class ServiceRequestsService {
       this.logger.log(
         `Service request status updated: ${id} from ${oldStatus} to ${normalizedStatus}`,
       );
+
+      // Send email notification to customer about status change
+      try {
+        const user = await this.userRepository.findOne({ where: { id: request.userId } });
+        if (user) {
+          await this.emailService.sendServiceRequestStatusUpdate(
+            user.email,
+            user.fullName,
+            savedRequest.id,
+            savedRequest.serviceType?.name || 'Servizio',
+            normalizedStatus,
+            reason || 'Status updated',
+          );
+          await this.notificationsService.send({
+            userId: user.id,
+            title: '🔔 Aggiornamento Stato Richiesta',
+            message: `Lo stato della tua richiesta è stato aggiornato a: ${normalizedStatus}`,
+            type: normalizedStatus === 'completed' ? 'success' : 'info',
+            actionUrl: `/service-requests/${id}`,
+          });
+        }
+      } catch (error) {
+        this.logger.error(`Failed to send email: ${error.message}`);
+      }
 
       return {
         success: true,

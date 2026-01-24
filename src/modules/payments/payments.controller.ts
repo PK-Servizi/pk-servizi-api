@@ -68,7 +68,10 @@ export class PaymentsController {
       type: 'object',
       properties: {
         reason: { type: 'string' },
-        amount: { type: 'number', description: 'Amount to refund (optional for partial)' },
+        amount: {
+          type: 'number',
+          description: 'Amount to refund (optional for partial)',
+        },
       },
       required: ['reason'],
     },

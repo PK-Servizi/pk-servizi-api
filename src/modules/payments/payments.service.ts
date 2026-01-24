@@ -35,7 +35,7 @@ export class PaymentsService {
    */
   async findAll(options?: { page?: number; limit?: number }) {
     const { page = 1, limit = 10 } = options || {};
-    
+
     const qb = this.paymentRepository
       .createQueryBuilder('payment')
       .leftJoin('payment.user', 'user')

@@ -11,7 +11,10 @@ import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 class FamilyMemberDto {
-  @ApiProperty({ description: 'Full name of the family member', example: 'Mario Rossi' })
+  @ApiProperty({
+    description: 'Full name of the family member',
+    example: 'Mario Rossi',
+  })
   @IsString()
   name: string;
 
@@ -19,7 +22,10 @@ class FamilyMemberDto {
   @IsString()
   fiscalCode: string;
 
-  @ApiProperty({ description: 'Relationship to the applicant', example: 'Spouse' })
+  @ApiProperty({
+    description: 'Relationship to the applicant',
+    example: 'Spouse',
+  })
   @IsString()
   relationship: string;
 
@@ -34,7 +40,10 @@ class FamilyMemberDto {
 }
 
 class ResidenceDto {
-  @ApiPropertyOptional({ description: 'Street address', example: 'Via Roma 123' })
+  @ApiPropertyOptional({
+    description: 'Street address',
+    example: 'Via Roma 123',
+  })
   @IsString()
   @IsOptional()
   address?: string;
@@ -49,7 +58,10 @@ class ResidenceDto {
   @IsOptional()
   postalCode?: string;
 
-  @ApiPropertyOptional({ description: 'Property ownership type', example: 'Owned' })
+  @ApiPropertyOptional({
+    description: 'Property ownership type',
+    example: 'Owned',
+  })
   @IsString()
   @IsOptional()
   propertyType?: string;
@@ -88,11 +100,17 @@ class UniversityStudentDto {
   @IsString()
   name: string;
 
-  @ApiProperty({ description: 'University name', example: 'Politecnico di Milano' })
+  @ApiProperty({
+    description: 'University name',
+    example: 'Politecnico di Milano',
+  })
   @IsString()
   university: string;
 
-  @ApiProperty({ description: 'Degree course', example: 'Computer Engineering' })
+  @ApiProperty({
+    description: 'Degree course',
+    example: 'Computer Engineering',
+  })
   @IsString()
   degree: string;
 }
@@ -113,11 +131,17 @@ class MinorDto {
 }
 
 export class CreateIseeRequestDto {
-  @ApiProperty({ description: 'Service Type ID', example: 'c42e6d62-1234-5678-9abc-def123456789' })
+  @ApiProperty({
+    description: 'Service Type ID',
+    example: 'c42e6d62-1234-5678-9abc-def123456789',
+  })
   @IsString()
   serviceTypeId: string;
 
-  @ApiPropertyOptional({ type: [FamilyMemberDto], description: 'List of family members' })
+  @ApiPropertyOptional({
+    type: [FamilyMemberDto],
+    description: 'List of family members',
+  })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => FamilyMemberDto)
@@ -140,14 +164,20 @@ export class CreateIseeRequestDto {
   @IsOptional()
   incomeYear2?: number;
 
-  @ApiPropertyOptional({ type: [IncomeSourceDto], description: 'List of income sources' })
+  @ApiPropertyOptional({
+    type: [IncomeSourceDto],
+    description: 'List of income sources',
+  })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => IncomeSourceDto)
   @IsOptional()
   incomeSources?: IncomeSourceDto[];
 
-  @ApiPropertyOptional({ description: 'Bank account balance metadata', example: 1 })
+  @ApiPropertyOptional({
+    description: 'Bank account balance metadata',
+    example: 1,
+  })
   @IsNumber()
   @IsOptional()
   bankAccounts?: number;
@@ -183,7 +213,10 @@ export class CreateIseeRequestDto {
   @IsOptional()
   disabilityPercentage?: string;
 
-  @ApiPropertyOptional({ type: [UniversityStudentDto], description: 'List of university students' })
+  @ApiPropertyOptional({
+    type: [UniversityStudentDto],
+    description: 'List of university students',
+  })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => UniversityStudentDto)
@@ -199,7 +232,10 @@ export class CreateIseeRequestDto {
 }
 
 export class UpdateIseeRequestDto {
-  @ApiPropertyOptional({ type: [FamilyMemberDto], description: 'List of family members' })
+  @ApiPropertyOptional({
+    type: [FamilyMemberDto],
+    description: 'List of family members',
+  })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => FamilyMemberDto)
@@ -222,14 +258,20 @@ export class UpdateIseeRequestDto {
   @IsOptional()
   incomeYear2?: number;
 
-  @ApiPropertyOptional({ type: [IncomeSourceDto], description: 'List of income sources' })
+  @ApiPropertyOptional({
+    type: [IncomeSourceDto],
+    description: 'List of income sources',
+  })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => IncomeSourceDto)
   @IsOptional()
   incomeSources?: IncomeSourceDto[];
 
-  @ApiPropertyOptional({ description: 'Bank account balance metadata', example: 1 })
+  @ApiPropertyOptional({
+    description: 'Bank account balance metadata',
+    example: 1,
+  })
   @IsNumber()
   @IsOptional()
   bankAccounts?: number;
@@ -265,7 +307,10 @@ export class UpdateIseeRequestDto {
   @IsOptional()
   disabilityPercentage?: string;
 
-  @ApiPropertyOptional({ type: [UniversityStudentDto], description: 'List of university students' })
+  @ApiPropertyOptional({
+    type: [UniversityStudentDto],
+    description: 'List of university students',
+  })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => UniversityStudentDto)

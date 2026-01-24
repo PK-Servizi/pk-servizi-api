@@ -4,6 +4,8 @@ import { Repository, LessThan } from 'typeorm';
 import { Notification } from './entities/notification.entity';
 import { EmailService } from './email.service';
 import { User } from '../users/entities/user.entity';
+import { CreateNotificationDto } from './dto/create-notification.dto';
+import { BroadcastNotificationDto } from './dto/broadcast-notification.dto';
 
 @Injectable()
 export class NotificationsService {
@@ -152,7 +154,13 @@ export class NotificationsService {
         }
 
         this.emailService
-          .sendEmail(userEmail, dto.title, htmlContent, dto.message)
+          .sendEmail({
+            to: userEmail,
+            subject: dto.title,
+            title: dto.title,
+            message: dto.message,
+            actionUrl: dto.actionUrl,
+          })
           .catch((error) => {
             console.error('Failed to send email:', error);
           });
@@ -162,7 +170,7 @@ export class NotificationsService {
     return { success: true, message: 'Notification sent', data: saved };
   }
 
-  async broadcast(dto: any): Promise<any> {
+  async broadcast(dto: BroadcastNotificationDto) {
     const users = await this.userRepository.find({
       select: ['id', 'email'],
     });
@@ -173,7 +181,6 @@ export class NotificationsService {
         title: dto.title,
         message: dto.message,
         type: dto.type || 'info',
-        metadata: dto.data,
       }),
     );
 
@@ -184,12 +191,12 @@ export class NotificationsService {
       users.forEach((user) => {
         if (user.email) {
           this.emailService
-            .sendEmail(
-              user.email,
-              dto.title,
-              `<p>${dto.message}</p>`,
-              dto.message,
-            )
+            .sendEmail({
+              to: user.email,
+              subject: dto.title,
+              title: dto.title,
+              message: dto.message,
+            })
             .catch((error) => {
               console.error(`Failed to send email to ${user.email}:`, error);
             });
@@ -234,11 +241,12 @@ export class NotificationsService {
         options.template,
         options.context,
       );
-      await this.emailService.sendEmail(
-        options.to,
-        options.subject,
-        htmlContent,
-      );
+      await this.emailService.sendEmail({
+        to: options.to,
+        subject: options.subject,
+        title: options.subject,
+        message: htmlContent,
+      });
     } catch (error) {
       console.error(`Failed to send email to ${options.to}:`, error);
       // Don't throw - email delivery shouldn't block application flow

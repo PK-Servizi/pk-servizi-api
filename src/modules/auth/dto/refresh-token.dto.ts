@@ -18,7 +18,10 @@ export class RefreshTokenDto {
 }
 
 export class PasswordResetDto {
-  @ApiProperty({ description: 'User email address', example: 'user@example.com' })
+  @ApiProperty({
+    description: 'User email address',
+    example: 'user@example.com',
+  })
   @IsEmail({}, { message: 'Please provide a valid email address' })
   @IsNotEmpty({ message: 'Email is required' })
   @MaxLength(255, { message: 'Email cannot exceed 255 characters' })

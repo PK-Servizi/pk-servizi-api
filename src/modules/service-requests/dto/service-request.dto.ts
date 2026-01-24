@@ -7,7 +7,10 @@ class NoteDto {
   @IsString()
   content: string;
 
-  @ApiPropertyOptional({ description: 'Type of note', enum: ['internal', 'user'] })
+  @ApiPropertyOptional({
+    description: 'Type of note',
+    enum: ['internal', 'user'],
+  })
   @IsOptional()
   @IsString()
   type?: 'internal' | 'user'; // internal for admin/operator, user for customer-visible
@@ -18,7 +21,10 @@ export class AddNoteDto {
   @IsString()
   content: string;
 
-  @ApiPropertyOptional({ description: 'Type of note', enum: ['internal', 'user'] })
+  @ApiPropertyOptional({
+    description: 'Type of note',
+    enum: ['internal', 'user'],
+  })
   @IsString()
   @IsOptional()
   type?: 'internal' | 'user';
@@ -82,7 +88,10 @@ export class DocumentChecklistDto {
   @IsString()
   documentType: string;
 
-  @ApiProperty({ description: 'Status of document', enum: ['pending', 'uploaded', 'approved', 'rejected'] })
+  @ApiProperty({
+    description: 'Status of document',
+    enum: ['pending', 'uploaded', 'approved', 'rejected'],
+  })
   @IsString()
   status: 'pending' | 'uploaded' | 'approved' | 'rejected';
 

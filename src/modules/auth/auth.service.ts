@@ -24,6 +24,8 @@ import { BlacklistedToken } from './entities/blacklisted-token.entity';
 
 import { SafeLogger } from '../../common/utils/logger.util';
 import { ValidationUtil } from '../../common/utils/validation.util';
+import { NotificationsService } from '../notifications/notifications.service';
+import { EmailService } from '../notifications/email.service';
 type UserWithoutPassword = Omit<User, 'password'>;
 
 @Injectable()
@@ -32,6 +34,8 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly rolesService: RolesService,
     private readonly jwtService: JwtService,
+    private readonly notificationsService: NotificationsService,
+    private readonly emailService: EmailService,
     @InjectRepository(RefreshToken)
     private readonly refreshTokenRepository: Repository<RefreshToken>,
     @InjectRepository(BlacklistedToken)
@@ -68,6 +72,19 @@ export class AuthService {
     SafeLogger.log(`User registered successfully: ${dto.email}`, 'AuthService');
     const userData = userResponse.data || (userResponse as any);
     const { ...userWithoutPassword } = userData;
+
+    // Send welcome email and notification
+    try {
+      await this.emailService.sendWelcomeEmail(userData.email, userData.fullName);
+      await this.notificationsService.send({
+        userId: userData.id,
+        title: '🎉 Benvenuto in PK SERVIZI',
+        message: 'Il tuo account è stato creato con successo. Ora puoi accedere a tutti i nostri servizi CAF.',
+        type: 'info',
+      });
+    } catch (error) {
+      SafeLogger.error(`Failed to send welcome email: ${error.message}`, 'AuthService');
+    }
 
     return {
       success: true,
@@ -230,6 +247,19 @@ export class AuthService {
     );
     SafeLogger.log(`Reset token: ${resetToken}`, 'AuthService');
 
+    // Send password reset email and notification
+    try {
+      await this.emailService.sendPasswordResetEmail(user.email, resetToken);
+      await this.notificationsService.send({
+        userId: user.id,
+        title: '🔐 Reset Password Richiesto',
+        message: 'Hai richiesto il reset della password. Controlla la tua email per il link di reset.',
+        type: 'info',
+      });
+    } catch (error) {
+      SafeLogger.error(`Failed to send password reset email: ${error.message}`, 'AuthService');
+    }
+
     return {
       success: true,
       message:
@@ -267,6 +297,24 @@ export class AuthService {
         `Password reset successful for user ID: ${payload.sub}`,
         'AuthService',
       );
+
+      // Send password reset confirmation
+      try {
+        const userResponse = await this.usersService.findOne(payload.sub);
+        const user = userResponse.data;
+        if (user) {
+          await this.emailService.sendPasswordResetConfirmation(user.email, user.fullName);
+          await this.notificationsService.send({
+            userId: payload.sub,
+            title: '✅ Password Modificata',
+            message: 'La tua password è stata modificata con successo.',
+            type: 'success',
+          });
+        }
+      } catch (error) {
+        SafeLogger.error(`Failed to send password reset confirmation: ${error.message}`, 'AuthService');
+      }
+
       return {
         success: true,
         message:

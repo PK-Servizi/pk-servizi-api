@@ -152,7 +152,9 @@ export class AppointmentsController {
   @Permissions('appointments:cancel')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Cancel appointment' })
-  @ApiBody({ schema: { type: 'object', properties: { reason: { type: 'string' } } } })
+  @ApiBody({
+    schema: { type: 'object', properties: { reason: { type: 'string' } } },
+  })
   cancel(
     @Param('id') id: string,
     @CurrentUser() user: UserRequest,

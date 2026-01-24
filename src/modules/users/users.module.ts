@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { UsersService } from './users.service';
@@ -14,6 +14,7 @@ import { SharedModule } from '../shared/shared.module';
 import { GuardsModule } from '../../common/modules/guards.module';
 import { StorageService } from '../../common/services/storage.service';
 import { AwsModule } from '../aws/aws.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { AwsModule } from '../aws/aws.module';
     SharedModule,
     GuardsModule,
     AwsModule,
+    forwardRef(() => NotificationsModule),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '7h' },

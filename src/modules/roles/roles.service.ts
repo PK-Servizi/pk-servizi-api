@@ -127,7 +127,9 @@ export class RolesService extends BaseService<
     }
 
     // Check if role exists
-    const role = await this.roleRepository.findOne({ where: { id: dto.roleId } });
+    const role = await this.roleRepository.findOne({
+      where: { id: dto.roleId },
+    });
     if (!role) {
       throw new NotFoundException(`Role with ID ${dto.roleId} not found`);
     }
@@ -135,7 +137,7 @@ export class RolesService extends BaseService<
     // Assign role
     user.role = role;
     const savedUser = await this.userRepository.save(user);
-    
+
     // Return user without password
     const { password, ...result } = savedUser;
     return result;

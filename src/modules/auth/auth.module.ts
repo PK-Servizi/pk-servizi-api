@@ -11,11 +11,13 @@ import { RolesModule } from '../roles/roles.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RefreshToken } from './entities/refresh-token.entity';
 import { BlacklistedToken } from './entities/blacklisted-token.entity';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
     UsersModule,
     RolesModule,
+    NotificationsModule,
     PassportModule,
     TypeOrmModule.forFeature([RefreshToken, BlacklistedToken]),
     JwtModule.registerAsync({

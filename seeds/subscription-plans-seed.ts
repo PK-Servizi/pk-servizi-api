@@ -102,8 +102,20 @@ export async function seedSubscriptionPlans() {
     const existing = await planRepo.findOne({ where: { name: planData.name } });
 
     if (!existing) {
-      const plan = planRepo.create(planData);
-      await planRepo.save(plan);
+      // Use raw SQL to avoid JSON serialization issues
+      await AppDataSource.query(
+        `INSERT INTO subscription_plans (name, description, price_monthly, price_annual, features, service_limits, is_active)
+         VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7)`,
+        [
+          planData.name,
+          planData.description,
+          planData.priceMonthly,
+          planData.priceAnnual,
+          JSON.stringify(planData.features),
+          JSON.stringify(planData.serviceLimits),
+          planData.isActive,
+        ],
+      );
       console.log(
         `✅ Created subscription plan: ${planData.name} (${planData.priceMonthly}€/month)`,
       );

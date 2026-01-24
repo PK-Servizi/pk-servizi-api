@@ -15,7 +15,9 @@ export class CreateServiceRequestDto {
   @IsUUID(4, { message: 'User ID must be a valid UUID' })
   userId?: string;
 
-  @ApiPropertyOptional({ description: 'Service type ID or code (can use query param instead)' })
+  @ApiPropertyOptional({
+    description: 'Service type ID or code (can use query param instead)',
+  })
   @IsOptional()
   @IsString()
   serviceTypeId?: string;

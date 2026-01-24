@@ -95,7 +95,9 @@ export class ServiceTypesController {
   @Permissions('service-types:update')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Update form schema' })
-  @ApiBody({ schema: { type: 'object', example: { type: 'object', properties: {} } } })
+  @ApiBody({
+    schema: { type: 'object', example: { type: 'object', properties: {} } },
+  })
   updateSchema(
     @Param('id') id: string,
     @Body() schema: Record<string, unknown>,

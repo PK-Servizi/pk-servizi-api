@@ -35,7 +35,12 @@ export class WebhooksController {
   @Permissions('webhooks:test')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Test webhook (dev environment)' })
-  @ApiBody({ schema: { type: 'object', example: { id: 'evt_test_123', type: 'payment_intent.succeeded' } } })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      example: { id: 'evt_test_123', type: 'payment_intent.succeeded' },
+    },
+  })
   testStripeWebhook(@Body() testPayload: Record<string, unknown>) {
     return this.webhooksService.testStripeWebhook(testPayload);
   }

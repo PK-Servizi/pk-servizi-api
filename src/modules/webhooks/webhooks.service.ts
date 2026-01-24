@@ -7,6 +7,7 @@ import { User } from '../users/entities/user.entity';
 import { StripeService } from '../payments/stripe.service';
 import { InvoiceService } from '../payments/invoice.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { EmailService } from '../notifications/email.service';
 import {
   StripeCheckoutSession,
   StripeSubscription,
@@ -30,6 +31,7 @@ export class WebhooksService {
     private stripeService: StripeService,
     private invoiceService: InvoiceService,
     private notificationsService: NotificationsService,
+    private emailService: EmailService,
   ) {}
 
   async handleStripeWebhook(
@@ -177,6 +179,21 @@ export class WebhooksService {
       this.logger.log(
         'Stripe subscription ID: ' + savedSubscription.stripeSubscriptionId,
       );
+
+      // Send subscription activated email
+      try {
+        const user = await this.userRepository.findOne({ where: { id: userId } });
+        if (user) {
+          await this.emailService.sendSubscriptionActivated(
+            user.email,
+            user.fullName,
+            savedSubscription.plan.name,
+            savedSubscription.endDate || new Date(),
+          );
+        }
+      } catch (error) {
+        this.logger.error(`Failed to send subscription email: ${error.message}`);
+      }
 
       // Create payment record
       const payment = this.paymentRepository.create({
@@ -345,6 +362,21 @@ export class WebhooksService {
         });
 
         this.logger.log('Payment completed: ' + payment.id);
+
+        // Send payment success email
+        try {
+          const user = await this.userRepository.findOne({ where: { id: payment.userId } });
+          if (user) {
+            const updatedPayment = await this.paymentRepository.findOne({ where: { id: payment.id } });
+            await this.emailService.sendPaymentSuccess(
+              user.email,
+              user.fullName,
+              updatedPayment.amount,
+            );
+          }
+        } catch (error) {
+          this.logger.error(`Failed to send payment email: ${error.message}`);
+        }
       }
 
       return { received: true, processed: true, action: 'payment_completed' };
@@ -366,12 +398,35 @@ export class WebhooksService {
   ): Promise<WebhookResponse> {
     const payment = await this.paymentRepository.findOne({
       where: { metadata: { stripePaymentIntentId: paymentIntent.id } },
+      relations: ['user'],
     });
 
     if (payment) {
       await this.paymentRepository.update(payment.id, {
         status: 'failed',
       });
+
+      // Send payment failed emails
+      try {
+        const user = await this.userRepository.findOne({ where: { id: payment.userId } });
+        if (user) {
+          // Customer notification
+          await this.emailService.sendPaymentFailed(
+            user.email,
+            user.fullName,
+            payment.amount,
+          );
+
+          // Admin notification
+          await this.emailService.sendPaymentFailedToAdmin(
+            user.fullName,
+            user.email,
+            payment.amount,
+          );
+        }
+      } catch (error) {
+        this.logger.error(`Failed to send payment failed email: ${error.message}`);
+      }
     }
 
     return { received: true, processed: true, action: 'payment_failed' };
@@ -383,12 +438,29 @@ export class WebhooksService {
     const userSubscription = await this.userSubscriptionRepository
       .createQueryBuilder('us')
       .where('us.stripeSubscriptionId = :id', { id: subscription.id })
+      .leftJoinAndSelect('us.user', 'user')
+      .leftJoinAndSelect('us.plan', 'plan')
       .getOne();
 
     if (userSubscription) {
       await this.userSubscriptionRepository.update(userSubscription.id, {
         status: subscription.status === 'active' ? 'active' : 'inactive',
       });
+
+      // Send subscription updated email (renewed/upgraded)
+      try {
+        const user = userSubscription.user;
+        if (user && subscription.status === 'active') {
+          await this.notificationsService.send({
+            userId: user.id,
+            title: '🔄 Abbonamento Aggiornato',
+            message: `Il tuo abbonamento "${userSubscription.plan?.name}" è stato rinnovato con successo.`,
+            type: 'success',
+          });
+        }
+      } catch (error) {
+        this.logger.error(`Failed to send subscription update email: ${error.message}`);
+      }
     }
 
     return { received: true, processed: true, action: 'subscription_updated' };
@@ -400,6 +472,8 @@ export class WebhooksService {
     const userSubscription = await this.userSubscriptionRepository
       .createQueryBuilder('us')
       .where('us.stripeSubscriptionId = :id', { id: subscription.id })
+      .leftJoinAndSelect('us.user', 'user')
+      .leftJoinAndSelect('us.plan', 'plan')
       .getOne();
 
     if (userSubscription) {
@@ -407,6 +481,27 @@ export class WebhooksService {
         status: 'cancelled',
         endDate: new Date(),
       });
+
+      // Send subscription cancelled emails
+      try {
+        const user = userSubscription.user;
+        if (user) {
+          // Customer notification
+          await this.emailService.sendSubscriptionCancelled(
+            user.email,
+            user.fullName,
+            userSubscription.plan?.name || 'Subscription',
+          );
+
+          // Admin notification
+          await this.emailService.sendSubscriptionCancelledToAdmin(
+            user.fullName,
+            userSubscription.plan?.name || 'Subscription',
+          );
+        }
+      } catch (error) {
+        this.logger.error(`Failed to send subscription cancelled email: ${error.message}`);
+      }
     }
 
     return {

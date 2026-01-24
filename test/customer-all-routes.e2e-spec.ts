@@ -8,7 +8,7 @@ import * as crypto from 'crypto';
 /**
  * COMPREHENSIVE CUSTOMER ROUTES E2E TEST
  * Tests ALL customer-accessible routes with REAL DATA (no mocks)
- * 
+ *
  * Complete Customer Journey:
  * 1. Authentication (register, login, profile, change password, logout)
  * 2. Profile Management (update, GDPR consent, consent history)
@@ -27,7 +27,7 @@ import * as crypto from 'crypto';
 describe('Customer All Routes E2E Test - Real Data', () => {
   let app: INestApplication;
   let dataSource: DataSource;
-  
+
   // Store test data IDs
   let customerToken: string;
   let customerId: string;
@@ -47,12 +47,8 @@ describe('Customer All Routes E2E Test - Real Data', () => {
   const customerData = {
     email: `customer.test.${timestamp}@example.com`,
     password: 'TestCustomer@12345',
-    firstName: 'Test',
-    lastName: 'Customer',
-    fiscalCode: 'TSTCST85M01H501Z',
-    phone: '+39 340 123 4567',
-    gdprConsent: true,
-    marketingConsent: false,
+    fullName: 'Test Customer',
+    phone: '+393401234567',
   };
 
   beforeAll(async () => {
@@ -84,12 +80,27 @@ describe('Customer All Routes E2E Test - Real Data', () => {
       try {
         // Delete in order to respect foreign keys
         // First delete dependent records
-        await dataSource.query('DELETE FROM request_status_history WHERE service_request_id IN (SELECT id FROM service_requests WHERE user_id = $1)', [customerId]);
-        await dataSource.query('DELETE FROM family_members WHERE user_id = $1', [customerId]);
-        await dataSource.query('DELETE FROM service_requests WHERE user_id = $1', [customerId]);
-        await dataSource.query('DELETE FROM appointments WHERE user_id = $1', [customerId]);
-        await dataSource.query('DELETE FROM notifications WHERE user_id = $1', [customerId]);
-        await dataSource.query('DELETE FROM user_profiles WHERE user_id = $1', [customerId]);
+        await dataSource.query(
+          'DELETE FROM request_status_history WHERE service_request_id IN (SELECT id FROM service_requests WHERE user_id = $1)',
+          [customerId],
+        );
+        await dataSource.query(
+          'DELETE FROM family_members WHERE user_id = $1',
+          [customerId],
+        );
+        await dataSource.query(
+          'DELETE FROM service_requests WHERE user_id = $1',
+          [customerId],
+        );
+        await dataSource.query('DELETE FROM appointments WHERE user_id = $1', [
+          customerId,
+        ]);
+        await dataSource.query('DELETE FROM notifications WHERE user_id = $1', [
+          customerId,
+        ]);
+        await dataSource.query('DELETE FROM user_profiles WHERE user_id = $1', [
+          customerId,
+        ]);
         await dataSource.query('DELETE FROM users WHERE id = $1', [customerId]);
         console.log('\n✅ Test data cleaned up');
       } catch (error) {
@@ -102,7 +113,7 @@ describe('Customer All Routes E2E Test - Real Data', () => {
   // ============================================================================
   // 1. AUTHENTICATION ROUTES
   // ============================================================================
-  
+
   describe('1. Authentication Routes', () => {
     it('POST /auth/register - Register new customer', async () => {
       const response = await request(app.getHttpServer())
@@ -114,9 +125,9 @@ describe('Customer All Routes E2E Test - Real Data', () => {
       expect(response.body.success).toBe(true);
       expect(response.body).toHaveProperty('user');
       expect(response.body.user.email).toBe(customerData.email);
-      
+
       customerId = response.body.user.id;
-      
+
       console.log('✅ POST /auth/register - Customer registered:', customerId);
     });
 
@@ -132,9 +143,9 @@ describe('Customer All Routes E2E Test - Real Data', () => {
       expect(response.body).toHaveProperty('data');
       expect(response.body.data).toHaveProperty('accessToken');
       expect(response.body.data).toHaveProperty('refreshToken');
-      
+
       customerToken = response.body.data.accessToken;
-      
+
       console.log('✅ POST /auth/login - Customer logged in');
       console.log('Token length:', customerToken?.length);
     });
@@ -154,7 +165,7 @@ describe('Customer All Routes E2E Test - Real Data', () => {
 
     it('POST /auth/change-password - Change customer password', async () => {
       const newPassword = 'NewTestPassword@12345';
-      
+
       const response = await request(app.getHttpServer())
         .post('/auth/change-password')
         .set('Authorization', `Bearer ${customerToken}`)
@@ -165,10 +176,10 @@ describe('Customer All Routes E2E Test - Real Data', () => {
         .expect(200);
 
       expect(response.body).toHaveProperty('message');
-      
+
       // Update password for future tests
       customerData.password = newPassword;
-      
+
       console.log('✅ POST /auth/change-password - Password changed');
     });
   });
@@ -207,8 +218,12 @@ describe('Customer All Routes E2E Test - Real Data', () => {
         .send(profileData);
 
       if (response.status === 400) {
-        console.log('⚠️ PUT /users/profile - Validation error:', response.body.message);
-        if (response.body.details) console.log('  Details:', response.body.details);
+        console.log(
+          '⚠️ PUT /users/profile - Validation error:',
+          response.body.message,
+        );
+        if (response.body.details)
+          console.log('  Details:', response.body.details);
         return;
       }
 
@@ -223,11 +238,14 @@ describe('Customer All Routes E2E Test - Real Data', () => {
         .post('/users/gdpr/consent')
         .set('Authorization', `Bearer ${customerToken}`)
         .send({
-          marketingConsent: false,
+          gdprConsent: true,
+          privacyConsent: true,
         })
         .expect(201);
 
       expect(response.body.data).toBeDefined();
+      expect(response.body.data.gdprConsent).toBe(true);
+      expect(response.body.data.privacyConsent).toBe(true);
       console.log('✅ POST /users/gdpr/consent - GDPR consent updated');
     });
 
@@ -238,7 +256,9 @@ describe('Customer All Routes E2E Test - Real Data', () => {
         .expect(200);
 
       expect(response.body.data).toBeDefined();
-      console.log('✅ GET /users/gdpr/consent-history - Consent history retrieved');
+      console.log(
+        '✅ GET /users/gdpr/consent-history - Consent history retrieved',
+      );
     });
   });
 
@@ -265,10 +285,15 @@ describe('Customer All Routes E2E Test - Real Data', () => {
       // Handle nested data or direct data
       const memberData = response.body.data.data || response.body.data;
       // Service combines firstName + lastName into fullName
-      expect(memberData.fullName).toBe(`${familyData.firstName} ${familyData.lastName}`);
+      expect(memberData.fullName).toBe(
+        `${familyData.firstName} ${familyData.lastName}`,
+      );
       expect(memberData.fiscalCode).toBe(familyData.fiscalCode);
       familyMemberId = memberData.id;
-      console.log('✅ POST /family-members - Family member created:', familyMemberId);
+      console.log(
+        '✅ POST /family-members - Family member created:',
+        familyMemberId,
+      );
     });
 
     it('GET /family-members - List all family members', async () => {
@@ -279,12 +304,18 @@ describe('Customer All Routes E2E Test - Real Data', () => {
 
       expect(Array.isArray(response.body.data)).toBe(true);
       expect(response.body.data.length).toBeGreaterThan(0);
-      console.log('✅ GET /family-members - Listed', response.body.data.length, 'family members');
+      console.log(
+        '✅ GET /family-members - Listed',
+        response.body.data.length,
+        'family members',
+      );
     });
 
     it('GET /family-members/:id - Get family member by ID', async () => {
       if (!familyMemberId) {
-        console.log('⚠️ GET /family-members/:id - No family member ID available');
+        console.log(
+          '⚠️ GET /family-members/:id - No family member ID available',
+        );
         return;
       }
 
@@ -303,12 +334,12 @@ describe('Customer All Routes E2E Test - Real Data', () => {
       const response = await request(app.getHttpServer())
         .put(`/family-members/${familyMemberId}`)
         .set('Authorization', `Bearer ${customerToken}`)
-        .send({ 
+        .send({
           relationship: 'child',
           birthDate: '1990-07-05',
           firstName: 'UpdatedName',
           lastName: 'UpdatedLast',
-          fiscalCode: 'UPDATEDFC123'
+          fiscalCode: 'UPDATEDFC123',
         });
 
       // Skip if route doesn't exist (404)
@@ -316,7 +347,7 @@ describe('Customer All Routes E2E Test - Real Data', () => {
         console.log('⚠️ PUT /family-members/:id - Route not implemented');
         return;
       }
-      
+
       expect(response.status).toBe(200);
       expect(response.body.data.relationship).toBe('child');
       console.log('✅ PUT /family-members/:id - Family member updated');
@@ -335,11 +366,15 @@ describe('Customer All Routes E2E Test - Real Data', () => {
 
       expect(Array.isArray(response.body.data)).toBe(true);
       expect(response.body.data.length).toBeGreaterThan(0);
-      
+
       // Store first service type ID for later tests
       serviceTypeId = response.body.data[0].id;
-      
-      console.log('✅ GET /service-types - Listed', response.body.data.length, 'service types');
+
+      console.log(
+        '✅ GET /service-types - Listed',
+        response.body.data.length,
+        'service types',
+      );
     });
 
     it('GET /service-types/:id - Get service type by ID', async () => {
@@ -363,18 +398,23 @@ describe('Customer All Routes E2E Test - Real Data', () => {
     });
 
     it('GET /service-types/:id/required-documents - Get required documents', async () => {
-      const response = await request(app.getHttpServer())
-        .get(`/service-types/${serviceTypeId}/required-documents`);
+      const response = await request(app.getHttpServer()).get(
+        `/service-types/${serviceTypeId}/required-documents`,
+      );
 
       // Skip if route doesn't exist
       if (response.status === 404) {
-        console.log('⚠️ GET /service-types/:id/required-documents - Route not implemented');
+        console.log(
+          '⚠️ GET /service-types/:id/required-documents - Route not implemented',
+        );
         return;
       }
 
       expect(response.status).toBe(200);
       expect(response.body.data).toBeDefined();
-      console.log('✅ GET /service-types/:id/required-documents - Required documents retrieved');
+      console.log(
+        '✅ GET /service-types/:id/required-documents - Required documents retrieved',
+      );
     });
   });
 
@@ -385,18 +425,23 @@ describe('Customer All Routes E2E Test - Real Data', () => {
   describe('4.5 Subscription Setup', () => {
     it('Setup: Give Customer active subscription', async () => {
       // 1. Get a plan
-      const plans = await dataSource.query(`SELECT id FROM subscription_plans LIMIT 1`);
+      const plans = await dataSource.query(
+        `SELECT id FROM subscription_plans LIMIT 1`,
+      );
       let planId;
       if (plans.length === 0) {
-          // Create a plan if none exist
-          planId = crypto.randomUUID();
-          await dataSource.query(`
+        // Create a plan if none exist
+        planId = crypto.randomUUID();
+        await dataSource.query(
+          `
               INSERT INTO subscription_plans (id, name, description, price_monthly, price_annual, features, is_active)
               VALUES ($1, 'Test Plan', 'Auto created', 10, 100, '[]', true)
-          `, [planId]);
-          subscriptionId = planId; // Use planId as we will link to it
+          `,
+          [planId],
+        );
+        subscriptionId = planId; // Use planId as we will link to it
       } else {
-          planId = plans[0].id;
+        planId = plans[0].id;
       }
 
       // 2. Create subscription
@@ -405,14 +450,20 @@ describe('Customer All Routes E2E Test - Real Data', () => {
       const endDate = new Date();
       endDate.setDate(endDate.getDate() + 30);
 
-      await dataSource.query(`
+      await dataSource.query(
+        `
           INSERT INTO user_subscriptions (id, user_id, plan_id, status, start_date, end_date, auto_renew, billing_cycle)
           VALUES ($1, $2, $3, 'active', $4, $5, true, 'monthly')
-      `, [subUuid, customerId, planId, startDate, endDate]);
+      `,
+        [subUuid, customerId, planId, startDate, endDate],
+      );
 
       // Store ID for later tests
       subscriptionId = subUuid;
-      console.log('✅ Setup 4.5: Active Subscription Assigned:', subscriptionId);
+      console.log(
+        '✅ Setup 4.5: Active Subscription Assigned:',
+        subscriptionId,
+      );
     });
   });
 
@@ -440,7 +491,10 @@ describe('Customer All Routes E2E Test - Real Data', () => {
       const requestData2 = response.body.data.data || response.body.data;
       expect(requestData2.status).toBe('draft');
       serviceRequestId = requestData2.id;
-      console.log('✅ POST /service-requests - Service request created:', serviceRequestId);
+      console.log(
+        '✅ POST /service-requests - Service request created:',
+        serviceRequestId,
+      );
     });
 
     it('GET /service-requests/my - List my service requests', async () => {
@@ -451,11 +505,16 @@ describe('Customer All Routes E2E Test - Real Data', () => {
 
       expect(Array.isArray(response.body.data)).toBe(true);
       expect(response.body.data.length).toBeGreaterThan(0);
-      
+
       // Always use the first service request from the list for subsequent tests
       // This ensures we're testing with a service request that definitely belongs to this user
       serviceRequestId = response.body.data[0].id;
-      console.log('✅ GET /service-requests/my - Listed', response.body.data.length, 'requests, using ID:', serviceRequestId);
+      console.log(
+        '✅ GET /service-requests/my - Listed',
+        response.body.data.length,
+        'requests, using ID:',
+        serviceRequestId,
+      );
     });
 
     it('GET /service-requests/:id - Get service request by ID', async () => {
@@ -479,7 +538,7 @@ describe('Customer All Routes E2E Test - Real Data', () => {
             requestType: 'Test Service Request - Updated',
             notes: 'Updated via E2E test',
             urgency: 'high',
-            additionalInfo: 'More details added'
+            additionalInfo: 'More details added',
           },
         })
         .expect(200);
@@ -495,7 +554,9 @@ describe('Customer All Routes E2E Test - Real Data', () => {
         .expect(200);
 
       expect(response.body.data).toBeDefined();
-      console.log('✅ GET /service-requests/:id/status-history - Status history retrieved');
+      console.log(
+        '✅ GET /service-requests/:id/status-history - Status history retrieved',
+      );
     });
 
     it('POST /service-requests/:id/submit - Submit service request', async () => {
@@ -504,14 +565,21 @@ describe('Customer All Routes E2E Test - Real Data', () => {
         .set('Authorization', `Bearer ${customerToken}`);
 
       // Skip if subscription required
-      if (response.status === 400 && response.body.message?.includes('subscription')) {
-        console.log('⚠️ POST /service-requests/:id/submit - Requires active subscription (skipped)');
+      if (
+        response.status === 400 &&
+        response.body.message?.includes('subscription')
+      ) {
+        console.log(
+          '⚠️ POST /service-requests/:id/submit - Requires active subscription (skipped)',
+        );
         return;
       }
 
       expect(response.status).toBe(201);
       expect(response.body.data.status).not.toBe('draft');
-      console.log('✅ POST /service-requests/:id/submit - Service request submitted');
+      console.log(
+        '✅ POST /service-requests/:id/submit - Service request submitted',
+      );
     });
   });
 
@@ -527,7 +595,9 @@ describe('Customer All Routes E2E Test - Real Data', () => {
         .expect(200);
 
       expect(response.body.data).toBeDefined();
-      console.log('✅ GET /documents/service-type/:serviceTypeId/required - Required documents listed');
+      console.log(
+        '✅ GET /documents/service-type/:serviceTypeId/required - Required documents listed',
+      );
     });
 
     it('GET /documents/request/:requestId - List request documents', async () => {
@@ -542,12 +612,16 @@ describe('Customer All Routes E2E Test - Real Data', () => {
 
     // Note: File upload requires multipart/form-data - documented only
     it('[DOCUMENTED] POST /documents/upload-multiple - Upload documents', () => {
-      console.log('📄 POST /documents/upload-multiple - Requires multipart/form-data');
+      console.log(
+        '📄 POST /documents/upload-multiple - Requires multipart/form-data',
+      );
     });
 
     // Note: Document download requires actual files - documented only
     it('[DOCUMENTED] POST /documents/:id/download - Download document', () => {
-      console.log('📄 POST /documents/:id/download - Requires actual document file');
+      console.log(
+        '📄 POST /documents/:id/download - Requires actual document file',
+      );
     });
   });
 
@@ -560,14 +634,16 @@ describe('Customer All Routes E2E Test - Real Data', () => {
       const futureDate = new Date();
       futureDate.setDate(futureDate.getDate() + 7);
       const dateStr = futureDate.toISOString().split('T')[0];
-      
+
       const response = await request(app.getHttpServer())
         .get('/appointments/available-slots')
         .query({ date: dateStr, duration: 60 })
         .expect(200);
 
       expect(response.body.data).toBeDefined();
-      console.log('✅ GET /appointments/available-slots - Available slots retrieved');
+      console.log(
+        '✅ GET /appointments/available-slots - Available slots retrieved',
+      );
     });
 
     it('POST /appointments - Book an appointment', async () => {
@@ -575,7 +651,7 @@ describe('Customer All Routes E2E Test - Real Data', () => {
       futureDate.setDate(futureDate.getDate() + 10);
       // Ensure Business Hours (10:00 AM)
       futureDate.setHours(10, 0, 0, 0);
-      
+
       const appointmentData = {
         serviceTypeId,
         title: 'Test Appointment',
@@ -590,8 +666,12 @@ describe('Customer All Routes E2E Test - Real Data', () => {
         .send(appointmentData);
 
       if (response.status === 400) {
-        console.log('⚠️ POST /appointments - Validation error:', response.body.message);
-        if (response.body.details) console.log('  Details:', response.body.details);
+        console.log(
+          '⚠️ POST /appointments - Validation error:',
+          response.body.message,
+        );
+        if (response.body.details)
+          console.log('  Details:', response.body.details);
         return;
       }
 
@@ -610,12 +690,18 @@ describe('Customer All Routes E2E Test - Real Data', () => {
       // Handle nested data structure
       const appointmentsData = response.body.data.data || response.body.data;
       expect(Array.isArray(appointmentsData)).toBe(true);
-      
+
       if (appointmentsData.length > 0) {
         appointmentId = appointmentsData[0].id;
-        console.log('✅ GET /appointments/my - Listed', appointmentsData.length, 'appointments');
+        console.log(
+          '✅ GET /appointments/my - Listed',
+          appointmentsData.length,
+          'appointments',
+        );
       } else {
-        console.log('ℹ️ GET /appointments/my - No appointments (expected if booking failed)');
+        console.log(
+          'ℹ️ GET /appointments/my - No appointments (expected if booking failed)',
+        );
       }
     });
 
@@ -638,31 +724,40 @@ describe('Customer All Routes E2E Test - Real Data', () => {
 
     it('PATCH /appointments/:id/reschedule - Reschedule appointment', async () => {
       if (!appointmentId) {
-        console.log('⚠️ PATCH /appointments/:id/reschedule - No appointment to reschedule');
+        console.log(
+          '⚠️ PATCH /appointments/:id/reschedule - No appointment to reschedule',
+        );
         return;
       }
 
       const newDate = new Date();
       newDate.setDate(newDate.getDate() + 12);
-      
+
       const response = await request(app.getHttpServer())
         .patch(`/appointments/${appointmentId}/reschedule`)
         .set('Authorization', `Bearer ${customerToken}`)
         .send({ appointmentDate: newDate.toISOString() });
 
       if (response.status === 400) {
-        console.log('⚠️ PATCH /appointments/:id/reschedule - Validation error:', response.body.message);
+        console.log(
+          '⚠️ PATCH /appointments/:id/reschedule - Validation error:',
+          response.body.message,
+        );
         return;
       }
 
       expect(response.status).toBe(200);
       expect(response.body.data).toBeDefined();
-      console.log('✅ PATCH /appointments/:id/reschedule - Appointment rescheduled');
+      console.log(
+        '✅ PATCH /appointments/:id/reschedule - Appointment rescheduled',
+      );
     });
 
     it('PATCH /appointments/:id/confirm - Confirm appointment', async () => {
       if (!appointmentId) {
-        console.log('⚠️ PATCH /appointments/:id/confirm - No appointment to confirm');
+        console.log(
+          '⚠️ PATCH /appointments/:id/confirm - No appointment to confirm',
+        );
         return;
       }
 
@@ -671,7 +766,10 @@ describe('Customer All Routes E2E Test - Real Data', () => {
         .set('Authorization', `Bearer ${customerToken}`);
 
       if (response.status === 400) {
-        console.log('⚠️ PATCH /appointments/:id/confirm - Validation error:', response.body.message);
+        console.log(
+          '⚠️ PATCH /appointments/:id/confirm - Validation error:',
+          response.body.message,
+        );
         return;
       }
 
@@ -692,7 +790,11 @@ describe('Customer All Routes E2E Test - Real Data', () => {
         .expect(200);
 
       expect(Array.isArray(response.body.data)).toBe(true);
-      console.log('✅ GET /subscriptions/plans - Listed', response.body.data.length, 'plans');
+      console.log(
+        '✅ GET /subscriptions/plans - Listed',
+        response.body.data.length,
+        'plans',
+      );
     });
 
     it('GET /subscriptions/plans/comparison - Get plans comparison', async () => {
@@ -701,7 +803,9 @@ describe('Customer All Routes E2E Test - Real Data', () => {
         .expect(200);
 
       expect(response.body.data).toBeDefined();
-      console.log('✅ GET /subscriptions/plans/comparison - Comparison retrieved');
+      console.log(
+        '✅ GET /subscriptions/plans/comparison - Comparison retrieved',
+      );
     });
 
     it('GET /subscriptions/plans/:id - Get plan details', async () => {
@@ -709,10 +813,10 @@ describe('Customer All Routes E2E Test - Real Data', () => {
       const plansResponse = await request(app.getHttpServer())
         .get('/subscriptions/plans')
         .expect(200);
-      
+
       if (plansResponse.body.data.length > 0) {
         const planId = plansResponse.body.data[0].id;
-        
+
         const response = await request(app.getHttpServer())
           .get(`/subscriptions/plans/${planId}`)
           .expect(200);
@@ -720,7 +824,9 @@ describe('Customer All Routes E2E Test - Real Data', () => {
         expect(response.body.data.id).toBe(planId);
         console.log('✅ GET /subscriptions/plans/:id - Plan details retrieved');
       } else {
-        console.log('ℹ️ GET /subscriptions/plans/:id - No plans available to test');
+        console.log(
+          'ℹ️ GET /subscriptions/plans/:id - No plans available to test',
+        );
       }
     });
 
@@ -760,15 +866,21 @@ describe('Customer All Routes E2E Test - Real Data', () => {
 
     // Note: Stripe integration required
     it('[DOCUMENTED] POST /subscriptions/checkout - Create checkout session', () => {
-      console.log('💳 POST /subscriptions/checkout - Requires Stripe integration');
+      console.log(
+        '💳 POST /subscriptions/checkout - Requires Stripe integration',
+      );
     });
 
     it('[DOCUMENTED] POST /subscriptions/my/upgrade - Upgrade subscription', () => {
-      console.log('💳 POST /subscriptions/my/upgrade - Requires Stripe integration');
+      console.log(
+        '💳 POST /subscriptions/my/upgrade - Requires Stripe integration',
+      );
     });
 
     it('[DOCUMENTED] POST /subscriptions/my/cancel - Cancel subscription', () => {
-      console.log('💳 POST /subscriptions/my/cancel - Requires active subscription');
+      console.log(
+        '💳 POST /subscriptions/my/cancel - Requires active subscription',
+      );
     });
   });
 
@@ -790,10 +902,14 @@ describe('Customer All Routes E2E Test - Real Data', () => {
 
       expect(response.status).toBe(200);
       expect(Array.isArray(response.body.data)).toBe(true);
-      
+
       if (response.body.data.length > 0) {
         paymentId = response.body.data[0].id;
-        console.log('✅ GET /payments/my - Listed', response.body.data.length, 'payments');
+        console.log(
+          '✅ GET /payments/my - Listed',
+          response.body.data.length,
+          'payments',
+        );
       } else {
         console.log('ℹ️ GET /payments/my - No payments available');
       }
@@ -831,7 +947,9 @@ describe('Customer All Routes E2E Test - Real Data', () => {
 
     it('POST /payments/:id/resend-receipt - Resend receipt email', async () => {
       if (!paymentId) {
-        console.log('ℹ️ POST /payments/:id/resend-receipt - No payment to test');
+        console.log(
+          'ℹ️ POST /payments/:id/resend-receipt - No payment to test',
+        );
         return;
       }
 
@@ -857,10 +975,14 @@ describe('Customer All Routes E2E Test - Real Data', () => {
         .expect(200);
 
       expect(Array.isArray(response.body.data)).toBe(true);
-      
+
       if (response.body.data.length > 0) {
         notificationId = response.body.data[0].id;
-        console.log('✅ GET /notifications/my - Listed', response.body.data.length, 'notifications');
+        console.log(
+          '✅ GET /notifications/my - Listed',
+          response.body.data.length,
+          'notifications',
+        );
       } else {
         console.log('ℹ️ GET /notifications/my - No notifications');
       }
@@ -873,17 +995,28 @@ describe('Customer All Routes E2E Test - Real Data', () => {
         .expect(200);
 
       // Handle if response format is different
-      if (!response.body.data || typeof response.body.data.count === 'undefined') {
-        console.log('✅ GET /notifications/unread-count - Response:', response.body);
+      if (
+        !response.body.data ||
+        typeof response.body.data.count === 'undefined'
+      ) {
+        console.log(
+          '✅ GET /notifications/unread-count - Response:',
+          response.body,
+        );
       } else {
         expect(response.body.data).toHaveProperty('count');
-        console.log('✅ GET /notifications/unread-count - Count:', response.body.data.count);
+        console.log(
+          '✅ GET /notifications/unread-count - Count:',
+          response.body.data.count,
+        );
       }
     });
 
     it('PATCH /notifications/:id/read - Mark notification as read', async () => {
       if (!notificationId) {
-        console.log('ℹ️ PATCH /notifications/:id/read - No notification to test');
+        console.log(
+          'ℹ️ PATCH /notifications/:id/read - No notification to test',
+        );
         return;
       }
 
@@ -923,7 +1056,9 @@ describe('Customer All Routes E2E Test - Real Data', () => {
 
     it('GET /notifications/track/:notificationId - Track notification (public)', async () => {
       if (!notificationId) {
-        console.log('ℹ️ GET /notifications/track/:notificationId - No notification to track');
+        console.log(
+          'ℹ️ GET /notifications/track/:notificationId - No notification to track',
+        );
         return;
       }
 
@@ -948,10 +1083,14 @@ describe('Customer All Routes E2E Test - Real Data', () => {
         .expect(200);
 
       expect(Array.isArray(response.body.data)).toBe(true);
-      
+
       if (response.body.data.length > 0) {
         courseId = response.body.data[0].id;
-        console.log('✅ GET /courses - Listed', response.body.data.length, 'courses');
+        console.log(
+          '✅ GET /courses - Listed',
+          response.body.data.length,
+          'courses',
+        );
       } else {
         console.log('ℹ️ GET /courses - No courses available');
       }
@@ -993,7 +1132,11 @@ describe('Customer All Routes E2E Test - Real Data', () => {
 
         expect(Array.isArray(response.body.data)).toBe(true);
         expect(response.body.data.length).toBeGreaterThan(0);
-        console.log('✅ GET /courses/my-enrollments - Listed', response.body.data.length, 'enrollments');
+        console.log(
+          '✅ GET /courses/my-enrollments - Listed',
+          response.body.data.length,
+          'enrollments',
+        );
       });
     } else {
       it('[SKIPPED] Course routes - No courses available', () => {
@@ -1013,7 +1156,11 @@ describe('Customer All Routes E2E Test - Real Data', () => {
         .expect(200);
 
       expect(Array.isArray(response.body.data)).toBe(true);
-      console.log('✅ GET /cms/faqs - Listed', response.body.data.length, 'FAQs');
+      console.log(
+        '✅ GET /cms/faqs - Listed',
+        response.body.data.length,
+        'FAQs',
+      );
     });
 
     it('GET /cms/news - List news articles', async () => {
@@ -1022,7 +1169,11 @@ describe('Customer All Routes E2E Test - Real Data', () => {
         .expect(200);
 
       expect(Array.isArray(response.body.data)).toBe(true);
-      console.log('✅ GET /cms/news - Listed', response.body.data.length, 'news articles');
+      console.log(
+        '✅ GET /cms/news - Listed',
+        response.body.data.length,
+        'news articles',
+      );
     });
 
     it('GET /cms/news/:id - Get news article by ID', async () => {
@@ -1033,7 +1184,7 @@ describe('Customer All Routes E2E Test - Real Data', () => {
 
       if (newsResponse.body.data.length > 0) {
         const newsId = newsResponse.body.data[0].id;
-        
+
         const response = await request(app.getHttpServer())
           .get(`/cms/news/${newsId}`)
           .expect(200);
@@ -1046,8 +1197,9 @@ describe('Customer All Routes E2E Test - Real Data', () => {
     });
 
     it('GET /cms/pages/:slug - Get page by slug', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/cms/pages/about-us');
+      const response = await request(app.getHttpServer()).get(
+        '/cms/pages/about-us',
+      );
 
       // Skip if content doesn't exist
       if (response.status === 404) {
@@ -1113,8 +1265,13 @@ describe('Customer All Routes E2E Test - Real Data', () => {
         .set('Authorization', `Bearer ${customerToken}`);
 
       // Skip if foreign key constraint (has status history)
-      if (response.status === 400 && response.body.message?.includes('foreign key')) {
-        console.log('⚠️ DELETE /service-requests/:id - Has status history (foreign key constraint)');
+      if (
+        response.status === 400 &&
+        response.body.message?.includes('foreign key')
+      ) {
+        console.log(
+          '⚠️ DELETE /service-requests/:id - Has status history (foreign key constraint)',
+        );
         return;
       }
 

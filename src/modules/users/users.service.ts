@@ -13,6 +13,8 @@ import { Role } from '../roles/entities/role.entity';
 import { StorageService } from '../../common/services/storage.service';
 import { AwsS3FolderService } from '../aws/services/aws-s3-folder.service';
 import { AwsS3UploadService } from '../../common/services/aws-s3-upload.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { EmailService } from '../notifications/email.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
@@ -34,6 +36,8 @@ export class UsersService {
     private storageService: StorageService,
     private awsS3FolderService: AwsS3FolderService,
     private awsS3UploadService: AwsS3UploadService,
+    private notificationsService: NotificationsService,
+    private emailService: EmailService,
   ) {}
 
   async create(dto: CreateUserDto) {
@@ -46,7 +50,7 @@ export class UsersService {
     }
 
     const hashedPassword = await bcrypt.hash(dto.password, 10);
-    
+
     // Create user with only core fields
     const user = this.userRepository.create({
       email: dto.email,
@@ -69,9 +73,7 @@ export class UsersService {
     // Create S3 folder structure for new user
     try {
       await this.awsS3FolderService.createUserFolderStructure(savedUser.id);
-      this.logger.log(
-        `S3 folder structure created for user: ${savedUser.id}`,
-      );
+      this.logger.log(`S3 folder structure created for user: ${savedUser.id}`);
     } catch (error) {
       this.logger.error(
         `Failed to create S3 folder structure for user ${savedUser.id}: ${error.message}`,
@@ -82,6 +84,23 @@ export class UsersService {
 
     // Remove password from response
     delete savedUser.password;
+
+    // Send welcome email to new user created by admin
+    try {
+      await this.emailService.sendUserCreatedByAdmin(
+        savedUser.email,
+        savedUser.fullName,
+        dto.password,
+      );
+      await this.notificationsService.send({
+        userId: savedUser.id,
+        title: '🎉 Account Creato',
+        message: 'Il tuo account è stato creato da un amministratore. Controlla la tua email per i dettagli di accesso.',
+        type: 'info',
+      });
+    } catch (error) {
+      this.logger.error(`Failed to send welcome email: ${error.message}`);
+    }
 
     return {
       success: true,
@@ -146,7 +165,9 @@ export class UsersService {
       try {
         user.permissions = JSON.parse(user.role.permissions);
       } catch (error) {
-        this.logger.error(`Failed to parse permissions for user ${id}: ${error.message}`);
+        this.logger.error(
+          `Failed to parse permissions for user ${id}: ${error.message}`,
+        );
         user.permissions = [];
       }
     } else {
@@ -373,7 +394,9 @@ export class UsersService {
         // Finally, delete the user
         await transactionalEntityManager.remove(user);
 
-        this.logger.log(`Successfully deleted user and all related data: ${id}`);
+        this.logger.log(
+          `Successfully deleted user and all related data: ${id}`,
+        );
 
         return {
           success: true,
@@ -448,7 +471,9 @@ export class UsersService {
       await this.userRepository.update(userId, userUpdateData);
     }
 
-    const updatedUser = await this.userRepository.findOne({ where: { id: userId } });
+    const updatedUser = await this.userRepository.findOne({
+      where: { id: userId },
+    });
     delete updatedUser.password;
 
     return {
@@ -610,7 +635,30 @@ export class UsersService {
   }
 
   async deactivate(id: string) {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
     await this.userRepository.update(id, { isActive: false });
+
+    // Send suspension notification
+    try {
+      await this.emailService.sendUserSuspended(
+        user.email,
+        user.fullName,
+        'Account sospeso dall\'amministratore',
+      );
+      await this.notificationsService.send({
+        userId: id,
+        title: '⚠️ Account Sospeso',
+        message: 'Il tuo account è stato sospeso. Contatta il supporto per maggiori informazioni.',
+        type: 'warning',
+      });
+    } catch (error) {
+      this.logger.error(`Failed to send suspension email: ${error.message}`);
+    }
+
     return {
       success: true,
       message: 'User deactivated',
@@ -701,11 +749,34 @@ export class UsersService {
   }
 
   async requestDataExport(userId: string) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const exportId = 'export_' + Date.now();
+
+    // Send GDPR export request confirmation
+    try {
+      await this.emailService.sendGdprExportRequest(
+        user.email,
+        user.fullName,
+      );
+      await this.notificationsService.send({
+        userId,
+        title: '📊 Richiesta Esportazione Dati',
+        message: 'La tua richiesta di esportazione dati è stata ricevuta. Ti invieremo un link quando sarà pronta.',
+        type: 'info',
+      });
+    } catch (error) {
+      this.logger.error(`Failed to send GDPR export email: ${error.message}`);
+    }
+
     return {
       success: true,
       message: 'Data export request submitted',
       data: {
-        exportId: 'export_123',
+        exportId,
         estimatedCompletion: '24 hours',
       },
     };
