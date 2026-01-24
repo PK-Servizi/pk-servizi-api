@@ -70,6 +70,24 @@ export class AwsS3UploadService {
   }
 
   /**
+   * Upload family member document
+   * Automatically places in users/{userId}/family-members/{familyMemberId}/documents/ folder
+   */
+  async uploadFamilyMemberDocument(
+    userId: string,
+    familyMemberId: string,
+    file: Express.Multer.File,
+  ): Promise<{ path: string; publicUrl: string }> {
+    const familyDocumentPath = `users/${userId}/family-members/${familyMemberId}/documents`;
+
+    this.logger.debug(
+      `Uploading family member document for user ${userId}, member ${familyMemberId} to ${familyDocumentPath}`,
+    );
+
+    return this.storageService.uploadFile(file, familyDocumentPath);
+  }
+
+  /**
    * Get all folder paths for user
    */
   getUserFolderPaths(userId: string) {

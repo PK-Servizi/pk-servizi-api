@@ -2,18 +2,23 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FamilyMember } from './entities/family-member.entity';
 import { CreateFamilyMemberDto } from './dto/create-family-member.dto';
 import { UpdateFamilyMemberDto } from './dto/update-family-member.dto';
+import { AwsS3UploadService } from '../../common/services/aws-s3-upload.service';
 
 @Injectable()
 export class FamilyMembersService {
+  private readonly logger = new Logger(FamilyMembersService.name);
+
   constructor(
     @InjectRepository(FamilyMember)
     private familyMemberRepository: Repository<FamilyMember>,
+    private awsS3UploadService: AwsS3UploadService,
   ) {}
 
   async create(dto: CreateFamilyMemberDto, userId: string) {
@@ -127,7 +132,7 @@ export class FamilyMembersService {
     }
 
     if (!files || Object.keys(files).length === 0) {
-      return { success: false, message: 'No files provided' };
+      throw new BadRequestException('No files provided');
     }
 
     const documentTypeMapping = {
@@ -142,23 +147,55 @@ export class FamilyMembersService {
     };
 
     const uploadedDocuments = [];
-    for (const [fieldName, fileArray] of Object.entries(files)) {
-      if (fileArray && fileArray.length > 0) {
-        const file = fileArray[0];
-        uploadedDocuments.push({
-          fileName: file.originalname,
-          fileSize: file.size,
-          mimeType: file.mimetype,
-          documentType: documentTypeMapping[fieldName] || 'OTHER',
-          familyMemberId: id,
-        });
-      }
-    }
 
-    return {
-      success: true,
-      message: `${uploadedDocuments.length} documents uploaded for family member`,
-      data: uploadedDocuments,
-    };
+    try {
+      for (const [fieldName, fileArray] of Object.entries(files)) {
+        if (fileArray && fileArray.length > 0) {
+          const file = fileArray[0];
+          const documentType = documentTypeMapping[fieldName] || 'OTHER';
+
+          this.logger.log(
+            `Uploading ${documentType} for family member ${id} (${familyMember.fullName})...`,
+          );
+
+          // Upload to S3 using the same service as profile images
+          // Path: users/{userId}/family-members/{familyMemberId}/documents/{filename}
+          const { publicUrl } =
+            await this.awsS3UploadService.uploadFamilyMemberDocument(
+              userId,
+              id,
+              file,
+            );
+
+          uploadedDocuments.push({
+            fileName: file.originalname,
+            fileSize: file.size,
+            mimeType: file.mimetype,
+            documentType: documentType,
+            familyMemberId: id,
+            s3Url: publicUrl,
+            uploadedAt: new Date(),
+          });
+
+          this.logger.log(
+            `Successfully uploaded ${documentType} to S3: ${publicUrl}`,
+          );
+        }
+      }
+
+      return {
+        success: true,
+        message: `${uploadedDocuments.length} document(s) uploaded successfully to AWS S3`,
+        data: uploadedDocuments,
+      };
+    } catch (error) {
+      this.logger.error(
+        `Failed to upload documents for family member ${id}:`,
+        error.stack,
+      );
+      throw new BadRequestException(
+        `Failed to upload documents: ${error.message}`,
+      );
+    }
   }
 }
