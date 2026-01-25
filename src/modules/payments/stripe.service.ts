@@ -285,6 +285,68 @@ export class StripeService {
   }
 
   /**
+   * Create checkout session for one-time payment (service requests)
+   */
+  async createPaymentCheckoutSession(params: {
+    amount: number;
+    currency: string;
+    serviceRequestId: string;
+    userId: string;
+    userEmail?: string;
+    description?: string;
+    successUrl?: string;
+    cancelUrl?: string;
+  }): Promise<Stripe.Checkout.Session> {
+    if (!this.stripe) {
+      throw new Error('Stripe not configured');
+    }
+
+    const frontendUrl = this.configService.get('FRONTEND_URL') || 'http://localhost:3001';
+    const successUrl =
+      params.successUrl ||
+      `${frontendUrl}/service-requests/${params.serviceRequestId}/payment-success?session_id={CHECKOUT_SESSION_ID}`;
+    const cancelUrl =
+      params.cancelUrl ||
+      `${frontendUrl}/service-requests/${params.serviceRequestId}/payment-cancelled`;
+
+    try {
+      const session = await this.stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: [
+          {
+            price_data: {
+              currency: params.currency,
+              unit_amount: params.amount * 100, // Convert to cents
+              product_data: {
+                name: params.description || 'Service Request Payment',
+                description: `Payment for service request ${params.serviceRequestId}`,
+              },
+            },
+            quantity: 1,
+          },
+        ],
+        mode: 'payment',
+        success_url: successUrl,
+        cancel_url: cancelUrl,
+        customer_email: params.userEmail,
+        client_reference_id: params.userId,
+        metadata: {
+          userId: params.userId,
+          serviceRequestId: params.serviceRequestId,
+        },
+      });
+
+      this.logger.log(
+        `Payment checkout session ${session.id} created for service request ${params.serviceRequestId}`,
+      );
+      return session;
+    } catch (error) {
+      this.logger.error(`Failed to create payment checkout session: ${error.message}`);
+      throw new BadRequestException('Failed to create payment checkout session');
+    }
+  }
+
+  /**
    * Get payment intent
    */
   async getPaymentIntent(

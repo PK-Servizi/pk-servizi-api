@@ -8,7 +8,7 @@ const SERVICE_TYPES = [
     code: 'ISEE',
     description: 'Indicatore della Situazione Economica Equivalente for social benefits.',
     category: 'TAX',
-    basePrice: 0.00, // Often free or low cost via CAF
+    basePrice: 45.00, // Payment workflow testing
     requiredDocuments: [
       {
         category: 'IDENTITY',
@@ -201,11 +201,6 @@ export async function seedServiceTypes() {
 
     for (const typeData of SERVICE_TYPES) {
       const existing = await repo.findOne({ where: { code: typeData.code } });
-      
-      // Workaround for TypeORM/Postgres issue with JSONB arrays
-      // We manually stringify the JSON objects/arrays to ensure correct Postgres format
-      const requiredDocuments = JSON.stringify(typeData.requiredDocuments);
-      const formSchema = JSON.stringify(typeData.formSchema);
 
       if (existing) {
         console.log(`Update existing service: ${typeData.name}`);
@@ -213,16 +208,16 @@ export async function seedServiceTypes() {
         existing.name = typeData.name;
         existing.description = typeData.description;
         existing.category = typeData.category;
-        existing.requiredDocuments = requiredDocuments;
-        existing.formSchema = formSchema;
+        existing.requiredDocuments = typeData.requiredDocuments as any;
+        existing.formSchema = typeData.formSchema as any;
         existing.basePrice = typeData.basePrice;
         await repo.save(existing);
       } else {
         console.log(`Create new service: ${typeData.name}`);
         const newType = repo.create({
           ...typeData,
-          requiredDocuments, // Pass as string
-          formSchema, // Pass as string
+          requiredDocuments: typeData.requiredDocuments as any,
+          formSchema: typeData.formSchema as any,
         });
         await repo.save(newType);
       }

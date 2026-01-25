@@ -88,6 +88,24 @@ export class AwsS3UploadService {
   }
 
   /**
+   * Upload service request document
+   * Automatically places in users/{userId}/service-requests/{serviceRequestId}/documents/ folder
+   */
+  async uploadServiceRequestDocument(
+    userId: string,
+    serviceRequestId: string,
+    file: Express.Multer.File,
+  ): Promise<{ path: string; publicUrl: string }> {
+    const serviceRequestDocumentPath = `users/${userId}/service-requests/${serviceRequestId}/documents`;
+
+    this.logger.debug(
+      `Uploading service request document for user ${userId}, request ${serviceRequestId} to ${serviceRequestDocumentPath}`,
+    );
+
+    return this.storageService.uploadFile(file, serviceRequestDocumentPath);
+  }
+
+  /**
    * Get all folder paths for user
    */
   getUserFolderPaths(userId: string) {

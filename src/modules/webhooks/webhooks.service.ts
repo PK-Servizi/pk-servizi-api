@@ -8,6 +8,7 @@ import { StripeService } from '../payments/stripe.service';
 import { InvoiceService } from '../payments/invoice.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { EmailService } from '../notifications/email.service';
+import { ServiceRequestsService } from '../service-requests/service-requests.service';
 import {
   StripeCheckoutSession,
   StripeSubscription,
@@ -32,6 +33,7 @@ export class WebhooksService {
     private invoiceService: InvoiceService,
     private notificationsService: NotificationsService,
     private emailService: EmailService,
+    private serviceRequestsService: ServiceRequestsService,
   ) {}
 
   async handleStripeWebhook(
@@ -111,15 +113,54 @@ export class WebhooksService {
     try {
       this.logger.log('Processing checkout session: ' + session.id);
 
-      // Get subscription ID from session metadata or subscription field
+      // Get metadata from session
       const userId = session.metadata?.userId || session.client_reference_id;
-      // const subscriptionPlanName = session.metadata?.subscriptionPlan;
+      const serviceRequestId = session.metadata?.serviceRequestId;
 
       if (!userId) {
         this.logger.error('No userId found in checkout session metadata');
         return { received: true, processed: false, error: 'Missing userId' };
       }
 
+      // Handle service request payment
+      if (serviceRequestId) {
+        this.logger.log('Processing service request payment: ' + serviceRequestId);
+        
+        // Find payment by checkout session or service request
+        const payment = await this.paymentRepository.findOne({
+          where: { serviceRequestId },
+          relations: ['serviceRequest'],
+        });
+
+        if (!payment) {
+          this.logger.error('Payment not found for service request: ' + serviceRequestId);
+          return {
+            received: true,
+            processed: false,
+            error: 'Payment not found',
+          };
+        }
+
+        // Update payment status
+        payment.status = 'completed';
+        payment.paidAt = new Date();
+        payment.stripePaymentIntentId = session.payment_intent as string;
+        if (payment.metadata) {
+          payment.metadata.checkoutSessionId = session.id;
+        }
+        await this.paymentRepository.save(payment);
+
+        this.logger.log('Payment completed for service request: ' + serviceRequestId);
+
+        // Trigger service request workflow update
+        await this.serviceRequestsService.handlePaymentSuccess(payment.id);
+
+        this.logger.log('Service request workflow updated successfully');
+
+        return { received: true, processed: true };
+      }
+
+      // Handle subscription payment (existing logic)
       // Find the pending subscription for this user
       this.logger.log('Looking for pending subscription for user: ' + userId);
 
@@ -353,6 +394,7 @@ export class WebhooksService {
     try {
       const payment = await this.paymentRepository.findOne({
         where: { stripePaymentIntentId: paymentIntent.id },
+        relations: ['serviceRequest'],
       });
 
       if (payment) {
@@ -362,6 +404,27 @@ export class WebhooksService {
         });
 
         this.logger.log('Payment completed: ' + payment.id);
+
+        // Check if this is a service request payment
+        if (payment.serviceRequestId) {
+          this.logger.log(
+            'Service request payment detected. Calling handlePaymentSuccess for service request: ' +
+              payment.serviceRequestId,
+          );
+
+          try {
+            await this.serviceRequestsService.handlePaymentSuccess(payment.id);
+            this.logger.log(
+              'Service request workflow updated successfully for payment: ' +
+                payment.id,
+            );
+          } catch (error) {
+            this.logger.error(
+              'Error updating service request workflow: ' + error.message,
+            );
+            // Don't throw - payment was still successful
+          }
+        }
 
         // Send payment success email
         try {
@@ -377,6 +440,10 @@ export class WebhooksService {
         } catch (error) {
           this.logger.error(`Failed to send payment email: ${error.message}`);
         }
+      } else {
+        this.logger.warn(
+          'Payment not found for payment intent: ' + paymentIntent.id,
+        );
       }
 
       return { received: true, processed: true, action: 'payment_completed' };
@@ -397,14 +464,34 @@ export class WebhooksService {
     paymentIntent: StripePaymentIntent,
   ): Promise<WebhookResponse> {
     const payment = await this.paymentRepository.findOne({
-      where: { metadata: { stripePaymentIntentId: paymentIntent.id } },
-      relations: ['user'],
+      where: { stripePaymentIntentId: paymentIntent.id },
+      relations: ['serviceRequest'],
     });
 
     if (payment) {
       await this.paymentRepository.update(payment.id, {
         status: 'failed',
       });
+
+      // Check if this is a service request payment
+      if (payment.serviceRequestId) {
+        this.logger.log(
+          'Service request payment failed. Calling handlePaymentFailure for service request: ' +
+            payment.serviceRequestId,
+        );
+
+        try {
+          await this.serviceRequestsService.handlePaymentFailure(payment.id);
+          this.logger.log(
+            'Service request updated for failed payment: ' + payment.id,
+          );
+        } catch (error) {
+          this.logger.error(
+            'Error updating service request for failed payment: ' +
+              error.message,
+          );
+        }
+      }
 
       // Send payment failed emails
       try {

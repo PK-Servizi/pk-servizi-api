@@ -3,10 +3,57 @@ import {
   IsOptional,
   IsBoolean,
   IsObject,
+  IsNumber,
+  IsArray,
+  Min,
   MinLength,
   MaxLength,
+  ValidateNested,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+
+export class DocumentRequirement {
+  @ApiProperty({ description: 'Field name for upload', example: 'identityDocument' })
+  @IsString()
+  fieldName: string;
+
+  @ApiProperty({ description: 'Display label', example: 'Identity Document' })
+  @IsString()
+  label: string;
+
+  @ApiProperty({ description: 'Document type code', example: 'IDENTITY' })
+  @IsString()
+  documentType: string;
+
+  @ApiProperty({ description: 'Is this document required?', example: true })
+  @IsBoolean()
+  required: boolean;
+
+  @ApiPropertyOptional({ description: 'Max number of files', example: 1 })
+  @IsOptional()
+  @IsNumber()
+  maxCount?: number;
+
+  @ApiPropertyOptional({ 
+    description: 'Allowed MIME types',
+    example: ['application/pdf', 'image/jpeg'],
+    type: [String]
+  })
+  @IsOptional()
+  @IsArray()
+  allowedMimeTypes?: string[];
+
+  @ApiPropertyOptional({ description: 'Max file size in bytes', example: 5242880 })
+  @IsOptional()
+  @IsNumber()
+  maxSizeBytes?: number;
+
+  @ApiPropertyOptional({ description: 'Help text for user', example: 'Valid ID card or passport' })
+  @IsOptional()
+  @IsString()
+  description?: string;
+}
 
 export class CreateServiceTypeDto {
   @ApiProperty({ description: 'Service type name', example: 'ISEE' })
@@ -27,13 +74,36 @@ export class CreateServiceTypeDto {
   @MaxLength(1000, { message: 'Description cannot exceed 1000 characters' })
   description?: string;
 
+  @ApiPropertyOptional({ description: 'Service category', example: 'TAX' })
+  @IsOptional()
+  @IsString({ message: 'Category must be a string' })
+  @MaxLength(50, { message: 'Category cannot exceed 50 characters' })
+  category?: string;
+
+  @ApiPropertyOptional({ description: 'Base price in euros', example: 50.00 })
+  @IsOptional()
+  @IsNumber({}, { message: 'Base price must be a number' })
+  @Min(0, { message: 'Base price must be positive' })
+  basePrice?: number;
+
   @ApiPropertyOptional({
-    description: 'Required documents list',
-    example: ['documento_identita', 'codice_fiscale'],
+    description: 'Required documents list (legacy - use documentRequirements instead)',
+    example: ['identityDocument', 'fiscalCode'],
+    type: [String]
   })
   @IsOptional()
-  @IsObject({ message: 'Required documents must be a valid object' })
-  requiredDocuments?: any;
+  @IsArray()
+  requiredDocuments?: string[];
+
+  @ApiPropertyOptional({ 
+    description: 'Detailed document requirements with validation rules',
+    type: [DocumentRequirement]
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => DocumentRequirement)
+  documentRequirements?: DocumentRequirement[];
 
   @ApiPropertyOptional({
     description: 'Form schema configuration',

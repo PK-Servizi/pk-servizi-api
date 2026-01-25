@@ -10,6 +10,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In, ILike, Between } from 'typeorm';
 import { NotificationsService } from '../notifications/notifications.service';
 import { EmailService } from '../notifications/email.service';
+import { AwsS3UploadService } from '../../common/services/aws-s3-upload.service';
+import { StripeService } from '../payments/stripe.service';
 import { User } from '../users/entities/user.entity';
 import { ServiceRequest } from './entities/service-request.entity';
 import { IseeRequest } from './entities/isee-request.entity';
@@ -17,6 +19,8 @@ import { Modello730Request } from './entities/modello-730-request.entity';
 import { ImuRequest } from './entities/imu-request.entity';
 import { RequestStatusHistory } from './entities/request-status-history.entity';
 import { ServiceType } from './entities/service-type.entity';
+import { Document } from '../documents/entities/document.entity';
+import { Payment } from '../payments/entities/payment.entity';
 import { UserSubscription } from '../subscriptions/entities/user-subscription.entity';
 import { SubscriptionPlan } from '../subscriptions/entities/subscription-plan.entity';
 import { CreateServiceRequestDto } from './dto/create-service-request.dto';
@@ -64,6 +68,10 @@ export class ServiceRequestsService {
     private statusHistoryRepository: Repository<RequestStatusHistory>,
     @InjectRepository(ServiceType)
     private serviceTypeRepository: Repository<ServiceType>,
+    @InjectRepository(Document)
+    private documentRepository: Repository<Document>,
+    @InjectRepository(Payment)
+    private paymentRepository: Repository<Payment>,
     @InjectRepository(UserSubscription)
     private userSubscriptionRepository: Repository<UserSubscription>,
     @InjectRepository(SubscriptionPlan)
@@ -72,7 +80,489 @@ export class ServiceRequestsService {
     private userRepository: Repository<User>,
     private notificationsService: NotificationsService,
     private emailService: EmailService,
+    private awsS3UploadService: AwsS3UploadService,
+    private stripeService: StripeService,
   ) {}
+
+  // ============================================================================
+  // PAYMENT → QUESTIONNAIRE → DOCUMENTS WORKFLOW
+  // ============================================================================
+
+  /**
+   * Step 1: Initiate service request with payment
+   * User selects service and creates payment
+   */
+  async initiateWithPayment(serviceTypeId: string, userId: string) {
+    // Get service type and validate price
+    const serviceType = await this.getServiceType(serviceTypeId);
+    
+    if (!serviceType.basePrice || serviceType.basePrice <= 0) {
+      throw new BadRequestException('This service does not require payment');
+    }
+
+    // Get user for Stripe customer
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Create service request with payment_pending status
+    const serviceRequest = this.serviceRequestRepository.create({
+      userId,
+      serviceTypeId: serviceType.id,
+      status: 'payment_pending',
+      priority: 'normal',
+    });
+
+    await this.serviceRequestRepository.save(serviceRequest);
+
+    // Create Stripe Checkout Session for hosted payment page
+    const checkoutSession = await this.stripeService.createPaymentCheckoutSession({
+      amount: serviceType.basePrice,
+      currency: 'EUR',
+      serviceRequestId: serviceRequest.id,
+      userId,
+      userEmail: user.email,
+      description: `Payment for ${serviceType.name}`,
+      successUrl: undefined, // Uses default
+      cancelUrl: undefined, // Uses default
+    });
+
+    this.logger.log(
+      `Created Stripe Checkout Session: ${checkoutSession.id} for service request ${serviceRequest.id}`,
+    );
+
+    // Create payment record in payments table
+    const payment = this.paymentRepository.create({
+      userId,
+      serviceRequestId: serviceRequest.id,
+      amount: serviceType.basePrice,
+      currency: 'EUR',
+      status: 'pending',
+      stripePaymentIntentId: checkoutSession.payment_intent as string || checkoutSession.id,
+      description: `Payment for ${serviceType.name} service`,
+      metadata: {
+        serviceTypeId: serviceType.id,
+        serviceTypeName: serviceType.name,
+        serviceRequestId: serviceRequest.id,
+        checkoutSessionId: checkoutSession.id,
+      },
+    });
+
+    await this.paymentRepository.save(payment);
+
+    // Link payment to service request
+    serviceRequest.paymentId = payment.id;
+    await this.serviceRequestRepository.save(serviceRequest);
+
+    // Send notifications
+    await this.notificationsService.send({
+      userId,
+      title: '💳 Payment Required',
+      message: `Please complete payment of €${serviceType.basePrice} for ${serviceType.name}`,
+      type: 'info',
+      actionUrl: `/service-requests/${serviceRequest.id}/payment`,
+    });
+
+    this.logger.log(
+      `Service request ${serviceRequest.id} initiated with payment ${payment.id}`,
+    );
+
+    return {
+      success: true,
+      message: 'Service request initiated. Please complete payment.',
+      data: {
+        serviceRequestId: serviceRequest.id,
+        paymentId: payment.id,
+        amount: serviceType.basePrice,
+        currency: 'EUR',
+        status: 'payment_pending',
+        checkoutSessionId: checkoutSession.id,
+        paymentUrl: checkoutSession.url, // Direct Stripe payment URL
+      },
+    };
+  }
+
+  /**
+   * Handle successful payment callback
+   * Called by payment webhook or payment service
+   */
+  async handlePaymentSuccess(paymentId: string) {
+    const payment = await this.paymentRepository.findOne({
+      where: { id: paymentId },
+      relations: ['serviceRequest', 'serviceRequest.user', 'serviceRequest.serviceType'],
+    });
+
+    if (!payment || !payment.serviceRequest) {
+      throw new NotFoundException('Payment or service request not found');
+    }
+
+    const serviceRequest = payment.serviceRequest;
+
+    // Update payment status
+    payment.status = 'completed';
+    payment.paidAt = new Date();
+    await this.paymentRepository.save(payment);
+
+    // Update service request status to awaiting_form
+    serviceRequest.status = 'awaiting_form';
+    await this.serviceRequestRepository.save(serviceRequest);
+
+    // Record status change
+    await this.statusHistoryRepository.save({
+      serviceRequestId: serviceRequest.id,
+      fromStatus: 'payment_pending',
+      toStatus: 'awaiting_form',
+      changedById: serviceRequest.userId,
+      notes: 'Payment completed successfully',
+    });
+
+    // Send notifications
+    await this.emailService.sendServiceRequestSubmitted(
+      serviceRequest.user.email,
+      serviceRequest.user.fullName || serviceRequest.user.email,
+      serviceRequest.id,
+      serviceRequest.serviceType.name,
+    );
+
+    await this.notificationsService.send({
+      userId: serviceRequest.userId,
+      title: '✅ Payment Confirmed',
+      message: `Payment successful! Please fill out the questionnaire for ${serviceRequest.serviceType.name}`,
+      type: 'success',
+      actionUrl: `/service-requests/${serviceRequest.id}/questionnaire`,
+    });
+
+    this.logger.log(
+      `Payment ${paymentId} successful for service request ${serviceRequest.id}`,
+    );
+
+    return {
+      success: true,
+      message: 'Payment confirmed. Please complete the questionnaire.',
+      data: {
+        serviceRequestId: serviceRequest.id,
+        status: serviceRequest.status,
+        serviceType: serviceRequest.serviceType,
+        formSchema: serviceRequest.serviceType.formSchema,
+      },
+    };
+  }
+
+  /**
+   * Handle failed payment callback
+   */
+  async handlePaymentFailure(paymentId: string) {
+    const payment = await this.paymentRepository.findOne({
+      where: { id: paymentId },
+      relations: ['serviceRequest', 'serviceRequest.user', 'serviceRequest.serviceType'],
+    });
+
+    if (!payment) return;
+
+    payment.status = 'failed';
+    await this.paymentRepository.save(payment);
+
+    if (payment.serviceRequest) {
+      await this.notificationsService.send({
+        userId: payment.serviceRequest.userId,
+        title: '❌ Payment Failed',
+        message: `Payment failed for ${payment.serviceRequest.serviceType.name}. Please try again.`,
+        type: 'error',
+        actionUrl: `/service-requests/${payment.serviceRequest.id}/payment`,
+      });
+    }
+
+    this.logger.error(`Payment ${paymentId} failed`);
+  }
+
+  /**
+   * Step 2: Submit questionnaire answers
+   * User fills out the form after payment
+   */
+  async submitQuestionnaire(
+    serviceRequestId: string,
+    userId: string,
+    formData: any,
+  ) {
+    const serviceRequest = await this.serviceRequestRepository.findOne({
+      where: { id: serviceRequestId, userId },
+      relations: ['user', 'serviceType', 'payment'],
+    });
+
+    if (!serviceRequest) {
+      throw new NotFoundException('Service request not found');
+    }
+
+    // Validate workflow status
+    if (serviceRequest.status !== 'awaiting_form') {
+      throw new BadRequestException(
+        `Cannot submit questionnaire. Current status: ${serviceRequest.status}. ` +
+        `Expected: awaiting_form`,
+      );
+    }
+
+    // Validate payment is completed
+    if (!serviceRequest.payment || serviceRequest.payment.status !== 'completed') {
+      throw new BadRequestException('Payment must be completed before submitting questionnaire');
+    }
+
+    // Update service request with form data
+    serviceRequest.formData = formData;
+    serviceRequest.formCompletedAt = new Date();
+    serviceRequest.status = 'awaiting_documents';
+
+    await this.serviceRequestRepository.save(serviceRequest);
+
+    // Record status change
+    await this.statusHistoryRepository.save({
+      serviceRequestId: serviceRequest.id,
+      fromStatus: 'awaiting_form',
+      toStatus: 'awaiting_documents',
+      changedById: userId,
+      notes: 'Questionnaire submitted',
+    });
+
+    // Get required documents
+    const requiredDocs = (serviceRequest.serviceType.documentRequirements || [])
+      .filter((doc) => doc.required)
+      .map((doc) => ({
+        fieldName: doc.fieldName,
+        label: doc.label,
+        description: doc.description,
+        maxCount: doc.maxCount,
+        allowedMimeTypes: doc.allowedMimeTypes,
+        maxSizeBytes: doc.maxSizeBytes,
+      }));
+
+    // Send notifications
+    await this.notificationsService.send({
+      userId,
+      title: '📋 Questionnaire Completed',
+      message: `Great! Now please upload the required documents for ${serviceRequest.serviceType.name}`,
+      type: 'success',
+      actionUrl: `/service-requests/${serviceRequest.id}/documents`,
+    });
+
+    this.logger.log(
+      `Questionnaire submitted for service request ${serviceRequestId}`,
+    );
+
+    return {
+      success: true,
+      message: 'Questionnaire submitted successfully. Please upload required documents.',
+      data: {
+        serviceRequestId: serviceRequest.id,
+        status: serviceRequest.status,
+        requiredDocuments: requiredDocs,
+        nextStep: 'upload_documents',
+      },
+    };
+  }
+
+  /**
+   * Step 3: Upload required documents only
+   * User uploads only the required documents after questionnaire
+   */
+  /**
+   * Get required documents for a service request
+   */
+  async getRequiredDocumentsForRequest(serviceRequestId: string, userId: string) {
+    const serviceRequest = await this.serviceRequestRepository.findOne({
+      where: { id: serviceRequestId, userId },
+      relations: ['serviceType'],
+    });
+
+    if (!serviceRequest) {
+      throw new NotFoundException('Service request not found');
+    }
+
+    const serviceType = serviceRequest.serviceType;
+    const documentRequirements = serviceType.documentRequirements || [];
+    const requiredDocs = documentRequirements.filter((doc) => doc.required);
+
+    return {
+      success: true,
+      data: {
+        serviceRequestId,
+        serviceTypeName: serviceType.name,
+        status: serviceRequest.status,
+        canUploadDocuments: serviceRequest.status === 'awaiting_documents',
+        requiredDocuments: requiredDocs.map((doc) => ({
+          fieldName: doc.fieldName,
+          label: doc.label,
+          documentType: doc.documentType,
+          required: doc.required,
+          maxCount: doc.maxCount,
+          maxSizeBytes: doc.maxSizeBytes,
+          allowedMimeTypes: doc.allowedMimeTypes,
+          description: doc.description,
+        })),
+      },
+    };
+  }
+
+  /**
+   * Upload required documents
+   */
+  async uploadRequiredDocuments(
+    serviceRequestId: string,
+    userId: string,
+    files: Record<string, Express.Multer.File[]>,
+  ) {
+    const serviceRequest = await this.serviceRequestRepository.findOne({
+      where: { id: serviceRequestId, userId },
+      relations: ['user', 'serviceType', 'payment'],
+    });
+
+    if (!serviceRequest) {
+      throw new NotFoundException('Service request not found');
+    }
+
+    // Validate workflow status
+    if (serviceRequest.status !== 'awaiting_documents') {
+      throw new BadRequestException(
+        `Cannot upload documents. Current status: ${serviceRequest.status}. ` +
+        `Expected: awaiting_documents`,
+      );
+    }
+
+    // Validate payment and questionnaire are completed
+    if (!serviceRequest.payment || serviceRequest.payment.status !== 'completed') {
+      throw new BadRequestException('Payment must be completed');
+    }
+
+    if (!serviceRequest.formCompletedAt) {
+      throw new BadRequestException('Questionnaire must be completed first');
+    }
+
+    const serviceType = serviceRequest.serviceType;
+    const documentRequirements = serviceType.documentRequirements || [];
+    const requiredDocs = documentRequirements.filter((doc) => doc.required);
+
+    // Validate ALL required documents are provided
+    const missingDocs = [];
+    
+    for (const docReq of requiredDocs) {
+      if (!files[docReq.fieldName] || files[docReq.fieldName].length === 0) {
+        missingDocs.push(docReq.label);
+      }
+    }
+
+    if (missingDocs.length > 0) {
+      throw new BadRequestException(
+        `Missing required documents: ${missingDocs.join(', ')}`,
+      );
+    }
+
+    // Validate ONLY required documents are uploaded (reject extras)
+    const allowedFieldNames = requiredDocs.map((req) => req.fieldName);
+    const uploadedFieldNames = Object.keys(files);
+    const extraFields = uploadedFieldNames.filter(
+      (field) => !allowedFieldNames.includes(field),
+    );
+
+    if (extraFields.length > 0) {
+      throw new BadRequestException(
+        `Only required documents are allowed. ` +
+        `Unexpected documents: ${extraFields.join(', ')}. ` +
+        `Required: ${allowedFieldNames.join(', ')}`,
+      );
+    }
+
+    // Validate file types, sizes, and counts
+    for (const [fieldName, uploadedFiles] of Object.entries(files)) {
+      const docReq = requiredDocs.find((r) => r.fieldName === fieldName);
+      if (!docReq) continue;
+
+      if (docReq.maxCount && uploadedFiles.length > docReq.maxCount) {
+        throw new BadRequestException(
+          `Too many files for ${docReq.label}. Max: ${docReq.maxCount}`,
+        );
+      }
+
+      for (const file of uploadedFiles) {
+        this.validateFile(file, docReq);
+      }
+    }
+
+    // Upload documents to S3 and save to database
+    const uploadedDocuments = [];
+
+    try {
+      for (const [fieldName, uploadedFiles] of Object.entries(files)) {
+        const docReq = requiredDocs.find((r) => r.fieldName === fieldName);
+
+        for (const file of uploadedFiles) {
+          const doc = await this.uploadServiceRequestDocument(
+            file,
+            serviceRequestId,
+            userId,
+            docReq.documentType,
+            true,
+          );
+          uploadedDocuments.push(doc);
+        }
+      }
+
+      // Update service request status
+      serviceRequest.documentsUploadedAt = new Date();
+      serviceRequest.status = 'submitted';
+      serviceRequest.submittedAt = new Date();
+
+      await this.serviceRequestRepository.save(serviceRequest);
+
+      // Record status change
+      await this.statusHistoryRepository.save({
+        serviceRequestId: serviceRequest.id,
+        fromStatus: 'awaiting_documents',
+        toStatus: 'submitted',
+        changedById: userId,
+        notes: `${uploadedDocuments.length} documents uploaded`,
+      });
+
+      // Send notifications
+      await this.emailService.sendServiceRequestSubmitted(
+        serviceRequest.user.email,
+        serviceRequest.user.fullName || serviceRequest.user.email,
+        serviceRequest.id,
+        serviceType.name,
+      );
+
+      await this.notificationsService.send({
+        userId,
+        title: '✅ Service Request Submitted',
+        message: `Your ${serviceType.name} request has been submitted and is under review`,
+        type: 'success',
+        actionUrl: `/service-requests/${serviceRequest.id}`,
+      });
+
+      this.logger.log(
+        `Service request ${serviceRequestId} submitted with ${uploadedDocuments.length} documents`,
+      );
+
+      return {
+        success: true,
+        message: `Service request submitted successfully with ${uploadedDocuments.length} documents`,
+        data: {
+          serviceRequestId: serviceRequest.id,
+          status: serviceRequest.status,
+          documents: uploadedDocuments.map((doc) => ({
+            id: doc.id,
+            filename: doc.filename,
+            category: doc.category,
+            status: doc.status,
+          })),
+        },
+      };
+    } catch (error) {
+      this.logger.error(
+        `Failed to upload documents: ${error.message}`,
+        error.stack,
+      );
+      throw new BadRequestException('Failed to upload one or more documents');
+    }
+  }
 
   // ============================================================================
   // SUBSCRIPTION & ACCESS CONTROL
@@ -269,6 +759,226 @@ export class ServiceRequestsService {
         error.message || 'Failed to create service request',
       );
     }
+  }
+
+  /**
+   * Create service request with documents in one transaction
+   * OPTIMIZED: Validates documents against service type requirements
+   */
+  async createWithDocuments(
+    dto: CreateServiceRequestDto,
+    userId: string,
+    serviceTypeCode?: string,
+    files?: Record<string, Express.Multer.File[]>,
+  ): Promise<any> {
+    try {
+      // Parse formData if it's a JSON string
+      if (typeof dto.formData === 'string') {
+        try {
+          dto.formData = JSON.parse(dto.formData);
+        } catch (error) {
+          throw new BadRequestException('Invalid formData JSON');
+        }
+      }
+
+      // Validate that serviceTypeId is provided
+      if (!dto.serviceTypeId) {
+        throw new BadRequestException('serviceTypeId is required');
+      }
+
+      // 1. Fetch service type with document requirements
+      const serviceType = await this.getServiceType(dto.serviceTypeId);
+      
+      // 2. Validate required documents
+      if (serviceType.documentRequirements?.length > 0) {
+        this.validateDocumentRequirements(serviceType.documentRequirements, files);
+      }
+
+      // 3. Create service request
+      const serviceRequest = await this.create(dto, userId, serviceTypeCode);
+      const requestId = serviceRequest.data.id;
+
+      // 4. Upload documents if provided
+      const uploadedDocuments = [];
+      if (files) {
+        for (const [fieldName, fileArray] of Object.entries(files)) {
+          if (!fileArray || fileArray.length === 0) continue;
+
+          // Find document requirement config
+          const docReq = serviceType.documentRequirements?.find(
+            (req: any) => req.fieldName === fieldName
+          );
+
+          for (const file of fileArray) {
+            // Validate file against requirements
+            if (docReq) {
+              this.validateFile(file, docReq);
+            }
+
+            // Upload to S3
+            const uploadedDoc = await this.uploadServiceRequestDocument(
+              file,
+              requestId,
+              userId,
+              docReq?.documentType || fieldName.toUpperCase(),
+              docReq?.required || false
+            );
+            
+            uploadedDocuments.push(uploadedDoc);
+          }
+        }
+      }
+
+      // 5. Send notifications
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+      
+      await this.emailService.sendServiceRequestSubmitted(
+        user.email,
+        user.fullName || user.email,
+        requestId,
+        serviceType.name,
+      );
+
+      await this.notificationsService.send({
+        userId,
+        title: 'Service Request Created',
+        message: `Your ${serviceType.name} request has been created with ${uploadedDocuments.length} document(s)`,
+        type: 'success',
+        actionUrl: `/service-requests/${requestId}`,
+      });
+
+      this.logger.log(
+        `Service request ${requestId} created with ${uploadedDocuments.length} documents`
+      );
+
+      return {
+        success: true,
+        message: `Service request created successfully with ${uploadedDocuments.length} document(s)`,
+        data: {
+          ...serviceRequest.data,
+          documents: uploadedDocuments.map(doc => ({
+            id: doc.id,
+            filename: doc.filename,
+            category: doc.category,
+            status: doc.status,
+            fileSize: doc.fileSize,
+          })),
+        },
+      };
+    } catch (error) {
+      this.logger.error(
+        `Failed to create service request with documents: ${error.message}`,
+        error.stack
+      );
+      throw error instanceof BadRequestException || 
+            error instanceof NotFoundException
+        ? error
+        : new BadRequestException('Failed to create service request with documents');
+    }
+  }
+
+  /**
+   * Get service type by ID or code
+   */
+  private async getServiceType(identifier: string): Promise<ServiceType> {
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier);
+    
+    const serviceType = await this.serviceTypeRepository.findOne({
+      where: isUUID 
+        ? { id: identifier, isActive: true }
+        : { code: identifier, isActive: true },
+    });
+
+    if (!serviceType) {
+      throw new NotFoundException(`Service type '${identifier}' not found or inactive`);
+    }
+
+    return serviceType;
+  }
+
+  /**
+   * Validate uploaded files against document requirements
+   */
+  private validateDocumentRequirements(
+    requirements: any[],
+    files?: Record<string, Express.Multer.File[]>
+  ): void {
+    const missingDocs = [];
+
+    for (const req of requirements) {
+      if (req.required) {
+        const uploadedFiles = files?.[req.fieldName];
+        if (!uploadedFiles || uploadedFiles.length === 0) {
+          missingDocs.push(req.label || req.fieldName);
+        }
+      }
+    }
+
+    if (missingDocs.length > 0) {
+      throw new BadRequestException(
+        `Missing required documents: ${missingDocs.join(', ')}`
+      );
+    }
+  }
+
+  /**
+   * Validate individual file against requirements
+   */
+  private validateFile(file: Express.Multer.File, requirement: any): void {
+    // Validate MIME type
+    if (requirement.allowedMimeTypes?.length > 0) {
+      if (!requirement.allowedMimeTypes.includes(file.mimetype)) {
+        throw new BadRequestException(
+          `Invalid file type for ${requirement.label}. ` +
+          `Allowed: ${requirement.allowedMimeTypes.join(', ')}. ` +
+          `Got: ${file.mimetype}`
+        );
+      }
+    }
+
+    // Validate file size
+    if (requirement.maxSizeBytes && file.size > requirement.maxSizeBytes) {
+      const maxMB = (requirement.maxSizeBytes / 1048576).toFixed(2);
+      const fileMB = (file.size / 1048576).toFixed(2);
+      throw new BadRequestException(
+        `File '${file.originalname}' exceeds maximum size. ` +
+        `Max: ${maxMB} MB, Got: ${fileMB} MB`
+      );
+    }
+  }
+
+  /**
+   * Upload document to S3 and save to database
+   */
+  private async uploadServiceRequestDocument(
+    file: Express.Multer.File,
+    serviceRequestId: string,
+    userId: string,
+    documentType: string,
+    isRequired: boolean
+  ): Promise<Document> {
+    // Upload to S3
+    const s3Result = await this.awsS3UploadService.uploadServiceRequestDocument(
+      userId,
+      serviceRequestId,
+      file
+    );
+
+    // Save to database
+    const document = this.documentRepository.create({
+      serviceRequestId,
+      category: documentType,
+      filename: file.originalname,
+      originalFilename: file.originalname,
+      filePath: s3Result.path,
+      fileSize: file.size,
+      mimeType: file.mimetype,
+      status: 'pending',
+      isRequired,
+      version: 1,
+    });
+
+    return this.documentRepository.save(document);
   }
 
   /**

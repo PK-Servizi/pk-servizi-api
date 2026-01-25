@@ -10,12 +10,16 @@ import { RequestStatusHistory } from './entities/request-status-history.entity';
 import { IseeRequest } from './entities/isee-request.entity';
 import { Modello730Request } from './entities/modello-730-request.entity';
 import { ImuRequest } from './entities/imu-request.entity';
+import { Document } from '../documents/entities/document.entity';
+import { Payment } from '../payments/entities/payment.entity';
 import { User } from '../users/entities/user.entity';
 import { UserSubscription } from '../subscriptions/entities/user-subscription.entity';
 import { SubscriptionPlan } from '../subscriptions/entities/subscription-plan.entity';
 import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { UsersModule } from '../users/users.module';
+import { AwsModule } from '../aws/aws.module';
+import { PaymentsModule } from '../payments/payments.module';
 
 @Module({
   imports: [
@@ -26,6 +30,8 @@ import { UsersModule } from '../users/users.module';
       IseeRequest,
       Modello730Request,
       ImuRequest,
+      Document,
+      Payment,
       User,
       UserSubscription,
       SubscriptionPlan,
@@ -33,6 +39,8 @@ import { UsersModule } from '../users/users.module';
     SubscriptionsModule,
     NotificationsModule,
     UsersModule,
+    AwsModule,
+    PaymentsModule,
   ],
   controllers: [ServiceRequestsController, ServiceTypesController],
   providers: [ServiceRequestsService, ServiceTypesService],

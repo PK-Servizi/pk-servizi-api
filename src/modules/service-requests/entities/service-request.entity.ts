@@ -27,6 +27,9 @@ export class ServiceRequest {
   @Column({ length: 20, default: 'draft' })
   status: string;
 
+  @Column({ nullable: true, name: 'payment_id' })
+  paymentId: string;
+
   @Column({ type: 'jsonb', nullable: true, name: 'form_data' })
   formData: any;
 
@@ -48,6 +51,12 @@ export class ServiceRequest {
   @Column({ nullable: true, name: 'completed_at' })
   completedAt: Date;
 
+  @Column({ nullable: true, name: 'form_completed_at' })
+  formCompletedAt: Date;
+
+  @Column({ nullable: true, name: 'documents_uploaded_at' })
+  documentsUploadedAt: Date;
+
   @ManyToOne(() => User, (user) => user.serviceRequests)
   @JoinColumn({ name: 'user_id' })
   user: User;
@@ -59,6 +68,10 @@ export class ServiceRequest {
   @ManyToOne(() => User, (user) => user.assignedRequests)
   @JoinColumn({ name: 'assigned_operator_id' })
   assignedOperator: User;
+
+  @ManyToOne('Payment', 'serviceRequest')
+  @JoinColumn({ name: 'payment_id' })
+  payment: any;
 
   @OneToMany(() => Document, (document) => document.serviceRequest)
   documents: Document[];

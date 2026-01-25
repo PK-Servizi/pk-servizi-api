@@ -36,7 +36,10 @@ export class ServiceType {
   basePrice: number;
 
   @Column({ type: 'jsonb', nullable: true, name: 'required_documents' })
-  requiredDocuments: any;
+  requiredDocuments: string[];
+
+  @Column({ type: 'jsonb', nullable: true, name: 'document_requirements' })
+  documentRequirements: any;
 
   @Column({ type: 'jsonb', nullable: true, name: 'form_schema' })
   formSchema: any;

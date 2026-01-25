@@ -7,12 +7,14 @@ import { Payment } from '../payments/entities/payment.entity';
 import { UserSubscription } from '../subscriptions/entities/user-subscription.entity';
 import { PaymentsModule } from '../payments/payments.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { ServiceRequestsModule } from '../service-requests/service-requests.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, Payment, UserSubscription]),
     PaymentsModule,
     NotificationsModule,
+    ServiceRequestsModule,
   ],
   controllers: [WebhooksController],
   providers: [WebhooksService],

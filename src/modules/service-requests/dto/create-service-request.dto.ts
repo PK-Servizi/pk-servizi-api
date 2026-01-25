@@ -6,6 +6,7 @@ import {
   IsUUID,
   IsDateString,
   MaxLength,
+  Allow,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -52,9 +53,8 @@ export class CreateServiceRequestDto {
   )
   status?: string;
 
-  @ApiPropertyOptional({ description: 'Form data as JSON object' })
+  @ApiPropertyOptional({ description: 'Form data as JSON string or object' })
   @IsOptional()
-  @IsObject({ message: 'Form data must be a valid object' })
   formData?: any;
 
   @ApiPropertyOptional({ description: 'Internal notes for operators' })
@@ -100,4 +100,40 @@ export class CreateServiceRequestDto {
     { message: 'Completed date must be a valid ISO date string' },
   )
   completedAt?: string;
+
+  // File upload fields - handled by FileFieldsInterceptor
+  @ApiPropertyOptional({ description: 'Identity document file' })
+  @IsOptional()
+  @Allow()
+  identityDocument?: any;
+
+  @ApiPropertyOptional({ description: 'Fiscal code document file' })
+  @IsOptional()
+  @Allow()
+  fiscalCode?: any;
+
+  @ApiPropertyOptional({ description: 'Income documents (max 5)' })
+  @IsOptional()
+  @Allow()
+  incomeDocuments?: any;
+
+  @ApiPropertyOptional({ description: 'Property documents (max 3)' })
+  @IsOptional()
+  @Allow()
+  propertyDocuments?: any;
+
+  @ApiPropertyOptional({ description: 'Disability certificates (max 2)' })
+  @IsOptional()
+  @Allow()
+  disabilityCertificates?: any;
+
+  @ApiPropertyOptional({ description: 'Family documents (max 5)' })
+  @IsOptional()
+  @Allow()
+  familyDocuments?: any;
+
+  @ApiPropertyOptional({ description: 'Other documents (max 10)' })
+  @IsOptional()
+  @Allow()
+  otherDocuments?: any;
 }

@@ -23,6 +23,9 @@ export class Payment {
   @Column({ nullable: true, name: 'subscription_id' })
   subscriptionId: string;
 
+  @Column({ nullable: true, name: 'service_request_id' })
+  serviceRequestId: string;
+
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   amount: number;
 
@@ -57,6 +60,10 @@ export class Payment {
   @ManyToOne(() => UserSubscription, (subscription) => subscription.payments)
   @JoinColumn({ name: 'subscription_id' })
   subscription: UserSubscription;
+
+  @ManyToOne('ServiceRequest', 'payment')
+  @JoinColumn({ name: 'service_request_id' })
+  serviceRequest: any;
 
   @OneToMany(() => Invoice, (invoice) => invoice.payment)
   invoices: Invoice[];
