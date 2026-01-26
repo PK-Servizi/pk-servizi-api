@@ -70,20 +70,26 @@ export class AuthService {
     });
 
     SafeLogger.log(`User registered successfully: ${dto.email}`, 'AuthService');
-    const userData = userResponse.data || (userResponse as any);
-    const { ...userWithoutPassword } = userData;
+    const { password, ...userWithoutPassword } = userResponse;
 
     // Send welcome email and notification
     try {
-      await this.emailService.sendWelcomeEmail(userData.email, userData.fullName);
+      await this.emailService.sendWelcomeEmail(
+        userResponse.email,
+        userResponse.fullName,
+      );
       await this.notificationsService.send({
-        userId: userData.id,
+        userId: userResponse.id,
         title: '🎉 Benvenuto in PK SERVIZI',
-        message: 'Il tuo account è stato creato con successo. Ora puoi accedere a tutti i nostri servizi CAF.',
+        message:
+          'Il tuo account è stato creato con successo. Ora puoi accedere a tutti i nostri servizi CAF.',
         type: 'info',
       });
     } catch (error) {
-      SafeLogger.error(`Failed to send welcome email: ${error.message}`, 'AuthService');
+      SafeLogger.error(
+        `Failed to send welcome email: ${error.message}`,
+        'AuthService',
+      );
     }
 
     return {
@@ -253,11 +259,15 @@ export class AuthService {
       await this.notificationsService.send({
         userId: user.id,
         title: '🔐 Reset Password Richiesto',
-        message: 'Hai richiesto il reset della password. Controlla la tua email per il link di reset.',
+        message:
+          'Hai richiesto il reset della password. Controlla la tua email per il link di reset.',
         type: 'info',
       });
     } catch (error) {
-      SafeLogger.error(`Failed to send password reset email: ${error.message}`, 'AuthService');
+      SafeLogger.error(
+        `Failed to send password reset email: ${error.message}`,
+        'AuthService',
+      );
     }
 
     return {
@@ -303,7 +313,10 @@ export class AuthService {
         const userResponse = await this.usersService.findOne(payload.sub);
         const user = userResponse.data;
         if (user) {
-          await this.emailService.sendPasswordResetConfirmation(user.email, user.fullName);
+          await this.emailService.sendPasswordResetConfirmation(
+            user.email,
+            user.fullName,
+          );
           await this.notificationsService.send({
             userId: payload.sub,
             title: '✅ Password Modificata',
@@ -312,7 +325,10 @@ export class AuthService {
           });
         }
       } catch (error) {
-        SafeLogger.error(`Failed to send password reset confirmation: ${error.message}`, 'AuthService');
+        SafeLogger.error(
+          `Failed to send password reset confirmation: ${error.message}`,
+          'AuthService',
+        );
       }
 
       return {
@@ -365,7 +381,7 @@ export class AuthService {
     userId: string,
   ): Promise<{ success: boolean; message: string; data: any }> {
     const user = await this.usersService.findOne(userId);
-    const { ...userWithoutPassword } = user as any;
+    const { password, ...userWithoutPassword } = user as any;
     return {
       success: true,
       message: 'User details retrieved successfully',
@@ -384,7 +400,7 @@ export class AuthService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    const { ...userWithoutPassword } = user as any;
+    const { password, ...userWithoutPassword } = user as any;
     return userWithoutPassword;
   }
 

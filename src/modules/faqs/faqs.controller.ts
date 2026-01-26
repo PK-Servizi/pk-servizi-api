@@ -8,6 +8,7 @@ import {
   Delete,
   Query,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -21,6 +22,7 @@ import { UpdateFaqDto } from './dto/update-faq.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { Permissions } from '../../common/decorators/permissions.decorator';
+import { HttpCacheInterceptor } from '../../common/interceptors/http-cache.interceptor';
 
 @ApiTags('FAQs')
 @Controller('faqs')
@@ -29,6 +31,7 @@ export class FaqsController {
 
   // 1. PUBLIC: Get active FAQs (optionally filtered by service type)
   @Get('public')
+  @UseInterceptors(HttpCacheInterceptor)
   @ApiOperation({
     summary: '[Public] Get active FAQs',
     description:

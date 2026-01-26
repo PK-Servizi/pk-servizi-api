@@ -1,5 +1,19 @@
-import { Controller, Get, Post, Param, UseGuards, Body } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Query,
+  UseGuards,
+  Body,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiBody,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { Permissions } from '../../common/decorators/permissions.decorator';
@@ -8,41 +22,41 @@ import { PaymentsService } from './payments.service';
 
 @ApiTags('Payments')
 @Controller('payments')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
+@ApiBearerAuth('JWT-auth')
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
   // Customer Routes
   @Get('my')
-  @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Permissions('payments:read_own')
-  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] List my payments' })
-  getMyPayments(@CurrentUser() user: any) {
-    return this.paymentsService.findByUser(user.id);
+  @ApiQuery({ name: 'page', required: false, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, example: 10 })
+  getMyPayments(
+    @CurrentUser() user: any,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+  ) {
+    return this.paymentsService.findByUser(user.id, page, limit);
   }
 
   @Get(':id/receipt')
-  @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Permissions('payments:read_own')
-  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Download payment receipt' })
   downloadReceipt(@Param('id') id: string, @CurrentUser() user: any) {
     return this.paymentsService.downloadReceipt(id, user.id);
   }
 
   @Get(':id/invoice')
-  @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Permissions('payments:read_own')
-  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Generate formal invoice' })
   generateInvoice(@Param('id') id: string, @CurrentUser() user: any) {
     return this.paymentsService.generateInvoice(id, user.id);
   }
 
   @Post(':id/resend-receipt')
-  @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Permissions('payments:read_own')
-  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Resend receipt email' })
   resendReceipt(@Param('id') id: string, @CurrentUser() user: any) {
     return this.paymentsService.resendReceipt(id, user.id);
@@ -50,18 +64,19 @@ export class PaymentsController {
 
   // Admin Routes
   @Get()
-  @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Permissions('payments:read')
-  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] List all payments' })
-  getAllPayments() {
-    return this.paymentsService.findAll();
+  @ApiQuery({ name: 'page', required: false, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, example: 20 })
+  getAllPayments(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 20,
+  ) {
+    return this.paymentsService.findAll(page, limit);
   }
 
   @Post(':id/refund')
-  @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Permissions('payments:refund')
-  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Process payment refund' })
   @ApiBody({
     schema: {

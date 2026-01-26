@@ -180,25 +180,25 @@ export class EmailService {
   async sendWelcomeEmail(email: string, fullName: string): Promise<boolean> {
     return this.sendEmail({
       to: email,
-      subject: '🎉 Benvenuto in PK SERVIZI',
-      title: `Benvenuto, ${fullName}!`,
+      subject: '🎉 Welcome to PK SERVIZI',
+      title: `Welcome, ${fullName}!`,
       message:
-        'Il tuo account è stato creato con successo. Ora puoi accedere a tutti i nostri servizi CAF.',
+        'Your account has been created successfully. You can now access all our CAF services.',
       actionUrl: `${this.getFrontendUrl()}/login`,
-      actionText: 'Accedi al portale',
+      actionText: 'Access Portal',
     });
   }
 
   async sendPasswordResetEmail(email: string, token: string): Promise<boolean> {
     return this.sendEmail({
       to: email,
-      subject: '🔐 Reset Password - PK SERVIZI',
-      title: 'Reset della Password',
+      subject: '🔐 Password Reset - PK SERVIZI',
+      title: 'Password Reset',
       message:
-        'Hai richiesto il reset della password. Clicca sul pulsante per reimpostare la password.',
-      details: [{ label: 'Validità link', value: '1 ora' }],
+        'You have requested a password reset. Click the button below to reset your password.',
+      details: [{ label: 'Link validity', value: '1 hour' }],
       actionUrl: `${this.getFrontendUrl()}/reset-password?token=${token}`,
-      actionText: 'Reimposta Password',
+      actionText: 'Reset Password',
     });
   }
 
@@ -208,9 +208,9 @@ export class EmailService {
   ): Promise<boolean> {
     return this.sendEmail({
       to: email,
-      subject: '✅ Password Modificata - PK SERVIZI',
-      title: 'Password Modificata con Successo',
-      message: `Ciao ${fullName}, la tua password è stata modificata con successo. Ora puoi accedere con la nuova password.`,
+      subject: '✅ Password Changed - PK SERVIZI',
+      title: 'Password Changed Successfully',
+      message: `Hello ${fullName}, your password has been changed successfully. You can now login with your new password.`,
     });
   }
 
@@ -224,15 +224,15 @@ export class EmailService {
   ): Promise<boolean> {
     return this.sendEmail({
       to: email,
-      subject: `✅ Richiesta ${serviceType} Inviata`,
-      title: 'Richiesta Inviata con Successo',
-      message: `Ciao ${fullName}, la tua richiesta per il servizio "${serviceType}" è stata inviata con successo. Ti contatteremo presto per l'elaborazione.`,
+      subject: `✅ ${serviceType} Request Submitted`,
+      title: 'Request Submitted Successfully',
+      message: `Hello ${fullName}, your request for "${serviceType}" service has been submitted successfully. We will contact you soon for processing.`,
       details: [
-        { label: 'ID Richiesta', value: `#${requestId}` },
-        { label: 'Servizio', value: serviceType },
+        { label: 'Request ID', value: `#${requestId}` },
+        { label: 'Service', value: serviceType },
       ],
       actionUrl: `${this.getFrontendUrl()}/requests/${requestId}`,
-      actionText: 'Visualizza Richiesta',
+      actionText: 'View Request',
     });
   }
 
@@ -244,17 +244,17 @@ export class EmailService {
   ): Promise<boolean> {
     return this.sendEmail({
       to: this.getAdminEmail(),
-      subject: `🔔 Nuova Richiesta: ${serviceType}`,
-      title: 'Nuova Richiesta da Gestire',
-      message: `Un nuovo cliente ha inviato una richiesta di servizio che richiede la tua attenzione.`,
+      subject: `🔔 New Request: ${serviceType}`,
+      title: 'New Request to Handle',
+      message: `A new customer has submitted a service request that requires your attention.`,
       details: [
-        { label: 'Cliente', value: customerName },
+        { label: 'Customer', value: customerName },
         { label: 'Email', value: customerEmail },
-        { label: 'Servizio', value: serviceType },
-        { label: 'ID Richiesta', value: `#${requestId}` },
+        { label: 'Service', value: serviceType },
+        { label: 'Request ID', value: `#${requestId}` },
       ],
       actionUrl: `${this.getFrontendUrl()}/admin/requests/${requestId}`,
-      actionText: 'Gestisci Richiesta',
+      actionText: 'Manage Request',
     });
   }
 
@@ -276,16 +276,16 @@ export class EmailService {
 
     return this.sendEmail({
       to: email,
-      subject: `${emoji} Aggiornamento Richiesta ${serviceType}`,
-      title: 'Stato Richiesta Aggiornato',
-      message: `Ciao ${fullName}, ${statusMessage}`,
+      subject: `${emoji} ${serviceType} Request Update`,
+      title: 'Request Status Updated',
+      message: `Hello ${fullName}, ${statusMessage}`,
       details: [
-        { label: 'ID Richiesta', value: `#${requestId}` },
-        { label: 'Servizio', value: serviceType },
-        { label: 'Nuovo Stato', value: newStatus },
+        { label: 'Request ID', value: `#${requestId}` },
+        { label: 'Service', value: serviceType },
+        { label: 'New Status', value: newStatus },
       ],
       actionUrl: `${this.getFrontendUrl()}/requests/${requestId}`,
-      actionText: 'Visualizza Dettagli',
+      actionText: 'View Details',
     });
   }
 
@@ -299,14 +299,14 @@ export class EmailService {
   ): Promise<boolean> {
     return this.sendEmail({
       to: email,
-      subject: '✅ Documento Approvato',
-      title: 'Documento Approvato',
-      message: `Ciao ${fullName}, il tuo documento "${documentName}" è stato approvato.`,
-      details: [{ label: 'Documento', value: documentName }],
+      subject: '✅ Document Approved',
+      title: 'Document Approved',
+      message: `Hello ${fullName}, your document "${documentName}" has been approved.`,
+      details: [{ label: 'Document', value: documentName }],
       actionUrl: requestId
         ? `${this.getFrontendUrl()}/requests/${requestId}`
         : undefined,
-      actionText: 'Visualizza Richiesta',
+      actionText: 'View Request',
     });
   }
 
@@ -319,17 +319,17 @@ export class EmailService {
   ): Promise<boolean> {
     return this.sendEmail({
       to: email,
-      subject: '❌ Documento Rifiutato',
-      title: 'Documento Rifiutato',
-      message: `Ciao ${fullName}, il tuo documento "${documentName}" è stato rifiutato. Ti preghiamo di caricare un nuovo documento.`,
+      subject: '❌ Document Rejected',
+      title: 'Document Rejected',
+      message: `Hello ${fullName}, your document "${documentName}" has been rejected. Please upload a new document.`,
       details: [
-        { label: 'Documento', value: documentName },
-        { label: 'Motivo', value: reason },
+        { label: 'Document', value: documentName },
+        { label: 'Reason', value: reason },
       ],
       actionUrl: requestId
         ? `${this.getFrontendUrl()}/requests/${requestId}`
         : undefined,
-      actionText: 'Carica Nuovo Documento',
+      actionText: 'Upload New Document',
     });
   }
 
@@ -340,17 +340,17 @@ export class EmailService {
   ): Promise<boolean> {
     return this.sendEmail({
       to: this.getAdminEmail(),
-      subject: '📄 Nuovo Documento Caricato',
-      title: 'Nuovo Documento da Verificare',
-      message: `Il cliente ${customerName} ha caricato un nuovo documento che richiede verifica.`,
+      subject: '📄 New Document Uploaded',
+      title: 'New Document to Verify',
+      message: `Customer ${customerName} has uploaded a new document that requires verification.`,
       details: [
-        { label: 'Cliente', value: customerName },
-        { label: 'Documento', value: documentName },
+        { label: 'Customer', value: customerName },
+        { label: 'Document', value: documentName },
       ],
       actionUrl: requestId
         ? `${this.getFrontendUrl()}/admin/requests/${requestId}`
         : undefined,
-      actionText: 'Verifica Documento',
+      actionText: 'Verify Document',
     });
   }
 
@@ -363,22 +363,22 @@ export class EmailService {
     title: string,
     appointmentId: string,
   ): Promise<boolean> {
-    const formattedDate = new Intl.DateTimeFormat('it-IT', {
+    const formattedDate = new Intl.DateTimeFormat('en-US', {
       dateStyle: 'full',
       timeStyle: 'short',
     }).format(appointmentDate);
 
     return this.sendEmail({
       to: email,
-      subject: '✅ Appuntamento Confermato',
-      title: 'Appuntamento Confermato',
-      message: `Ciao ${fullName}, il tuo appuntamento è stato confermato con successo.`,
+      subject: '✅ Appointment Confirmed',
+      title: 'Appointment Confirmed',
+      message: `Hello ${fullName}, your appointment has been confirmed successfully.`,
       details: [
-        { label: 'Data e Ora', value: formattedDate },
-        { label: 'Servizio', value: title },
+        { label: 'Date & Time', value: formattedDate },
+        { label: 'Service', value: title },
       ],
       actionUrl: `${this.getFrontendUrl()}/appointments/${appointmentId}`,
-      actionText: 'Visualizza Appuntamento',
+      actionText: 'View Appointment',
     });
   }
 
@@ -388,23 +388,23 @@ export class EmailService {
     title: string,
     appointmentId: string,
   ): Promise<boolean> {
-    const formattedDate = new Intl.DateTimeFormat('it-IT', {
+    const formattedDate = new Intl.DateTimeFormat('en-US', {
       dateStyle: 'full',
       timeStyle: 'short',
     }).format(appointmentDate);
 
     return this.sendEmail({
       to: this.getAdminEmail(),
-      subject: '🔔 Nuovo Appuntamento Prenotato',
-      title: 'Nuovo Appuntamento',
-      message: `Un cliente ha prenotato un nuovo appuntamento.`,
+      subject: '🔔 New Appointment Booked',
+      title: 'New Appointment',
+      message: `A customer has booked a new appointment.`,
       details: [
-        { label: 'Cliente', value: customerName },
-        { label: 'Data e Ora', value: formattedDate },
-        { label: 'Servizio', value: title },
+        { label: 'Customer', value: customerName },
+        { label: 'Date & Time', value: formattedDate },
+        { label: 'Service', value: title },
       ],
       actionUrl: `${this.getFrontendUrl()}/admin/appointments/${appointmentId}`,
-      actionText: 'Visualizza Appuntamento',
+      actionText: 'View Appointment',
     });
   }
 
@@ -416,20 +416,20 @@ export class EmailService {
     title: string,
   ): Promise<boolean> {
     const formatDate = (date: Date) =>
-      new Intl.DateTimeFormat('it-IT', {
+      new Intl.DateTimeFormat('en-US', {
         dateStyle: 'full',
         timeStyle: 'short',
       }).format(date);
 
     return this.sendEmail({
       to: email,
-      subject: '📅 Appuntamento Riprogrammato',
-      title: 'Appuntamento Riprogrammato',
-      message: `Ciao ${fullName}, il tuo appuntamento è stato riprogrammato.`,
+      subject: '📅 Appointment Rescheduled',
+      title: 'Appointment Rescheduled',
+      message: `Hello ${fullName}, your appointment has been rescheduled.`,
       details: [
-        { label: 'Servizio', value: title },
-        { label: 'Data Precedente', value: formatDate(oldDate) },
-        { label: 'Nuova Data', value: formatDate(newDate) },
+        { label: 'Service', value: title },
+        { label: 'Previous Date', value: formatDate(oldDate) },
+        { label: 'New Date', value: formatDate(newDate) },
       ],
     });
   }
@@ -440,19 +440,19 @@ export class EmailService {
     appointmentDate: Date,
     title: string,
   ): Promise<boolean> {
-    const formattedDate = new Intl.DateTimeFormat('it-IT', {
+    const formattedDate = new Intl.DateTimeFormat('en-US', {
       dateStyle: 'full',
       timeStyle: 'short',
     }).format(appointmentDate);
 
     return this.sendEmail({
       to: email,
-      subject: '❌ Appuntamento Cancellato',
-      title: 'Appuntamento Cancellato',
-      message: `Ciao ${fullName}, il tuo appuntamento è stato cancellato.`,
+      subject: '❌ Appointment Cancelled',
+      title: 'Appointment Cancelled',
+      message: `Hello ${fullName}, your appointment has been cancelled.`,
       details: [
-        { label: 'Data', value: formattedDate },
-        { label: 'Servizio', value: title },
+        { label: 'Date', value: formattedDate },
+        { label: 'Service', value: title },
       ],
     });
   }
@@ -462,20 +462,20 @@ export class EmailService {
     appointmentDate: Date,
     title: string,
   ): Promise<boolean> {
-    const formattedDate = new Intl.DateTimeFormat('it-IT', {
+    const formattedDate = new Intl.DateTimeFormat('en-US', {
       dateStyle: 'full',
       timeStyle: 'short',
     }).format(appointmentDate);
 
     return this.sendEmail({
       to: this.getAdminEmail(),
-      subject: '🔔 Appuntamento Cancellato dal Cliente',
-      title: 'Appuntamento Cancellato',
-      message: `Il cliente ${customerName} ha cancellato un appuntamento.`,
+      subject: '🔔 Appointment Cancelled by Customer',
+      title: 'Appointment Cancelled',
+      message: `Customer ${customerName} has cancelled an appointment.`,
       details: [
-        { label: 'Cliente', value: customerName },
-        { label: 'Data', value: formattedDate },
-        { label: 'Servizio', value: title },
+        { label: 'Customer', value: customerName },
+        { label: 'Date', value: formattedDate },
+        { label: 'Service', value: title },
       ],
     });
   }
@@ -486,19 +486,19 @@ export class EmailService {
     appointmentDate: Date,
     title: string,
   ): Promise<boolean> {
-    const formattedDate = new Intl.DateTimeFormat('it-IT', {
+    const formattedDate = new Intl.DateTimeFormat('en-US', {
       dateStyle: 'full',
       timeStyle: 'short',
     }).format(appointmentDate);
 
     return this.sendEmail({
       to: email,
-      subject: '⏰ Promemoria Appuntamento - Domani',
-      title: 'Promemoria Appuntamento',
-      message: `Ciao ${fullName}, ti ricordiamo che hai un appuntamento domani.`,
+      subject: '⏰ Appointment Reminder - Tomorrow',
+      title: 'Appointment Reminder',
+      message: `Hello ${fullName}, this is a reminder that you have an appointment tomorrow.`,
       details: [
-        { label: 'Data e Ora', value: formattedDate },
-        { label: 'Servizio', value: title },
+        { label: 'Date & Time', value: formattedDate },
+        { label: 'Service', value: title },
       ],
     });
   }
@@ -513,12 +513,12 @@ export class EmailService {
   ): Promise<boolean> {
     return this.sendEmail({
       to: email,
-      subject: '✅ Iscrizione Corso Confermata',
-      title: 'Iscrizione Confermata',
-      message: `Ciao ${fullName}, la tua iscrizione al corso "${courseTitle}" è stata confermata.`,
-      details: [{ label: 'Corso', value: courseTitle }],
+      subject: '✅ Course Enrollment Confirmed',
+      title: 'Enrollment Confirmed',
+      message: `Hello ${fullName}, your enrollment in the course "${courseTitle}" has been confirmed.`,
+      details: [{ label: 'Course', value: courseTitle }],
       actionUrl: `${this.getFrontendUrl()}/courses/${courseId}`,
-      actionText: 'Visualizza Corso',
+      actionText: 'View Course',
     });
   }
 
@@ -529,10 +529,10 @@ export class EmailService {
   ): Promise<boolean> {
     return this.sendEmail({
       to: email,
-      subject: '❌ Iscrizione Corso Cancellata',
-      title: 'Iscrizione Cancellata',
-      message: `Ciao ${fullName}, la tua iscrizione al corso "${courseTitle}" è stata cancellata.`,
-      details: [{ label: 'Corso', value: courseTitle }],
+      subject: '❌ Course Enrollment Cancelled',
+      title: 'Enrollment Cancelled',
+      message: `Hello ${fullName}, your enrollment in the course "${courseTitle}" has been cancelled.`,
+      details: [{ label: 'Course', value: courseTitle }],
     });
   }
 
@@ -544,21 +544,21 @@ export class EmailService {
     planName: string,
     endDate: Date,
   ): Promise<boolean> {
-    const formattedDate = new Intl.DateTimeFormat('it-IT', {
+    const formattedDate = new Intl.DateTimeFormat('en-US', {
       dateStyle: 'full',
     }).format(endDate);
 
     return this.sendEmail({
       to: email,
-      subject: '✅ Abbonamento Attivato',
-      title: 'Abbonamento Attivato',
-      message: `Ciao ${fullName}, il tuo abbonamento "${planName}" è ora attivo!`,
+      subject: '✅ Subscription Activated',
+      title: 'Subscription Activated',
+      message: `Hello ${fullName}, your "${planName}" subscription is now active!`,
       details: [
-        { label: 'Piano', value: planName },
-        { label: 'Scadenza', value: formattedDate },
+        { label: 'Plan', value: planName },
+        { label: 'Expires', value: formattedDate },
       ],
       actionUrl: `${this.getFrontendUrl()}/subscriptions`,
-      actionText: 'Gestisci Abbonamento',
+      actionText: 'Manage Subscription',
     });
   }
 
@@ -570,12 +570,12 @@ export class EmailService {
   ): Promise<boolean> {
     return this.sendEmail({
       to: email,
-      subject: '✅ Pagamento Ricevuto',
-      title: 'Pagamento Confermato',
-      message: `Ciao ${fullName}, abbiamo ricevuto il tuo pagamento di €${amount.toFixed(2)}.`,
-      details: [{ label: 'Importo', value: `€${amount.toFixed(2)}` }],
+      subject: '✅ Payment Received',
+      title: 'Payment Confirmed',
+      message: `Hello ${fullName}, we have received your payment of €${amount.toFixed(2)}.`,
+      details: [{ label: 'Amount', value: `€${amount.toFixed(2)}` }],
       actionUrl: invoiceUrl,
-      actionText: 'Scarica Ricevuta',
+      actionText: 'Download Receipt',
     });
   }
 
@@ -586,12 +586,12 @@ export class EmailService {
   ): Promise<boolean> {
     return this.sendEmail({
       to: email,
-      subject: '❌ Pagamento Fallito',
-      title: 'Pagamento Non Riuscito',
-      message: `Ciao ${fullName}, il pagamento di €${amount.toFixed(2)} non è andato a buon fine. Ti preghiamo di aggiornare il metodo di pagamento.`,
-      details: [{ label: 'Importo', value: `€${amount.toFixed(2)}` }],
+      subject: '❌ Payment Failed',
+      title: 'Payment Failed',
+      message: `Hello ${fullName}, the payment of €${amount.toFixed(2)} was not successful. Please update your payment method.`,
+      details: [{ label: 'Amount', value: `€${amount.toFixed(2)}` }],
       actionUrl: `${this.getFrontendUrl()}/payments`,
-      actionText: 'Aggiorna Pagamento',
+      actionText: 'Update Payment',
     });
   }
 
@@ -602,13 +602,13 @@ export class EmailService {
   ): Promise<boolean> {
     return this.sendEmail({
       to: this.getAdminEmail(),
-      subject: '⚠️ Pagamento Fallito',
-      title: 'Pagamento Fallito - Azione Richiesta',
-      message: `Un pagamento del cliente ${customerName} non è andato a buon fine.`,
+      subject: '⚠️ Payment Failed',
+      title: 'Payment Failed - Action Required',
+      message: `A payment from customer ${customerName} was not successful.`,
       details: [
-        { label: 'Cliente', value: customerName },
+        { label: 'Customer', value: customerName },
         { label: 'Email', value: customerEmail },
-        { label: 'Importo', value: `€${amount.toFixed(2)}` },
+        { label: 'Amount', value: `€${amount.toFixed(2)}` },
       ],
     });
   }
@@ -620,10 +620,10 @@ export class EmailService {
   ): Promise<boolean> {
     return this.sendEmail({
       to: email,
-      subject: '❌ Abbonamento Cancellato',
-      title: 'Abbonamento Cancellato',
-      message: `Ciao ${fullName}, il tuo abbonamento "${planName}" è stato cancellato.`,
-      details: [{ label: 'Piano', value: planName }],
+      subject: '❌ Subscription Cancelled',
+      title: 'Subscription Cancelled',
+      message: `Hello ${fullName}, your "${planName}" subscription has been cancelled.`,
+      details: [{ label: 'Plan', value: planName }],
     });
   }
 
@@ -633,12 +633,12 @@ export class EmailService {
   ): Promise<boolean> {
     return this.sendEmail({
       to: this.getAdminEmail(),
-      subject: '🔔 Abbonamento Cancellato',
-      title: 'Abbonamento Cancellato',
-      message: `Il cliente ${customerName} ha cancellato l'abbonamento "${planName}".`,
+      subject: '🔔 Subscription Cancelled',
+      title: 'Subscription Cancelled',
+      message: `Customer ${customerName} has cancelled the "${planName}" subscription.`,
       details: [
-        { label: 'Cliente', value: customerName },
-        { label: 'Piano', value: planName },
+        { label: 'Customer', value: customerName },
+        { label: 'Plan', value: planName },
       ],
     });
   }
@@ -652,15 +652,15 @@ export class EmailService {
   ): Promise<boolean> {
     return this.sendEmail({
       to: email,
-      subject: `📄 Fattura ${invoiceNumber}`,
-      title: 'Nuova Fattura Disponibile',
-      message: `Ciao ${fullName}, la tua fattura è disponibile per il download.`,
+      subject: `📄 Invoice ${invoiceNumber}`,
+      title: 'New Invoice Available',
+      message: `Hello ${fullName}, your invoice is available for download.`,
       details: [
-        { label: 'Numero Fattura', value: invoiceNumber },
-        { label: 'Importo', value: `€${amount.toFixed(2)}` },
+        { label: 'Invoice Number', value: invoiceNumber },
+        { label: 'Amount', value: `€${amount.toFixed(2)}` },
       ],
       actionUrl: pdfUrl,
-      actionText: 'Scarica Fattura',
+      actionText: 'Download Invoice',
     });
   }
 
@@ -672,9 +672,9 @@ export class EmailService {
   ): Promise<boolean> {
     return this.sendEmail({
       to: email,
-      subject: '📋 Richiesta Esportazione Dati Ricevuta',
-      title: 'Richiesta GDPR Ricevuta',
-      message: `Ciao ${fullName}, abbiamo ricevuto la tua richiesta di esportazione dati. Elaboreremo la richiesta entro 30 giorni.`,
+      subject: '📋 Data Export Request Received',
+      title: 'GDPR Request Received',
+      message: `Hello ${fullName}, we have received your data export request. We will process the request within 30 days.`,
     });
   }
 
@@ -685,12 +685,12 @@ export class EmailService {
   ): Promise<boolean> {
     return this.sendEmail({
       to: email,
-      subject: '✅ I Tuoi Dati Sono Pronti',
-      title: 'Esportazione Dati Completata',
-      message: `Ciao ${fullName}, l'esportazione dei tuoi dati è completata. Il link per il download scadrà tra 7 giorni.`,
-      details: [{ label: 'Validità', value: '7 giorni' }],
+      subject: '✅ Your Data is Ready',
+      title: 'Data Export Completed',
+      message: `Hello ${fullName}, your data export is complete. The download link will expire in 7 days.`,
+      details: [{ label: 'Validity', value: '7 days' }],
       actionUrl: downloadUrl,
-      actionText: 'Scarica Dati',
+      actionText: 'Download Data',
     });
   }
 
@@ -703,15 +703,15 @@ export class EmailService {
   ): Promise<boolean> {
     return this.sendEmail({
       to: email,
-      subject: '🔐 Account Creato - PK SERVIZI',
-      title: 'Account Creato',
-      message: `Ciao ${fullName}, un account è stato creato per te. Accedi con le credenziali fornite e modifica la password al primo accesso.`,
+      subject: '🔐 Account Created - PK SERVIZI',
+      title: 'Account Created',
+      message: `Hello ${fullName}, an account has been created for you. Login with the provided credentials and change your password on first access.`,
       details: [
         { label: 'Email', value: email },
-        { label: 'Password Temporanea', value: tempPassword },
+        { label: 'Temporary Password', value: tempPassword },
       ],
       actionUrl: `${this.getFrontendUrl()}/login`,
-      actionText: 'Accedi',
+      actionText: 'Login',
     });
   }
 
@@ -722,10 +722,10 @@ export class EmailService {
   ): Promise<boolean> {
     return this.sendEmail({
       to: email,
-      subject: '⚠️ Account Sospeso',
-      title: 'Account Sospeso',
-      message: `Ciao ${fullName}, il tuo account è stato sospeso.`,
-      details: [{ label: 'Motivo', value: reason }],
+      subject: '⚠️ Account Suspended',
+      title: 'Account Suspended',
+      message: `Hello ${fullName}, your account has been suspended.`,
+      details: [{ label: 'Reason', value: reason }],
     });
   }
 
@@ -739,15 +739,15 @@ export class EmailService {
     return this.sendEmail({
       to: this.getAdminEmail(),
       subject: '⚠️ SLA Violation Alert',
-      title: 'Violazione SLA',
-      message: `Una richiesta ha superato il tempo massimo di elaborazione.`,
+      title: 'SLA Violation',
+      message: `A request has exceeded the maximum processing time.`,
       details: [
-        { label: 'ID Richiesta', value: `#${requestId}` },
-        { label: 'Servizio', value: serviceType },
-        { label: 'Giorni in ritardo', value: `${daysOverdue}` },
+        { label: 'Request ID', value: `#${requestId}` },
+        { label: 'Service', value: serviceType },
+        { label: 'Days Overdue', value: `${daysOverdue}` },
       ],
       actionUrl: `${this.getFrontendUrl()}/admin/requests/${requestId}`,
-      actionText: 'Gestisci Richiesta',
+      actionText: 'Manage Request',
     });
   }
 
@@ -759,14 +759,14 @@ export class EmailService {
   ): Promise<boolean> {
     return this.sendEmail({
       to: this.getAdminEmail(),
-      subject: '⏰ Abbonamento in Scadenza',
-      title: 'Abbonamento in Scadenza',
-      message: `L'abbonamento di un cliente scadrà a breve.`,
+      subject: '⏰ Subscription Expiring Soon',
+      title: 'Subscription Expiring',
+      message: `A customer's subscription will expire soon.`,
       details: [
-        { label: 'Cliente', value: customerName },
+        { label: 'Customer', value: customerName },
         { label: 'Email', value: customerEmail },
-        { label: 'Piano', value: planName },
-        { label: 'Giorni Rimanenti', value: `${daysRemaining}` },
+        { label: 'Plan', value: planName },
+        { label: 'Days Remaining', value: `${daysRemaining}` },
       ],
     });
   }
@@ -778,13 +778,13 @@ export class EmailService {
   ): Promise<boolean> {
     return this.sendEmail({
       to: this.getAdminEmail(),
-      subject: '❌ Tentativi di Pagamento Esauriti',
-      title: 'Tentativi di Pagamento Esauriti',
-      message: `Tutti i tentativi di pagamento per il cliente ${customerName} sono falliti.`,
+      subject: '❌ Payment Retry Attempts Exhausted',
+      title: 'Payment Retry Exhausted',
+      message: `All payment attempts for customer ${customerName} have failed.`,
       details: [
-        { label: 'Cliente', value: customerName },
+        { label: 'Customer', value: customerName },
         { label: 'Email', value: customerEmail },
-        { label: 'Importo', value: `€${amount.toFixed(2)}` },
+        { label: 'Amount', value: `€${amount.toFixed(2)}` },
       ],
     });
   }

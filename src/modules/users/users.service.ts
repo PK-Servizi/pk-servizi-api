@@ -102,11 +102,7 @@ export class UsersService {
       this.logger.error(`Failed to send welcome email: ${error.message}`);
     }
 
-    return {
-      success: true,
-      message: 'User created successfully',
-      data: savedUser,
-    };
+    return savedUser;
   }
 
   async findByEmail(email: string, options?: { includePassword?: boolean }) {
@@ -177,9 +173,8 @@ export class UsersService {
     return user;
   }
 
-  async findAll() {
-    // Optimized: Use query builder with select for better performance
-    const users = await this.userRepository
+  async findAll(page: number = 1, limit: number = 20, search?: string) {
+    const query = this.userRepository
       .createQueryBuilder('user')
       .leftJoin('user.role', 'role')
       .select([
@@ -190,14 +185,29 @@ export class UsersService {
         'user.createdAt',
         'user.updatedAt',
         'role.name',
-      ])
+      ]);
+
+    if (search) {
+      query.where(
+        'user.fullName ILIKE :search OR user.email ILIKE :search',
+        { search: `%${search}%` },
+      );
+    }
+
+    const [users, total] = await query
       .orderBy('user.createdAt', 'DESC')
-      .getMany();
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
 
     return {
-      success: true,
-      message: 'Users retrieved successfully',
       data: users,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
     };
   }
 
@@ -476,11 +486,7 @@ export class UsersService {
     });
     delete updatedUser.password;
 
-    return {
-      success: true,
-      message: 'User updated successfully',
-      data: updatedUser,
-    };
+    return updatedUser;
   }
 
   async getExtendedProfile(userId: string) {

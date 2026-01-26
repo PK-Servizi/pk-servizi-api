@@ -7,6 +7,7 @@ import {
   Put,
   Delete,
   Patch,
+  Query,
   UseGuards,
   UseInterceptors,
   UploadedFile,
@@ -17,6 +18,7 @@ import {
   ApiBearerAuth,
   ApiConsumes,
   ApiBody,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UsersService } from './users.service';
@@ -167,8 +169,15 @@ export class UsersController {
   @Permissions('users:list')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] List all users' })
-  findAll() {
-    return this.usersService.findAll();
+  @ApiQuery({ name: 'page', required: false, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, example: 20 })
+  @ApiQuery({ name: 'search', required: false })
+  findAll(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 20,
+    @Query('search') search?: string,
+  ) {
+    return this.usersService.findAll(page, limit, search);
   }
 
   @Get(':id')

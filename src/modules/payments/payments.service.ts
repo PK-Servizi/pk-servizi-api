@@ -33,27 +33,11 @@ export class PaymentsService {
   /**
    * Find all payments (wrapper for BaseService)
    */
-  async findAll(options?: { page?: number; limit?: number }) {
-    const { page = 1, limit = 10 } = options || {};
-
+  async findAll(page: number = 1, limit: number = 20) {
     const qb = this.paymentRepository
       .createQueryBuilder('payment')
-      .leftJoin('payment.user', 'user')
-      .leftJoin('payment.serviceRequest', 'serviceRequest')
-      .select([
-        'payment.id',
-        'payment.amount',
-        'payment.status',
-        'payment.stripePaymentIntentId',
-        'payment.createdAt',
-        'payment.updatedAt',
-        'user.id',
-        'user.fullName',
-        'user.email',
-        'serviceRequest.id',
-        'serviceRequest.title',
-        'serviceRequest.status',
-      ])
+      .leftJoinAndSelect('payment.user', 'user')
+      .leftJoinAndSelect('payment.serviceRequest', 'serviceRequest')
       .skip((page - 1) * limit)
       .take(limit)
       .orderBy('payment.createdAt', 'DESC');
@@ -62,9 +46,12 @@ export class PaymentsService {
 
     return {
       data,
-      total,
-      page,
-      totalPages: Math.ceil(total / limit),
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
     };
   }
 
@@ -74,17 +61,7 @@ export class PaymentsService {
   async findByUser(userId: string, page = 1, limit = 10) {
     const qb = this.paymentRepository
       .createQueryBuilder('payment')
-      .leftJoin('payment.serviceRequest', 'serviceRequest')
-      .select([
-        'payment.id',
-        'payment.amount',
-        'payment.status',
-        'payment.stripePaymentIntentId',
-        'payment.createdAt',
-        'serviceRequest.id',
-        'serviceRequest.title',
-        'serviceRequest.status',
-      ])
+      .leftJoinAndSelect('payment.serviceRequest', 'serviceRequest')
       .where('payment.userId = :userId', { userId })
       .skip((page - 1) * limit)
       .take(limit)
@@ -93,10 +70,14 @@ export class PaymentsService {
     const [data, total] = await qb.getManyAndCount();
 
     return {
+
       data,
-      total,
-      page,
-      totalPages: Math.ceil(total / limit),
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
     };
   }
 
