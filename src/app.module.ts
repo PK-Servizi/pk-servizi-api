@@ -14,7 +14,7 @@ import { CoursesModule } from './modules/courses/courses.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
-import { CmsModule } from './modules/cms/cms.module';
+import { FaqsModule } from './modules/faqs/faqs.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { AuditModule } from './modules/audit/audit.module';
@@ -96,7 +96,7 @@ import { HealthController } from './health.controller';
     SubscriptionsModule,
     PaymentsModule,
     NotificationsModule,
-    CmsModule,
+    FaqsModule,
     ReportsModule,
     AdminModule,
     AuditModule,
