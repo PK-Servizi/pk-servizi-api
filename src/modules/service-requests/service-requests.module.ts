@@ -2,10 +2,8 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ServiceRequestsController } from './service-requests.controller';
 import { ServiceRequestsService } from './service-requests.service';
-import { ServiceTypesController } from './service-types.controller';
-import { ServiceTypesService } from './service-types.service';
 import { ServiceRequest } from './entities/service-request.entity';
-import { ServiceType } from './entities/service-type.entity';
+import { Service } from '../services/entities/service.entity';
 import { RequestStatusHistory } from './entities/request-status-history.entity';
 import { IseeRequest } from './entities/isee-request.entity';
 import { Modello730Request } from './entities/modello-730-request.entity';
@@ -25,7 +23,7 @@ import { PaymentsModule } from '../payments/payments.module';
   imports: [
     TypeOrmModule.forFeature([
       ServiceRequest,
-      ServiceType,
+      Service,
       RequestStatusHistory,
       IseeRequest,
       Modello730Request,
@@ -42,8 +40,8 @@ import { PaymentsModule } from '../payments/payments.module';
     AwsModule,
     PaymentsModule,
   ],
-  controllers: [ServiceRequestsController, ServiceTypesController],
-  providers: [ServiceRequestsService, ServiceTypesService],
-  exports: [ServiceRequestsService, ServiceTypesService],
+  controllers: [ServiceRequestsController],
+  providers: [ServiceRequestsService],
+  exports: [ServiceRequestsService],
 })
 export class ServiceRequestsModule {}

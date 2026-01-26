@@ -15,7 +15,7 @@ export class CreateFaqDto {
   })
   @IsOptional()
   @IsUUID()
-  serviceTypeId?: string;
+  serviceId?: string;
 
   @ApiProperty({
     description: 'FAQ question',

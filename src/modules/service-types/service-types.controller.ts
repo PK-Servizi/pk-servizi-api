@@ -28,20 +28,14 @@ export class ServiceTypesController {
   // Public/Customer Routes
   @Get()
   @ApiOperation({ summary: '[Public] List active service types' })
-  findActive() {
-    return this.serviceTypesService.findActive();
+  findAll() {
+    return this.serviceTypesService.findAll();
   }
 
   @Get(':id')
   @ApiOperation({ summary: '[Public] Get service type details' })
   findOne(@Param('id') id: string) {
     return this.serviceTypesService.findOne(id);
-  }
-
-  @Get(':id/schema')
-  @ApiOperation({ summary: '[Public] Get form schema' })
-  getSchema(@Param('id') id: string) {
-    return this.serviceTypesService.getSchema(id);
   }
 
   // Admin Routes

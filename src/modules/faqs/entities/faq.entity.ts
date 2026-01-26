@@ -7,7 +7,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { ServiceType } from '../../service-requests/entities/service-type.entity';
+import { Service } from '../../services/entities/service.entity';
 
 @Entity('faqs')
 export class Faq {
@@ -15,7 +15,7 @@ export class Faq {
   id: string;
 
   @Column({ name: 'service_type_id', type: 'uuid', nullable: true })
-  serviceTypeId: string;
+  serviceId: string;
 
   @Column({ type: 'varchar', length: 500 })
   question: string;
@@ -39,7 +39,7 @@ export class Faq {
   updatedAt: Date;
 
   // Relations
-  @ManyToOne(() => ServiceType, { nullable: true })
+  @ManyToOne(() => Service, { nullable: true })
   @JoinColumn({ name: 'service_type_id' })
-  serviceType: ServiceType;
+  Service: Service;
 }

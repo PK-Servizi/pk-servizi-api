@@ -5,12 +5,15 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
-import { ServiceRequest } from './service-request.entity';
+import { ServiceRequest } from '../../service-requests/entities/service-request.entity';
 import { Appointment } from '../../appointments/entities/appointment.entity';
+import { ServiceType } from '../../service-types/entities/service-type.entity';
 
-@Entity('service_types')
-export class ServiceType {
+@Entity('services')
+export class Service {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -47,10 +50,18 @@ export class ServiceType {
   @Column({ default: true, name: 'is_active' })
   isActive: boolean;
 
-  @OneToMany(() => ServiceRequest, (request) => request.serviceType)
+  // Relation to ServiceType
+  @Column({ name: 'service_type_id', nullable: true })
+  serviceTypeId: string;
+
+  @ManyToOne(() => ServiceType, (serviceType) => serviceType.services)
+  @JoinColumn({ name: 'service_type_id' })
+  serviceType: ServiceType;
+
+  @OneToMany(() => ServiceRequest, (request) => request.service)
   requests: ServiceRequest[];
 
-  @OneToMany(() => Appointment, (appointment) => appointment.serviceType)
+  @OneToMany(() => Appointment, (appointment) => appointment.service)
   appointments: Appointment[];
 
   @CreateDateColumn({ name: 'created_at' })

@@ -8,6 +8,8 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { ServiceRequestsModule } from './modules/service-requests/service-requests.module';
+import { ServiceTypesModule } from './modules/service-types/service-types.module';
+import { ServicesModule } from './modules/services/services.module';
 import { DocumentsModule } from './modules/documents/documents.module';
 import { AppointmentsModule } from './modules/appointments/appointments.module';
 import { CoursesModule } from './modules/courses/courses.module';
@@ -89,6 +91,8 @@ import { HealthController } from './health.controller';
     RolesModule,
 
     // Business modules
+    ServiceTypesModule,
+    ServicesModule,
     ServiceRequestsModule,
     DocumentsModule,
     AppointmentsModule,

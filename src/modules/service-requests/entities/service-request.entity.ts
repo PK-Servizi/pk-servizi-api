@@ -9,7 +9,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
-import { ServiceType } from './service-type.entity';
+import { Service } from '../../services/entities/service.entity';
 import { Document } from '../../documents/entities/document.entity';
 import { RequestStatusHistory } from './request-status-history.entity';
 
@@ -21,8 +21,8 @@ export class ServiceRequest {
   @Column({ name: 'user_id' })
   userId: string;
 
-  @Column({ name: 'service_type_id' })
-  serviceTypeId: string;
+  @Column({ name: 'service_id' })
+  serviceId: string;
 
   @Column({ length: 20, default: 'draft' })
   status: string;
@@ -61,9 +61,9 @@ export class ServiceRequest {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @ManyToOne(() => ServiceType, (serviceType) => serviceType.requests)
-  @JoinColumn({ name: 'service_type_id' })
-  serviceType: ServiceType;
+  @ManyToOne(() => Service, (service) => service.requests)
+  @JoinColumn({ name: 'service_id' })
+  service: Service;
 
   @ManyToOne(() => User, (user) => user.assignedRequests)
   @JoinColumn({ name: 'assigned_operator_id' })

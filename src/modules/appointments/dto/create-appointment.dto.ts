@@ -15,7 +15,7 @@ export class CreateAppointmentDto {
   @ApiPropertyOptional({ description: 'Service type ID' })
   @IsOptional()
   @IsUUID(4, { message: 'Service type ID must be a valid UUID' })
-  serviceTypeId?: string;
+  serviceId?: string;
 
   @ApiPropertyOptional({ description: 'Preferred operator ID' })
   @IsOptional()

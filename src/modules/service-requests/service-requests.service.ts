@@ -18,7 +18,7 @@ import { IseeRequest } from './entities/isee-request.entity';
 import { Modello730Request } from './entities/modello-730-request.entity';
 import { ImuRequest } from './entities/imu-request.entity';
 import { RequestStatusHistory } from './entities/request-status-history.entity';
-import { ServiceType } from './entities/service-type.entity';
+import { Service } from '../services/entities/service.entity';
 import { Document } from '../documents/entities/document.entity';
 import { Payment } from '../payments/entities/payment.entity';
 import { UserSubscription } from '../subscriptions/entities/user-subscription.entity';
@@ -66,8 +66,8 @@ export class ServiceRequestsService {
     private imuRequestRepository: Repository<ImuRequest>,
     @InjectRepository(RequestStatusHistory)
     private statusHistoryRepository: Repository<RequestStatusHistory>,
-    @InjectRepository(ServiceType)
-    private serviceTypeRepository: Repository<ServiceType>,
+    @InjectRepository(Service)
+    private serviceRepository: Repository<Service>,
     @InjectRepository(Document)
     private documentRepository: Repository<Document>,
     @InjectRepository(Payment)
@@ -92,11 +92,11 @@ export class ServiceRequestsService {
    * Step 1: Initiate service request with payment
    * User selects service and creates payment
    */
-  async initiateWithPayment(serviceTypeId: string, userId: string) {
-    // Get service type and validate price
-    const serviceType = await this.getServiceType(serviceTypeId);
+  async initiateWithPayment(serviceId: string, userId: string) {
+    // Get service and validate price
+    const service = await this.getService(serviceId);
     
-    if (!serviceType.basePrice || serviceType.basePrice <= 0) {
+    if (!service.basePrice || service.basePrice <= 0) {
       throw new BadRequestException('This service does not require payment');
     }
 
@@ -109,7 +109,7 @@ export class ServiceRequestsService {
     // Create service request with payment_pending status
     const serviceRequest = this.serviceRequestRepository.create({
       userId,
-      serviceTypeId: serviceType.id,
+      serviceId: service.id,
       status: 'payment_pending',
       priority: 'normal',
     });
@@ -118,12 +118,12 @@ export class ServiceRequestsService {
 
     // Create Stripe Checkout Session for hosted payment page
     const checkoutSession = await this.stripeService.createPaymentCheckoutSession({
-      amount: serviceType.basePrice,
+      amount: service.basePrice,
       currency: 'EUR',
       serviceRequestId: serviceRequest.id,
       userId,
       userEmail: user.email,
-      description: `Payment for ${serviceType.name}`,
+      description: `Payment for ${service.name}`,
       successUrl: undefined, // Uses default
       cancelUrl: undefined, // Uses default
     });
@@ -136,14 +136,14 @@ export class ServiceRequestsService {
     const payment = this.paymentRepository.create({
       userId,
       serviceRequestId: serviceRequest.id,
-      amount: serviceType.basePrice,
+      amount: service.basePrice,
       currency: 'EUR',
       status: 'pending',
       stripePaymentIntentId: checkoutSession.payment_intent as string || checkoutSession.id,
-      description: `Payment for ${serviceType.name} service`,
+      description: `Payment for ${service.name} service`,
       metadata: {
-        serviceTypeId: serviceType.id,
-        serviceTypeName: serviceType.name,
+        serviceId: service.id,
+        serviceName: service.name,
         serviceRequestId: serviceRequest.id,
         checkoutSessionId: checkoutSession.id,
       },
@@ -159,7 +159,7 @@ export class ServiceRequestsService {
     await this.notificationsService.send({
       userId,
       title: '💳 Payment Required',
-      message: `Please complete payment of €${serviceType.basePrice} for ${serviceType.name}`,
+      message: `Please complete payment of €${service.basePrice} for ${service.name}`,
       type: 'info',
       actionUrl: `/service-requests/${serviceRequest.id}/payment`,
     });
@@ -174,7 +174,7 @@ export class ServiceRequestsService {
       data: {
         serviceRequestId: serviceRequest.id,
         paymentId: payment.id,
-        amount: serviceType.basePrice,
+        amount: service.basePrice,
         currency: 'EUR',
         status: 'payment_pending',
         checkoutSessionId: checkoutSession.id,
@@ -190,7 +190,7 @@ export class ServiceRequestsService {
   async handlePaymentSuccess(paymentId: string) {
     const payment = await this.paymentRepository.findOne({
       where: { id: paymentId },
-      relations: ['serviceRequest', 'serviceRequest.user', 'serviceRequest.serviceType'],
+      relations: ['serviceRequest', 'serviceRequest.user', 'serviceRequest.service'],
     });
 
     if (!payment || !payment.serviceRequest) {
@@ -222,13 +222,13 @@ export class ServiceRequestsService {
       serviceRequest.user.email,
       serviceRequest.user.fullName || serviceRequest.user.email,
       serviceRequest.id,
-      serviceRequest.serviceType.name,
+      serviceRequest.service.name,
     );
 
     await this.notificationsService.send({
       userId: serviceRequest.userId,
       title: '✅ Payment Confirmed',
-      message: `Payment successful! Please fill out the questionnaire for ${serviceRequest.serviceType.name}`,
+      message: `Payment successful! Please fill out the questionnaire for ${serviceRequest.service.name}`,
       type: 'success',
       actionUrl: `/service-requests/${serviceRequest.id}/questionnaire`,
     });
@@ -243,8 +243,8 @@ export class ServiceRequestsService {
       data: {
         serviceRequestId: serviceRequest.id,
         status: serviceRequest.status,
-        serviceType: serviceRequest.serviceType,
-        formSchema: serviceRequest.serviceType.formSchema,
+        service: serviceRequest.service,
+        formSchema: serviceRequest.service.formSchema,
       },
     };
   }
@@ -255,7 +255,7 @@ export class ServiceRequestsService {
   async handlePaymentFailure(paymentId: string) {
     const payment = await this.paymentRepository.findOne({
       where: { id: paymentId },
-      relations: ['serviceRequest', 'serviceRequest.user', 'serviceRequest.serviceType'],
+      relations: ['serviceRequest', 'serviceRequest.user', 'serviceRequest.service'],
     });
 
     if (!payment) return;
@@ -267,7 +267,7 @@ export class ServiceRequestsService {
       await this.notificationsService.send({
         userId: payment.serviceRequest.userId,
         title: '❌ Payment Failed',
-        message: `Payment failed for ${payment.serviceRequest.serviceType.name}. Please try again.`,
+        message: `Payment failed for ${payment.serviceRequest.service.name}. Please try again.`,
         type: 'error',
         actionUrl: `/service-requests/${payment.serviceRequest.id}/payment`,
       });
@@ -287,7 +287,7 @@ export class ServiceRequestsService {
   ) {
     const serviceRequest = await this.serviceRequestRepository.findOne({
       where: { id: serviceRequestId, userId },
-      relations: ['user', 'serviceType', 'payment'],
+      relations: ['user', 'service', 'payment'],
     });
 
     if (!serviceRequest) {
@@ -324,7 +324,7 @@ export class ServiceRequestsService {
     });
 
     // Get required documents
-    const requiredDocs = (serviceRequest.serviceType.documentRequirements || [])
+    const requiredDocs = (serviceRequest.service.documentRequirements || [])
       .filter((doc) => doc.required)
       .map((doc) => ({
         fieldName: doc.fieldName,
@@ -339,7 +339,7 @@ export class ServiceRequestsService {
     await this.notificationsService.send({
       userId,
       title: '📋 Questionnaire Completed',
-      message: `Great! Now please upload the required documents for ${serviceRequest.serviceType.name}`,
+      message: `Great! Now please upload the required documents for ${serviceRequest.service.name}`,
       type: 'success',
       actionUrl: `/service-requests/${serviceRequest.id}/documents`,
     });
@@ -370,22 +370,22 @@ export class ServiceRequestsService {
   async getRequiredDocumentsForRequest(serviceRequestId: string, userId: string) {
     const serviceRequest = await this.serviceRequestRepository.findOne({
       where: { id: serviceRequestId, userId },
-      relations: ['serviceType'],
+      relations: ['service'],
     });
 
     if (!serviceRequest) {
       throw new NotFoundException('Service request not found');
     }
 
-    const serviceType = serviceRequest.serviceType;
-    const documentRequirements = serviceType.documentRequirements || [];
+    const service = serviceRequest.service;
+    const documentRequirements = service.documentRequirements || [];
     const requiredDocs = documentRequirements.filter((doc) => doc.required);
 
     return {
       success: true,
       data: {
         serviceRequestId,
-        serviceTypeName: serviceType.name,
+        serviceTypeName: service.name,
         status: serviceRequest.status,
         canUploadDocuments: serviceRequest.status === 'awaiting_documents',
         requiredDocuments: requiredDocs.map((doc) => ({
@@ -412,7 +412,7 @@ export class ServiceRequestsService {
   ) {
     const serviceRequest = await this.serviceRequestRepository.findOne({
       where: { id: serviceRequestId, userId },
-      relations: ['user', 'serviceType', 'payment'],
+      relations: ['user', 'service', 'payment'],
     });
 
     if (!serviceRequest) {
@@ -436,8 +436,8 @@ export class ServiceRequestsService {
       throw new BadRequestException('Questionnaire must be completed first');
     }
 
-    const serviceType = serviceRequest.serviceType;
-    const documentRequirements = serviceType.documentRequirements || [];
+    const service = serviceRequest.service;
+    const documentRequirements = service.documentRequirements || [];
     const requiredDocs = documentRequirements.filter((doc) => doc.required);
 
     // Validate ALL required documents are provided
@@ -526,13 +526,13 @@ export class ServiceRequestsService {
         serviceRequest.user.email,
         serviceRequest.user.fullName || serviceRequest.user.email,
         serviceRequest.id,
-        serviceType.name,
+        service.name,
       );
 
       await this.notificationsService.send({
         userId,
         title: '✅ Service Request Submitted',
-        message: `Your ${serviceType.name} request has been submitted and is under review`,
+        message: `Your ${service.name} request has been submitted and is under review`,
         type: 'success',
         actionUrl: `/service-requests/${serviceRequest.id}`,
       });
@@ -574,7 +574,7 @@ export class ServiceRequestsService {
    */
   private async verifySubscriptionAccess(
     userId: string,
-    serviceTypeCode: string,
+    serviceCode: string,
   ): Promise<{
     isValid: boolean;
     subscription?: UserSubscription;
@@ -616,11 +616,11 @@ export class ServiceRequestsService {
     // All services are enabled by default unless explicitly disabled in serviceLimits
     if (
       plan.serviceLimits &&
-      plan.serviceLimits[serviceTypeCode.toLowerCase().replace('_', '')] === 0
+      plan.serviceLimits[serviceCode.toLowerCase().replace('_', '')] === 0
     ) {
       return {
         isValid: false,
-        message: `Service "${serviceTypeCode}" is not included in your subscription plan.`,
+        message: `Service "${serviceCode}" is not included in your subscription plan.`,
       };
     }
 
@@ -666,43 +666,43 @@ export class ServiceRequestsService {
   async create(
     dto: CreateServiceRequestDto,
     userId: string,
-    serviceTypeCode?: string,
+    serviceCode?: string,
   ): Promise<any> {
     try {
       // Validate service type exists and is active
-      let serviceType;
+      let service;
 
-      if (serviceTypeCode) {
+      if (serviceCode) {
         // Check if it's a UUID or code
         const isUUID =
           /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-            serviceTypeCode,
+            serviceCode,
           );
 
         if (isUUID) {
-          serviceType = await this.serviceTypeRepository.findOne({
-            where: { id: serviceTypeCode, isActive: true },
+          service = await this.serviceRepository.findOne({
+            where: { id: serviceCode, isActive: true },
           });
         } else {
-          serviceType = await this.serviceTypeRepository.findOne({
-            where: { code: serviceTypeCode, isActive: true },
+          service = await this.serviceRepository.findOne({
+            where: { code: serviceCode, isActive: true },
           });
         }
       } else {
         // Default to ISEE
-        serviceType = await this.serviceTypeRepository.findOne({
+        service = await this.serviceRepository.findOne({
           where: { code: 'ISEE', isActive: true },
         });
       }
 
-      if (!serviceType) {
+      if (!service) {
         throw new BadRequestException('Service type not found or inactive');
       }
 
       // Create base service request
       const serviceRequest = new ServiceRequest();
       serviceRequest.userId = userId;
-      serviceRequest.serviceTypeId = serviceType.id;
+      serviceRequest.serviceId = service.id;
       serviceRequest.status = SERVICE_REQUEST_STATUSES.DRAFT;
       serviceRequest.formData = {};
 
@@ -710,7 +710,7 @@ export class ServiceRequestsService {
         await this.serviceRequestRepository.save(serviceRequest);
 
       // Create type-specific request record
-      const code = serviceTypeCode || 'ISEE';
+      const code = serviceCode || 'ISEE';
       try {
         switch (code) {
           case 'ISEE':
@@ -748,7 +748,7 @@ export class ServiceRequestsService {
         message: 'Service request created successfully',
         data: {
           id: savedRequest.id,
-          serviceTypeId: savedRequest.serviceTypeId,
+          serviceId: savedRequest.serviceId,
           status: savedRequest.status,
           createdAt: savedRequest.createdAt,
         },
@@ -768,7 +768,7 @@ export class ServiceRequestsService {
   async createWithDocuments(
     dto: CreateServiceRequestDto,
     userId: string,
-    serviceTypeCode?: string,
+    serviceCode?: string,
     files?: Record<string, Express.Multer.File[]>,
   ): Promise<any> {
     try {
@@ -781,21 +781,21 @@ export class ServiceRequestsService {
         }
       }
 
-      // Validate that serviceTypeId is provided
-      if (!dto.serviceTypeId) {
-        throw new BadRequestException('serviceTypeId is required');
+      // Validate that serviceId is provided
+      if (!dto.serviceId) {
+        throw new BadRequestException('serviceId is required');
       }
 
       // 1. Fetch service type with document requirements
-      const serviceType = await this.getServiceType(dto.serviceTypeId);
+      const service = await this.getService(dto.serviceId);
       
       // 2. Validate required documents
-      if (serviceType.documentRequirements?.length > 0) {
-        this.validateDocumentRequirements(serviceType.documentRequirements, files);
+      if (service.documentRequirements?.length > 0) {
+        this.validateDocumentRequirements(service.documentRequirements, files);
       }
 
       // 3. Create service request
-      const serviceRequest = await this.create(dto, userId, serviceTypeCode);
+      const serviceRequest = await this.create(dto, userId, serviceCode);
       const requestId = serviceRequest.data.id;
 
       // 4. Upload documents if provided
@@ -805,7 +805,7 @@ export class ServiceRequestsService {
           if (!fileArray || fileArray.length === 0) continue;
 
           // Find document requirement config
-          const docReq = serviceType.documentRequirements?.find(
+          const docReq = service.documentRequirements?.find(
             (req: any) => req.fieldName === fieldName
           );
 
@@ -836,13 +836,13 @@ export class ServiceRequestsService {
         user.email,
         user.fullName || user.email,
         requestId,
-        serviceType.name,
+        service.name,
       );
 
       await this.notificationsService.send({
         userId,
         title: 'Service Request Created',
-        message: `Your ${serviceType.name} request has been created with ${uploadedDocuments.length} document(s)`,
+        message: `Your ${service.name} request has been created with ${uploadedDocuments.length} document(s)`,
         type: 'success',
         actionUrl: `/service-requests/${requestId}`,
       });
@@ -878,22 +878,22 @@ export class ServiceRequestsService {
   }
 
   /**
-   * Get service type by ID or code
+   * Get service by ID or code
    */
-  private async getServiceType(identifier: string): Promise<ServiceType> {
+  private async getService(identifier: string): Promise<Service> {
     const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier);
     
-    const serviceType = await this.serviceTypeRepository.findOne({
+    const service = await this.serviceRepository.findOne({
       where: isUUID 
         ? { id: identifier, isActive: true }
         : { code: identifier, isActive: true },
     });
 
-    if (!serviceType) {
-      throw new NotFoundException(`Service type '${identifier}' not found or inactive`);
+    if (!service) {
+      throw new NotFoundException(`Service '${identifier}' not found or inactive`);
     }
 
-    return serviceType;
+    return service;
   }
 
   /**
@@ -1027,7 +1027,7 @@ export class ServiceRequestsService {
     try {
       const query = this.serviceRequestRepository
         .createQueryBuilder('sr')
-        .leftJoinAndSelect('sr.serviceType', 'st')
+        .leftJoinAndSelect('sr.service', 'st')
         .leftJoinAndSelect('sr.statusHistory', 'sh')
         .leftJoinAndSelect('sr.documents', 'doc')
         .where('sr.userId = :userId', { userId });
@@ -1036,9 +1036,9 @@ export class ServiceRequestsService {
         query.andWhere('sr.status = :status', { status: options.status });
       }
 
-      if (options.serviceTypeId) {
-        query.andWhere('sr.serviceTypeId = :serviceTypeId', {
-          serviceTypeId: options.serviceTypeId,
+      if (options.serviceId) {
+        query.andWhere('sr.serviceId = :serviceId', {
+          serviceId: options.serviceId,
         });
       }
 
@@ -1066,7 +1066,7 @@ export class ServiceRequestsService {
       const request = await this.serviceRequestRepository.findOne({
         where: { id },
         relations: [
-          'serviceType',
+          'service',
           'user',
           'assignedOperator',
           'documents',
@@ -1090,17 +1090,17 @@ export class ServiceRequestsService {
       let typeSpecificData = {};
       try {
         let typeData: any = null;
-        if (request.serviceType.code === 'ISEE') {
+        if (request.service.code === 'ISEE') {
           typeData =
             (await this.iseeRequestRepository.findOne({
               where: { serviceRequestId: id },
             })) || {};
-        } else if (request.serviceType.code === 'MODELLO_730') {
+        } else if (request.service.code === 'MODELLO_730') {
           typeData =
             (await this.modello730RequestRepository.findOne({
               where: { serviceRequestId: id },
             })) || {};
-        } else if (request.serviceType.code === 'IMU') {
+        } else if (request.service.code === 'IMU') {
           typeData =
             (await this.imuRequestRepository.findOne({
               where: { serviceRequestId: id },
@@ -1116,7 +1116,7 @@ export class ServiceRequestsService {
         }
       } catch (error) {
         this.logger.warn(
-          `Type-specific data not available for ${request.serviceType.code}: ${error.message}`,
+          `Type-specific data not available for ${request.service.code}: ${error.message}`,
         );
         typeSpecificData = {};
       }
@@ -1141,12 +1141,12 @@ export class ServiceRequestsService {
     id: string,
     dto: UpdateServiceRequestDto,
     userId: string,
-    serviceTypeCode?: string,
+    serviceCode?: string,
   ): Promise<any> {
     try {
       const request = await this.serviceRequestRepository.findOne({
         where: { id },
-        relations: ['serviceType'],
+        relations: ['service'],
       });
 
       if (!request) {
@@ -1168,7 +1168,7 @@ export class ServiceRequestsService {
       await this.serviceRequestRepository.save(request);
 
       // Update type-specific data
-      const code = serviceTypeCode || request.serviceType.code;
+      const code = serviceCode || request.service.code;
       try {
         switch (code) {
           case 'ISEE':
@@ -1234,7 +1234,7 @@ export class ServiceRequestsService {
     try {
       const request = await this.serviceRequestRepository.findOne({
         where: { id },
-        relations: ['serviceType'],
+        relations: ['service'],
       });
 
       if (!request) {
@@ -1250,10 +1250,10 @@ export class ServiceRequestsService {
       }
 
       // CRITICAL: Verify subscription before allowing submission (MILSTON M6)
-      const serviceTypeCode = request.serviceType?.code || 'ISEE';
+      const serviceCode = request.service?.code || 'ISEE';
       const subscriptionCheck = await this.verifySubscriptionAccess(
         userId,
-        serviceTypeCode,
+        serviceCode,
       );
 
       if (!subscriptionCheck.isValid) {
@@ -1289,12 +1289,12 @@ export class ServiceRequestsService {
             user.email,
             user.fullName,
             request.id,
-            request.serviceType?.name || 'Servizio',
+            request.service?.name || 'Servizio',
           );
           await this.notificationsService.send({
             userId: user.id,
             title: '✅ Richiesta Inviata',
-            message: `La tua richiesta di servizio ${request.serviceType?.name || 'servizio'} è stata inviata con successo.`,
+            message: `La tua richiesta di servizio ${request.service?.name || 'servizio'} è stata inviata con successo.`,
             type: 'success',
             actionUrl: `/service-requests/${request.id}`,
           });
@@ -1304,7 +1304,7 @@ export class ServiceRequestsService {
             await this.emailService.getAdminEmail(),
             user.fullName,
             request.id,
-            request.serviceType?.name || 'Servizio',
+            request.service?.name || 'Servizio',
           );
         }
       } catch (error) {
@@ -1385,7 +1385,7 @@ export class ServiceRequestsService {
             user.email,
             user.fullName,
             savedRequest.id,
-            savedRequest.serviceType?.name || 'Servizio',
+            savedRequest.service?.name || 'Servizio',
             normalizedStatus,
             reason || 'Status updated',
           );
@@ -1537,7 +1537,7 @@ export class ServiceRequestsService {
     try {
       const qb = this.serviceRequestRepository
         .createQueryBuilder('sr')
-        .leftJoin('sr.serviceType', 'st')
+        .leftJoin('sr.service', 'st')
         .leftJoin('sr.user', 'u')
         .leftJoin('sr.assignedOperator', 'ao')
         .select([
@@ -1561,21 +1561,21 @@ export class ServiceRequestsService {
         qb.andWhere('sr.status = :status', { status: query.status });
       }
 
-      if (query.serviceTypeId) {
+      if (query.serviceId) {
         // Check if it's a UUID or code
         const isUUID =
           /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-            query.serviceTypeId,
+            query.serviceId,
           );
 
         if (isUUID) {
-          qb.andWhere('sr.serviceTypeId = :serviceTypeId', {
-            serviceTypeId: query.serviceTypeId,
+          qb.andWhere('sr.serviceId = :serviceId', {
+            serviceId: query.serviceId,
           });
         } else {
           // If it's a code, join with service_types table to filter by code
-          qb.andWhere('st.code = :serviceTypeCode', {
-            serviceTypeCode: query.serviceTypeId,
+          qb.andWhere('st.code = :serviceCode', {
+            serviceCode: query.serviceId,
           });
         }
       }

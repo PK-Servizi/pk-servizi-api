@@ -133,7 +133,7 @@ export class AdminDashboardService {
       oldestPending: oldestPending
         ? {
             id: oldestPending.id,
-            serviceType: oldestPending.serviceType?.name,
+            serviceType: oldestPending.service?.name,
             userId: oldestPending.user?.id,
             status: oldestPending.status,
             createdAt: oldestPending.createdAt,

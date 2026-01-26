@@ -11,7 +11,7 @@ import { Repository, Between, In, MoreThan, LessThan } from 'typeorm';
 import { Appointment } from './entities/appointment.entity';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { User } from '../users/entities/user.entity';
-import { ServiceType } from '../service-requests/entities/service-type.entity';
+import { Service } from '../services/entities/service.entity';
 import { NotificationsService } from '../notifications/notifications.service';
 import { EmailService } from '../notifications/email.service';
 
@@ -41,8 +41,8 @@ export class AppointmentsService {
     private readonly appointmentRepository: Repository<Appointment>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(ServiceType)
-    private readonly serviceTypeRepository: Repository<ServiceType>,
+    @InjectRepository(Service)
+    private readonly serviceRepository: Repository<Service>,
     private notificationsService: NotificationsService,
     private emailService: EmailService,
   ) {}
@@ -84,11 +84,11 @@ export class AppointmentsService {
     }
 
     // Validate service type if provided
-    if (dto.serviceTypeId) {
-      const serviceType = await this.serviceTypeRepository.findOne({
-        where: { id: dto.serviceTypeId, isActive: true },
+    if (dto.serviceId) {
+      const service = await this.serviceRepository.findOne({
+        where: { id: dto.serviceId, isActive: true },
       });
-      if (!serviceType) {
+      if (!service) {
         throw new NotFoundException('Service type not found or inactive');
       }
     }
@@ -121,7 +121,7 @@ export class AppointmentsService {
     // Create appointment
     const appointment = this.appointmentRepository.create({
       userId,
-      serviceTypeId: dto.serviceTypeId,
+      serviceId: dto.serviceId,
       operatorId: dto.operatorId,
       title: dto.title,
       description: dto.description,
@@ -294,7 +294,7 @@ export class AppointmentsService {
 
     const query = this.appointmentRepository
       .createQueryBuilder('appointment')
-      .leftJoinAndSelect('appointment.serviceType', 'serviceType')
+      .leftJoinAndSelect('appointment.Service', 'Service')
       .leftJoinAndSelect('appointment.operator', 'operator')
       .where('appointment.userId = :userId', { userId });
 
@@ -317,7 +317,7 @@ export class AppointmentsService {
   async findOne(id: string, userId?: string): Promise<any> {
     const appointment = await this.appointmentRepository.findOne({
       where: { id },
-      relations: ['user', 'serviceType', 'operator'],
+      relations: ['user', 'Service', 'operator'],
     });
 
     if (!appointment) {
@@ -583,7 +583,7 @@ export class AppointmentsService {
     const qb = this.appointmentRepository
       .createQueryBuilder('appointment')
       .leftJoinAndSelect('appointment.user', 'user')
-      .leftJoinAndSelect('appointment.serviceType', 'serviceType')
+      .leftJoinAndSelect('appointment.Service', 'Service')
       .leftJoinAndSelect('appointment.operator', 'operator');
 
     if (status) qb.andWhere('appointment.status = :status', { status });

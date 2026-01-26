@@ -8,15 +8,15 @@ import { Repository } from 'typeorm';
 import { Faq } from './entities/faq.entity';
 import { CreateFaqDto } from './dto/create-faq.dto';
 import { UpdateFaqDto } from './dto/update-faq.dto';
-import { ServiceType } from '../service-requests/entities/service-type.entity';
+import { Service } from '../services/entities/service.entity';
 
 @Injectable()
 export class FaqsService {
   constructor(
     @InjectRepository(Faq)
     private faqRepository: Repository<Faq>,
-    @InjectRepository(ServiceType)
-    private serviceTypeRepository: Repository<ServiceType>,
+    @InjectRepository(Service)
+    private serviceRepository: Repository<Service>,
   ) {}
 
   /**
@@ -24,11 +24,11 @@ export class FaqsService {
    */
   async create(createFaqDto: CreateFaqDto) {
     // Validate service type if provided
-    if (createFaqDto.serviceTypeId) {
-      const serviceType = await this.serviceTypeRepository.findOne({
-        where: { id: createFaqDto.serviceTypeId },
+    if (createFaqDto.serviceId) {
+      const Service = await this.serviceRepository.findOne({
+        where: { id: createFaqDto.serviceId },
       });
-      if (!serviceType) {
+      if (!Service) {
         throw new BadRequestException('Service type not found');
       }
     }
@@ -46,15 +46,15 @@ export class FaqsService {
   /**
    * Get all FAQs (admin view)
    */
-  async findAll(serviceTypeId?: string, category?: string, isActive?: boolean) {
+  async findAll(serviceId?: string, category?: string, isActive?: boolean) {
     const query = this.faqRepository
       .createQueryBuilder('faq')
-      .leftJoinAndSelect('faq.serviceType', 'serviceType')
+      .leftJoinAndSelect('faq.Service', 'Service')
       .orderBy('faq.order', 'ASC')
       .addOrderBy('faq.createdAt', 'DESC');
 
-    if (serviceTypeId) {
-      query.andWhere('faq.serviceTypeId = :serviceTypeId', { serviceTypeId });
+    if (serviceId) {
+      query.andWhere('faq.serviceId = :serviceId', { serviceId });
     }
 
     if (category) {
@@ -77,23 +77,23 @@ export class FaqsService {
   /**
    * Get active FAQs (public view)
    */
-  async findActive(serviceTypeId?: string, category?: string) {
-    return this.findAll(serviceTypeId, category, true);
+  async findActive(serviceId?: string, category?: string) {
+    return this.findAll(serviceId, category, true);
   }
 
   /**
    * Get FAQs by service type code
    */
   async findByServiceTypeCode(code: string) {
-    const serviceType = await this.serviceTypeRepository.findOne({
+    const Service = await this.serviceRepository.findOne({
       where: { code },
     });
 
-    if (!serviceType) {
+    if (!Service) {
       throw new NotFoundException('Service type not found');
     }
 
-    return this.findActive(serviceType.id);
+    return this.findActive(Service.id);
   }
 
   /**
@@ -102,7 +102,7 @@ export class FaqsService {
   async findOne(id: string) {
     const faq = await this.faqRepository.findOne({
       where: { id },
-      relations: ['serviceType'],
+      relations: ['Service'],
     });
 
     if (!faq) {
@@ -126,11 +126,11 @@ export class FaqsService {
     }
 
     // Validate service type if being updated
-    if (updateFaqDto.serviceTypeId) {
-      const serviceType = await this.serviceTypeRepository.findOne({
-        where: { id: updateFaqDto.serviceTypeId },
+    if (updateFaqDto.serviceId) {
+      const Service = await this.serviceRepository.findOne({
+        where: { id: updateFaqDto.serviceId },
       });
-      if (!serviceType) {
+      if (!Service) {
         throw new BadRequestException('Service type not found');
       }
     }

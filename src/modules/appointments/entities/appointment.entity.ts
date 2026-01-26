@@ -8,7 +8,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
-import { ServiceType } from '../../service-requests/entities/service-type.entity';
+import { Service } from '../../services/entities/service.entity';
 
 @Entity('appointments')
 export class Appointment {
@@ -18,8 +18,8 @@ export class Appointment {
   @Column({ name: 'user_id' })
   userId: string;
 
-  @Column({ nullable: true, name: 'service_type_id' })
-  serviceTypeId: string;
+  @Column({ nullable: true, name: 'service_id' })
+  serviceId: string;
 
   @Column({ nullable: true, name: 'operator_id' })
   operatorId: string;
@@ -70,9 +70,9 @@ export class Appointment {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @ManyToOne(() => ServiceType, (serviceType) => serviceType.appointments)
-  @JoinColumn({ name: 'service_type_id' })
-  serviceType: ServiceType;
+  @ManyToOne(() => Service, (service) => service.appointments)
+  @JoinColumn({ name: 'service_id' })
+  service: Service;
 
   @ManyToOne(() => User, (user) => user.operatorAppointments)
   @JoinColumn({ name: 'operator_id' })

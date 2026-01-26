@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { AppDataSource } from '../src/config/data-source';
-import { ServiceType } from '../src/modules/service-requests/entities/service-type.entity';
+import { Service } from '../src/modules/services/entities/service.entity';
 
 const SERVICE_TYPES = [
   {
@@ -197,7 +197,7 @@ export async function seedServiceTypes() {
         await AppDataSource.initialize();
     }
 
-    const repo = AppDataSource.getRepository(ServiceType);
+    const repo = AppDataSource.getRepository(Service);
 
     for (const typeData of SERVICE_TYPES) {
       const existing = await repo.findOne({ where: { code: typeData.code } });

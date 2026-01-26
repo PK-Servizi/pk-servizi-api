@@ -17,7 +17,7 @@ export interface SortQuery {
 
 export interface ServiceRequestFilters extends PaginationQuery, SortQuery {
   status?: string;
-  serviceTypeId?: string;
+  serviceId?: string;
   userId?: string;
   assignedOperatorId?: string;
   priority?: string;

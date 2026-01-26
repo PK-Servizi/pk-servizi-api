@@ -17,11 +17,11 @@ export class CreateServiceRequestDto {
   userId?: string;
 
   @ApiPropertyOptional({
-    description: 'Service type ID or code (can use query param instead)',
+    description: 'Service ID or code (can use query param instead)',
   })
   @IsOptional()
   @IsString()
-  serviceTypeId?: string;
+  serviceId?: string;
 
   @ApiPropertyOptional({
     description: 'Request status',

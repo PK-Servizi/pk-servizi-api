@@ -22,11 +22,8 @@ import {
 } from '@nestjs/swagger';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { ServiceRequestsService } from './service-requests.service';
-import { ServiceTypesService } from './service-types.service';
 import { CreateServiceRequestDto } from './dto/create-service-request.dto';
 import { UpdateServiceRequestDto } from './dto/update-service-request.dto';
-import { CreateServiceTypeDto } from './dto/create-service-type.dto';
-import { UpdateServiceTypeDto } from './dto/update-service-type.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';
 import { AssignOperatorDto } from './dto/assign-operator.dto';
 import { UpdatePriorityDto } from './dto/update-priority.dto';
@@ -38,95 +35,6 @@ import { Permissions } from '../../common/decorators/permissions.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { UserRequest } from '../../common/interfaces/user-request.interface';
 import { ServiceRequestFilters } from '../../common/interfaces/query-filters.interface';
-
-/**
- * Service Types Controller
- * Manages available service types (ISEE, Modello 730, IMU)
- */
-@ApiTags('Service Types')
-@Controller('service-types')
-export class ServiceTypesController {
-  constructor(private readonly serviceTypesService: ServiceTypesService) {}
-
-  // Public Routes
-  @Get()
-  @ApiOperation({ summary: '[Public] List active service types' })
-  findActive() {
-    return this.serviceTypesService.findActive();
-  }
-
-  @Get(':id')
-  @ApiOperation({ summary: '[Public] Get service type details' })
-  findOne(@Param('id') id: string) {
-    return this.serviceTypesService.findOne(id);
-  }
-
-  @Get(':id/schema')
-  @ApiOperation({ summary: '[Public] Get form schema for service type' })
-  getSchema(@Param('id') id: string) {
-    return this.serviceTypesService.getSchema(id);
-  }
-
-  @Get(':id/required-documents')
-  @ApiOperation({ summary: '[Public] Get required document list' })
-  getRequiredDocuments(@Param('id') id: string) {
-    return this.serviceTypesService.getRequiredDocuments(id);
-  }
-
-  // Admin Routes
-  @Post()
-  @UseGuards(JwtAuthGuard, PermissionsGuard)
-  @Permissions('service-types:create')
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: '[Admin] Create new service type' })
-  @ApiBody({ type: CreateServiceTypeDto })
-  create(@Body() dto: CreateServiceTypeDto) {
-    return this.serviceTypesService.create(dto);
-  }
-
-  @Put(':id')
-  @UseGuards(JwtAuthGuard, PermissionsGuard)
-  @Permissions('service-types:update')
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: '[Admin] Update service type' })
-  @ApiBody({ type: UpdateServiceTypeDto })
-  update(@Param('id') id: string, @Body() dto: UpdateServiceTypeDto) {
-    return this.serviceTypesService.update(id, dto);
-  }
-
-  @Put(':id/schema')
-  @UseGuards(JwtAuthGuard, PermissionsGuard)
-  @Permissions('service-types:update')
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: '[Admin] Update form schema' })
-  @ApiBody({
-    schema: { type: 'object', example: { type: 'object', properties: {} } },
-  })
-  updateSchema(
-    @Param('id') id: string,
-    @Body() schema: Record<string, unknown>,
-  ) {
-    return this.serviceTypesService.updateSchema(id, schema);
-  }
-
-  @Delete(':id')
-  @UseGuards(JwtAuthGuard, PermissionsGuard)
-  @Permissions('service-types:delete')
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: '[Admin] Delete service type' })
-  remove(@Param('id') id: string) {
-    return this.serviceTypesService.remove(id);
-  }
-
-  @Patch(':id/activate')
-  @UseGuards(JwtAuthGuard, PermissionsGuard)
-  @Permissions('service-types:update')
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: '[Admin] Activate/deactivate service type' })
-  activate(@Param('id') id: string) {
-    return this.serviceTypesService.activate(id);
-  }
-}
 
 /**
  * Service Requests Controller - M3 Implementation
@@ -156,18 +64,18 @@ export class ServiceRequestsController {
     description: 'Filter by status',
   })
   @ApiQuery({
-    name: 'serviceTypeId',
+    name: 'serviceId',
     required: false,
     description: 'Filter by service type',
   })
   findMy(
     @CurrentUser() user: UserRequest,
     @Query('status') status?: string,
-    @Query('serviceTypeId') serviceTypeId?: string,
+    @Query('serviceId') serviceId?: string,
   ) {
     return this.serviceRequestsService.findByUser(user.id, {
       status,
-      serviceTypeId,
+      serviceId,
     });
   }
 
@@ -189,20 +97,20 @@ export class ServiceRequestsController {
     schema: {
       type: 'object',
       properties: {
-        serviceTypeId: { 
+        serviceId: { 
           type: 'string',
           description: 'Service type ID (UUID) or code',
           example: 'ISEE'
         }
       },
-      required: ['serviceTypeId']
+      required: ['serviceId']
     }
   })
   initiateWithPayment(
-    @Body('serviceTypeId') serviceTypeId: string,
+    @Body('serviceId') serviceId: string,
     @CurrentUser() user: UserRequest,
   ) {
-    return this.serviceRequestsService.initiateWithPayment(serviceTypeId, user.id);
+    return this.serviceRequestsService.initiateWithPayment(serviceId, user.id);
   }
 
   /**
@@ -367,7 +275,7 @@ export class ServiceRequestsController {
     schema: {
       type: 'object',
       properties: {
-        serviceTypeId: { 
+        serviceId: { 
           type: 'string',
           description: 'Service type ID (UUID) or service type code (ISEE, MODELLO_730, IMU)',
           example: 'dae8b64-57f7-4562-b3fc-2c96f368afa8'
@@ -419,7 +327,7 @@ export class ServiceRequestsController {
           description: 'Additional documents (max 10)'
         },
       },
-      required: ['serviceTypeId']
+      required: ['serviceId']
     }
   })
   create(
@@ -564,9 +472,9 @@ export class ServiceRequestsController {
   @ApiQuery({ name: 'sortBy', required: false })
   @ApiQuery({ name: 'sortOrder', required: false, enum: ['ASC', 'DESC'] })
   findAll(@Query() query: ServiceRequestFilters) {
-    // Map serviceType to serviceTypeId for backward compatibility
+    // Map serviceType to serviceId for backward compatibility
     if ((query as any).serviceType) {
-      query.serviceTypeId = (query as any).serviceType;
+      query.serviceId = (query as any).serviceType;
     }
     return this.serviceRequestsService.findAll(query);
   }

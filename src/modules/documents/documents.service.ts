@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Document } from './entities/document.entity';
-import { ServiceType } from '../service-requests/entities/service-type.entity';
+import { Service } from '../services/entities/service.entity';
 import { ServiceRequest } from '../service-requests/entities/service-request.entity';
 import { User } from '../users/entities/user.entity';
 import { StorageService } from '../../common/services/storage.service';
@@ -16,8 +16,8 @@ export class DocumentsService {
   constructor(
     @InjectRepository(Document)
     private documentRepository: Repository<Document>,
-    @InjectRepository(ServiceType)
-    private serviceTypeRepository: Repository<ServiceType>,
+    @InjectRepository(Service)
+    private serviceRepository: Repository<Service>,
     @InjectRepository(ServiceRequest)
     private serviceRequestRepository: Repository<ServiceRequest>,
     @InjectRepository(User)
@@ -65,7 +65,7 @@ export class DocumentsService {
   //   // Validate service request exists
   //   const serviceRequest = await this.serviceRequestRepository.findOne({
   //     where: { id: dto.serviceRequestId },
-  //     relations: ['serviceType'],
+  //     relations: ['Service'],
   //   });
 
   //   if (!serviceRequest) {
@@ -73,7 +73,7 @@ export class DocumentsService {
   //   }
 
   //   // Get service type name for S3 path
-  //   const serviceTypeName = serviceRequest.serviceType?.name || 'General';
+  //   const serviceTypeName = serviceRequest.Service?.name || 'General';
   //   const s3PathPrefix = `users/${userId}/services/${serviceTypeName.replace(/[^a-zA-Z0-9]/g, '')}`;
 
   //   // Upload to S3
@@ -136,11 +136,11 @@ export class DocumentsService {
     // Get service request for S3 path
     const serviceRequest = await this.serviceRequestRepository.findOne({
       where: { id: document.serviceRequestId },
-      relations: ['serviceType'],
+      relations: ['service'],
     });
 
     if (files && Object.keys(files).length > 0) {
-      const serviceTypeName = serviceRequest?.serviceType?.name || 'General';
+      const serviceTypeName = serviceRequest?.service?.name || 'General';
       const s3PathPrefix = `users/${userId}/services/${serviceTypeName.replace(/[^a-zA-Z0-9]/g, '')}`;
 
       // Get first available file
@@ -275,22 +275,22 @@ export class DocumentsService {
     return { success: true, message: 'Admin notes added', data: updated };
   }
 
-  async getRequiredDocuments(serviceTypeId: string): Promise<any> {
-    const serviceType = await this.serviceTypeRepository.findOne({
-      where: { id: serviceTypeId },
+  async getRequiredDocuments(serviceId: string): Promise<any> {
+    const Service = await this.serviceRepository.findOne({
+      where: { id: serviceId },
       select: ['id', 'name', 'requiredDocuments'],
     });
 
-    if (!serviceType) {
+    if (!Service) {
       return { success: false, message: 'Service type not found' };
     }
 
     return {
       success: true,
       data: {
-        serviceTypeId,
-        serviceName: serviceType.name,
-        requiredDocuments: serviceType.requiredDocuments || [],
+        serviceId,
+        serviceName: Service.name,
+        requiredDocuments: Service.requiredDocuments || [],
       },
     };
   }
@@ -307,7 +307,7 @@ export class DocumentsService {
     // Validate service request exists
     const serviceRequest = await this.serviceRequestRepository.findOne({
       where: { id: dto.serviceRequestId },
-      relations: ['serviceType'],
+      relations: ['Service'],
     });
 
     if (!serviceRequest) {
@@ -330,7 +330,7 @@ export class DocumentsService {
     };
 
     // Get service type name for S3 path
-    const serviceTypeName = serviceRequest.serviceType?.name || 'General';
+    const serviceTypeName = serviceRequest.service?.name || 'General';
     const s3PathPrefix = `users/${userId}/services/${serviceTypeName.replace(/[^a-zA-Z0-9]/g, '')}`;
 
     for (const [fieldName, fileArray] of Object.entries(files)) {
