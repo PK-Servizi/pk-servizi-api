@@ -49,7 +49,7 @@ export class AdminRequestManagementService {
 
       const query = this.serviceRequestRepository
         .createQueryBuilder('sr')
-        .leftJoinAndSelect('sr.serviceType', 'st')
+        .leftJoinAndSelect('sr.service', 'st')
         .leftJoinAndSelect('sr.user', 'u')
         .leftJoinAndSelect('sr.assignedOperator', 'op')
         .skip(skip)
@@ -119,12 +119,11 @@ export class AdminRequestManagementService {
       const request = await this.serviceRequestRepository.findOne({
         where: { id },
         relations: [
-          'serviceType',
+          'service',
           'user',
           'assignedOperator',
           'documents',
           'statusHistory',
-          'notes',
         ],
       });
 
@@ -165,7 +164,7 @@ export class AdminRequestManagementService {
     try {
       const query = this.serviceRequestRepository
         .createQueryBuilder('sr')
-        .leftJoinAndSelect('sr.serviceType', 'st')
+        .leftJoinAndSelect('sr.service', 'st')
         .leftJoinAndSelect('sr.user', 'u')
         .where('sr.assignedOperatorId = :operatorId', { operatorId });
 

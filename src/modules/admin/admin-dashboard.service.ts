@@ -93,7 +93,7 @@ export class AdminDashboardService {
     // Get requests by service type
     const byServiceData = await this.serviceRequestRepository
       .createQueryBuilder('sr')
-      .leftJoinAndSelect('sr.serviceType', 'st')
+      .leftJoinAndSelect('sr.service', 'st')
       .select('st.code', 'code')
       .addSelect('COUNT(sr.id)', 'count')
       .where('sr.createdAt BETWEEN :start AND :end', {
@@ -119,7 +119,7 @@ export class AdminDashboardService {
         status: In(['submitted', 'in_review', 'missing_documents']),
       },
       order: { createdAt: 'ASC' },
-      relations: ['serviceType', 'user'],
+      relations: ['service', 'user'],
     });
 
     return {
@@ -454,7 +454,7 @@ export class AdminDashboardService {
     // Get requests by service type
     const byServiceData = await this.serviceRequestRepository
       .createQueryBuilder('sr')
-      .leftJoinAndSelect('sr.serviceType', 'st')
+      .leftJoinAndSelect('sr.service', 'st')
       .select('st.code', 'code')
       .addSelect('COUNT(sr.id)', 'total')
       .addSelect(
