@@ -18,6 +18,8 @@
     "migration:generate": "npm run typeorm -- migration:generate ./migrations/Migration",
     "migration:run": "npm run typeorm -- migration:run",
     "migration:revert": "npm run typeorm -- migration:revert",
+    "migration:clean": "ts-node -r tsconfig-paths/register ./scripts/clean-database.ts",
+    "migration:reset": "npm run migration:revert && npm run migration:clean && npm run migration:run",
     "seed": "ts-node ./seeds/seed.ts",
     "seed:permissions": "ts-node seeds/permissions-seed.ts",
     "seed:all": "npm run seed && npm run seed:permissions",

@@ -20,6 +20,7 @@ export class ConsolidatedSchema1770000000000 implements MigrationInterface {
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
         "name" character varying NOT NULL,
         "description" text,
+        "permissions" text,
         "created_at" TIMESTAMP NOT NULL DEFAULT now(),
         "updated_at" TIMESTAMP NOT NULL DEFAULT now(),
         CONSTRAINT "UQ_roles_name" UNIQUE ("name"),
@@ -33,16 +34,10 @@ export class ConsolidatedSchema1770000000000 implements MigrationInterface {
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
         "email" character varying NOT NULL,
         "password" character varying NOT NULL,
-        "first_name" character varying NOT NULL,
-        "last_name" character varying NOT NULL,
-        "phone_number" character varying,
-        "role_id" uuid NOT NULL,
+        "full_name" character varying NOT NULL,
+        "phone" character varying(20),
+        "role_id" uuid,
         "is_active" boolean NOT NULL DEFAULT true,
-        "email_verified" boolean NOT NULL DEFAULT false,
-        "verification_token" character varying,
-        "reset_token" character varying,
-        "reset_token_expiry" TIMESTAMP,
-        "last_login" TIMESTAMP,
         "created_at" TIMESTAMP NOT NULL DEFAULT now(),
         "updated_at" TIMESTAMP NOT NULL DEFAULT now(),
         CONSTRAINT "UQ_users_email" UNIQUE ("email"),
@@ -89,16 +84,19 @@ export class ConsolidatedSchema1770000000000 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE "services" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
-        "name" character varying NOT NULL,
+        "name" character varying(100) NOT NULL,
+        "code" character varying(20) NOT NULL,
         "description" text,
-        "price" numeric(10,2) NOT NULL,
-        "service_type_id" uuid NOT NULL,
+        "category" character varying(50),
+        "base_price" numeric(10,2),
+        "service_type_id" uuid,
         "is_active" boolean NOT NULL DEFAULT true,
-        "processing_time_days" integer,
         "required_documents" jsonb,
+        "document_requirements" jsonb,
         "form_schema" jsonb,
         "created_at" TIMESTAMP NOT NULL DEFAULT now(),
         "updated_at" TIMESTAMP NOT NULL DEFAULT now(),
+        CONSTRAINT "UQ_services_code" UNIQUE ("code"),
         CONSTRAINT "PK_services" PRIMARY KEY ("id")
       )
     `);
@@ -288,11 +286,12 @@ export class ConsolidatedSchema1770000000000 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE "subscription_plans" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
-        "name" character varying NOT NULL,
+        "name" character varying(100) NOT NULL,
         "description" text,
-        "price" numeric(10,2) NOT NULL,
-        "duration_months" integer NOT NULL,
+        "price_monthly" numeric(10,2),
+        "price_annual" numeric(10,2),
         "features" jsonb,
+        "service_limits" jsonb,
         "is_active" boolean NOT NULL DEFAULT true,
         "created_at" TIMESTAMP NOT NULL DEFAULT now(),
         "updated_at" TIMESTAMP NOT NULL DEFAULT now(),
@@ -665,8 +664,12 @@ export class ConsolidatedSchema1770000000000 implements MigrationInterface {
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     // Drop all indexes first (with IF EXISTS to avoid errors)
-    await queryRunner.query(`DROP INDEX IF EXISTS "public"."IDX_faqs_is_active"`);
-    await queryRunner.query(`DROP INDEX IF EXISTS "public"."IDX_faqs_service_type_id"`);
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "public"."IDX_faqs_is_active"`,
+    );
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "public"."IDX_faqs_service_type_id"`,
+    );
     await queryRunner.query(
       `DROP INDEX IF EXISTS "public"."IDX_service_types_is_active"`,
     );
@@ -676,27 +679,45 @@ export class ConsolidatedSchema1770000000000 implements MigrationInterface {
     await queryRunner.query(
       `DROP INDEX IF EXISTS "public"."IDX_services_service_type_id"`,
     );
-    await queryRunner.query(`DROP INDEX IF EXISTS "public"."IDX_services_is_active"`);
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "public"."IDX_services_is_active"`,
+    );
     await queryRunner.query(
       `DROP INDEX IF EXISTS "public"."IDX_payments_service_request_id"`,
     );
-    await queryRunner.query(`DROP INDEX IF EXISTS "public"."IDX_payments_status"`);
-    await queryRunner.query(`DROP INDEX IF EXISTS "public"."IDX_payments_user_id"`);
-    await queryRunner.query(`DROP INDEX IF EXISTS "public"."IDX_documents_status"`);
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "public"."IDX_payments_status"`,
+    );
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "public"."IDX_payments_user_id"`,
+    );
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "public"."IDX_documents_status"`,
+    );
     await queryRunner.query(
       `DROP INDEX IF EXISTS "public"."IDX_documents_service_request_id"`,
     );
     await queryRunner.query(
       `DROP INDEX IF EXISTS "public"."IDX_appointments_user_status"`,
     );
-    await queryRunner.query(`DROP INDEX IF EXISTS "public"."IDX_appointments_date"`);
-    await queryRunner.query(`DROP INDEX IF EXISTS "public"."IDX_appointments_status"`);
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "public"."IDX_appointments_date"`,
+    );
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "public"."IDX_appointments_status"`,
+    );
     await queryRunner.query(
       `DROP INDEX IF EXISTS "public"."IDX_appointments_operator_id"`,
     );
-    await queryRunner.query(`DROP INDEX IF EXISTS "public"."IDX_appointments_user_id"`);
-    await queryRunner.query(`DROP INDEX IF EXISTS "public"."IDX_users_is_active"`);
-    await queryRunner.query(`DROP INDEX IF EXISTS "public"."IDX_users_role_id"`);
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "public"."IDX_appointments_user_id"`,
+    );
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "public"."IDX_users_is_active"`,
+    );
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "public"."IDX_users_role_id"`,
+    );
     await queryRunner.query(`DROP INDEX IF EXISTS "public"."IDX_users_email"`);
     await queryRunner.query(
       `DROP INDEX IF EXISTS "public"."IDX_service_requests_assigned_operator_id"`,
@@ -826,26 +847,38 @@ export class ConsolidatedSchema1770000000000 implements MigrationInterface {
 
     // Drop all tables (with CASCADE to handle any remaining dependencies)
     await queryRunner.query(`DROP TABLE IF EXISTS "faqs" CASCADE`);
-    await queryRunner.query(`DROP TABLE IF EXISTS "modello_730_requests" CASCADE`);
+    await queryRunner.query(
+      `DROP TABLE IF EXISTS "modello_730_requests" CASCADE`,
+    );
     await queryRunner.query(`DROP TABLE IF EXISTS "isee_requests" CASCADE`);
     await queryRunner.query(`DROP TABLE IF EXISTS "imu_requests" CASCADE`);
     await queryRunner.query(`DROP TABLE IF EXISTS "family_members" CASCADE`);
-    await queryRunner.query(`DROP TABLE IF EXISTS "course_enrollments" CASCADE`);
+    await queryRunner.query(
+      `DROP TABLE IF EXISTS "course_enrollments" CASCADE`,
+    );
     await queryRunner.query(`DROP TABLE IF EXISTS "courses" CASCADE`);
     await queryRunner.query(`DROP TABLE IF EXISTS "user_permissions" CASCADE`);
     await queryRunner.query(`DROP TABLE IF EXISTS "role_permissions" CASCADE`);
     await queryRunner.query(`DROP TABLE IF EXISTS "permissions" CASCADE`);
-    await queryRunner.query(`DROP TABLE IF EXISTS "user_subscriptions" CASCADE`);
-    await queryRunner.query(`DROP TABLE IF EXISTS "subscription_plans" CASCADE`);
+    await queryRunner.query(
+      `DROP TABLE IF EXISTS "user_subscriptions" CASCADE`,
+    );
+    await queryRunner.query(
+      `DROP TABLE IF EXISTS "subscription_plans" CASCADE`,
+    );
     await queryRunner.query(`DROP TABLE IF EXISTS "refresh_tokens" CASCADE`);
-    await queryRunner.query(`DROP TABLE IF EXISTS "blacklisted_tokens" CASCADE`);
+    await queryRunner.query(
+      `DROP TABLE IF EXISTS "blacklisted_tokens" CASCADE`,
+    );
     await queryRunner.query(`DROP TABLE IF EXISTS "audit_logs" CASCADE`);
     await queryRunner.query(`DROP TABLE IF EXISTS "notifications" CASCADE`);
     await queryRunner.query(`DROP TABLE IF EXISTS "payments" CASCADE`);
     await queryRunner.query(`DROP TABLE IF EXISTS "invoices" CASCADE`);
     await queryRunner.query(`DROP TABLE IF EXISTS "appointments" CASCADE`);
     await queryRunner.query(`DROP TABLE IF EXISTS "documents" CASCADE`);
-    await queryRunner.query(`DROP TABLE IF EXISTS "request_status_history" CASCADE`);
+    await queryRunner.query(
+      `DROP TABLE IF EXISTS "request_status_history" CASCADE`,
+    );
     await queryRunner.query(`DROP TABLE IF EXISTS "service_requests" CASCADE`);
     await queryRunner.query(`DROP TABLE IF EXISTS "services" CASCADE`);
     await queryRunner.query(`DROP TABLE IF EXISTS "service_types" CASCADE`);
@@ -853,10 +886,12 @@ export class ConsolidatedSchema1770000000000 implements MigrationInterface {
     await queryRunner.query(`DROP TABLE IF EXISTS "users" CASCADE`);
     await queryRunner.query(`DROP TABLE IF EXISTS "roles" CASCADE`);
 
-    // Drop TypeORM metadata table (migrations table is handled by TypeORM after this)
+    // Drop TypeORM metadata table
     await queryRunner.query(`DROP TABLE IF EXISTS "typeorm_metadata" CASCADE`);
 
     // Drop extension
     await queryRunner.query(`DROP EXTENSION IF EXISTS "uuid-ossp"`);
+
+    // Note: migrations table is managed by TypeORM and will be cleaned up automatically
   }
 }
