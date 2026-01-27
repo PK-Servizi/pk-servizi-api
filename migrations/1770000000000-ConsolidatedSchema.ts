@@ -853,6 +853,9 @@ export class ConsolidatedSchema1770000000000 implements MigrationInterface {
     await queryRunner.query(`DROP TABLE IF EXISTS "users" CASCADE`);
     await queryRunner.query(`DROP TABLE IF EXISTS "roles" CASCADE`);
 
+    // Drop TypeORM metadata table (migrations table is handled by TypeORM after this)
+    await queryRunner.query(`DROP TABLE IF EXISTS "typeorm_metadata" CASCADE`);
+
     // Drop extension
     await queryRunner.query(`DROP EXTENSION IF EXISTS "uuid-ossp"`);
   }
