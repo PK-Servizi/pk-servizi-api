@@ -16,4 +16,21 @@ export class HealthController {
   favicon(@Res() res: Response) {
     res.status(204).end();
   }
+
+  @Get('/')
+  root() {
+    return {
+      name: 'PK SERVIZI API',
+      version: '1.0.0',
+      status: 'running',
+      documentation: '/api/v1',
+      health: '/health',
+    };
+  }
+
+  @Get('robots.txt')
+  robots(@Res() res: Response) {
+    res.type('text/plain');
+    res.send('User-agent: *\nDisallow: /api/\nAllow: /health');
+  }
 }
