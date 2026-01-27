@@ -15,14 +15,19 @@ const databaseConfig = (configService: ConfigService): TypeOrmModuleOptions => {
 
     // Performance optimizations
     extra: {
-      max: configService.get<number>('DB_POOL_SIZE', 20), // Increased from 10
-      min: 5, // Minimum pool size
+      max: configService.get<number>('DB_POOL_SIZE', 30), // Increased connection pool
+      min: 10, // Increased minimum pool size
       connectionTimeoutMillis: configService.get<number>(
         'DB_CONNECTION_TIMEOUT',
-        5000,
+        3000, // Reduced timeout
       ),
-      idleTimeoutMillis: configService.get<number>('DB_IDLE_TIMEOUT', 10000), // Reduced from 30s to 10s
-      query_timeout: configService.get<number>('DB_QUERY_TIMEOUT', 30000),
+      idleTimeoutMillis: configService.get<number>('DB_IDLE_TIMEOUT', 30000),
+      query_timeout: configService.get<number>('DB_QUERY_TIMEOUT', 20000), // Reduced query timeout
+      statement_timeout: 20000, // 20 second max statement time
+      // PostgreSQL specific optimizations
+      application_name: 'pk-servizi-api',
+      keepAlive: true,
+      keepAliveInitialDelayMillis: 10000,
     },
 
     entities: [__dirname + '/../modules/*/entities/*.entity.{ts,js}'],
@@ -33,14 +38,6 @@ const databaseConfig = (configService: ConfigService): TypeOrmModuleOptions => {
     logging:
       !isProduction && configService.get<boolean>('TYPEORM_LOGGING', false),
     namingStrategy: new SnakeNamingStrategy(),
-
-    // Query result cache (increased duration for better performance)
-    cache: configService.get<boolean>('DB_CACHE', true)
-      ? {
-          type: 'database',
-          duration: configService.get<number>('DB_CACHE_DURATION', 60000), // Increased from 30s to 60s
-        }
-      : false,
 
     maxQueryExecutionTime: configService.get<number>('DB_SLOW_QUERY_LOG', 1000),
 

@@ -38,16 +38,21 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         throw new UnauthorizedException('Token has expired');
       }
 
-      // Check if token is blacklisted
-      const blacklisted = await this.blacklistedTokenRepository.findOne({
-        where: { token },
-      });
+      // Parallel execution of blacklist check and user lookup
+      const [blacklisted, user] = await Promise.all([
+        this.blacklistedTokenRepository.findOne({
+          where: { token },
+          cache: {
+            id: `blacklist-${token.slice(-20)}`,
+            milliseconds: 60000, // 1 minute
+          },
+        }),
+        this.usersService.findOneWithPermissions(payload.sub),
+      ]);
 
       if (blacklisted) {
         throw new UnauthorizedException('Token has been invalidated');
       }
-
-      const user = await this.usersService.findOneWithPermissions(payload.sub);
 
       if (!user) {
         throw new UnauthorizedException('Invalid token - user not found');

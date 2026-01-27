@@ -455,34 +455,34 @@ export class ServiceRequestsService {
       );
     }
 
-    // Validate ONLY required documents are uploaded (reject extras)
-    const allowedFieldNames = requiredDocs.map((req) => req.fieldName);
-    const uploadedFieldNames = Object.keys(files);
-    const extraFields = uploadedFieldNames.filter(
-      (field) => !allowedFieldNames.includes(field),
-    );
-
-    if (extraFields.length > 0) {
-      throw new BadRequestException(
-        `Only required documents are allowed. ` +
-        `Unexpected documents: ${extraFields.join(', ')}. ` +
-        `Required: ${allowedFieldNames.join(', ')}`,
-      );
-    }
-
-    // Validate file types, sizes, and counts
+    // Validate file types, sizes, and counts for known document types
     for (const [fieldName, uploadedFiles] of Object.entries(files)) {
-      const docReq = requiredDocs.find((r) => r.fieldName === fieldName);
-      if (!docReq) continue;
+      const docReq = documentRequirements.find((r) => r.fieldName === fieldName);
+      
+      // If document requirement exists, validate against it
+      if (docReq) {
+        if (docReq.maxCount && uploadedFiles.length > docReq.maxCount) {
+          throw new BadRequestException(
+            `Too many files for ${docReq.label}. Max: ${docReq.maxCount}`,
+          );
+        }
 
-      if (docReq.maxCount && uploadedFiles.length > docReq.maxCount) {
-        throw new BadRequestException(
-          `Too many files for ${docReq.label}. Max: ${docReq.maxCount}`,
-        );
-      }
-
-      for (const file of uploadedFiles) {
-        this.validateFile(file, docReq);
+        for (const file of uploadedFiles) {
+          this.validateFile(file, docReq);
+        }
+      } else {
+        // For extra documents not in requirements, just validate basic file constraints
+        for (const file of uploadedFiles) {
+          this.validateFile(file, {
+            fieldName: fieldName,
+            label: fieldName,
+            documentType: 'other',
+            required: false,
+            maxCount: 10,
+            maxSizeMB: 10,
+            acceptedFormats: ['pdf', 'jpg', 'jpeg', 'png'],
+          });
+        }
       }
     }
 
@@ -491,14 +491,15 @@ export class ServiceRequestsService {
 
     try {
       for (const [fieldName, uploadedFiles] of Object.entries(files)) {
-        const docReq = requiredDocs.find((r) => r.fieldName === fieldName);
+        const docReq = documentRequirements.find((r) => r.fieldName === fieldName);
+        const documentType = docReq ? docReq.documentType : 'other';
 
         for (const file of uploadedFiles) {
           const doc = await this.uploadServiceRequestDocument(
             file,
             serviceRequestId,
             userId,
-            docReq.documentType,
+            documentType,
             true,
           );
           uploadedDocuments.push(doc);
@@ -1027,9 +1028,19 @@ export class ServiceRequestsService {
     try {
       const query = this.serviceRequestRepository
         .createQueryBuilder('sr')
-        .leftJoinAndSelect('sr.service', 'st')
-        .leftJoinAndSelect('sr.statusHistory', 'sh')
-        .leftJoinAndSelect('sr.documents', 'doc')
+        .select([
+          'sr.id',
+          'sr.userId',
+          'sr.serviceId',
+          'sr.status',
+          'sr.priority',
+          'sr.submittedAt',
+          'sr.completedAt',
+          'sr.createdAt',
+          'sr.updatedAt',
+        ])
+        .leftJoin('sr.service', 'st')
+        .addSelect(['st.id', 'st.name', 'st.code', 'st.category'])
         .where('sr.userId = :userId', { userId });
 
       if (options.status) {

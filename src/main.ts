@@ -35,8 +35,9 @@ async function bootstrap() {
         }
         return compression.filter(req, res);
       },
-      threshold: 1024,
+      threshold: 512, // Compress responses > 512 bytes (reduced from 1024)
       level: 6,
+      memLevel: 8,
     }),
   );
 

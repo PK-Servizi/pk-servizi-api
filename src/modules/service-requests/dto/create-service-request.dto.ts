@@ -1,14 +1,13 @@
 import {
   IsString,
   IsOptional,
-  IsObject,
   IsIn,
   IsUUID,
   IsDateString,
   MaxLength,
   Allow,
 } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateServiceRequestDto {
   @ApiPropertyOptional({ description: 'User ID (auto-populated from auth)' })

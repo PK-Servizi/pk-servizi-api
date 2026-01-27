@@ -85,31 +85,35 @@ export class UsersService {
     // Remove password from response
     delete savedUser.password;
 
-    // Send welcome email to new user created by admin
-    try {
-      await this.emailService.sendUserCreatedByAdmin(
-        savedUser.email,
-        savedUser.fullName,
-        dto.password,
-      );
-      await this.notificationsService.send({
-        userId: savedUser.id,
-        title: '🎉 Account Creato',
-        message: 'Il tuo account è stato creato da un amministratore. Controlla la tua email per i dettagli di accesso.',
-        type: 'info',
-      });
-    } catch (error) {
-      this.logger.error(`Failed to send welcome email: ${error.message}`);
+    // Send welcome email to new user created by admin (skip if this is self-registration)
+    if (!dto.skipWelcomeEmail) {
+      try {
+        await this.emailService.sendUserCreatedByAdmin(
+          savedUser.email,
+          savedUser.fullName,
+          dto.password,
+        );
+        await this.notificationsService.send({
+          userId: savedUser.id,
+          title: '🎉 Account Creato',
+          message: 'Il tuo account è stato creato da un amministratore. Controlla la tua email per i dettagli di accesso.',
+          type: 'info',
+        });
+      } catch (error) {
+        this.logger.error(`Failed to send welcome email: ${error.message}`);
+      }
     }
 
     return savedUser;
   }
 
   async findByEmail(email: string, options?: { includePassword?: boolean }) {
+    const normalizedEmail = email.toLowerCase().trim();
     const queryBuilder = this.userRepository
       .createQueryBuilder('user')
-      .leftJoinAndSelect('user.role', 'role')
-      .where('user.email = :email', { email: email.toLowerCase().trim() });
+      .leftJoin('user.role', 'role')
+      .addSelect(['role.id', 'role.name'])
+      .where('user.email = :email', { email: normalizedEmail });
 
     if (options?.includePassword) {
       queryBuilder.addSelect('user.password');
@@ -147,10 +151,11 @@ export class UsersService {
   }
 
   async findOneWithPermissions(id: string) {
-    const user = await this.userRepository.findOne({
-      where: { id },
-      relations: ['role'],
-    });
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.role', 'role')
+      .where('user.id = :id', { id })
+      .getOne();
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -181,9 +186,11 @@ export class UsersService {
         'user.id',
         'user.email',
         'user.fullName',
+        'user.phone',
         'user.isActive',
         'user.createdAt',
         'user.updatedAt',
+        'role.id',
         'role.name',
       ]);
 
@@ -194,6 +201,8 @@ export class UsersService {
       );
     }
 
+    const cacheKey = `users-list-${page}-${limit}-${search || 'all'}`;
+    
     const [users, total] = await query
       .orderBy('user.createdAt', 'DESC')
       .skip((page - 1) * limit)
@@ -212,10 +221,11 @@ export class UsersService {
   }
 
   async findOne(id: string) {
-    const user = await this.userRepository.findOne({
-      where: { id },
-      relations: ['role'],
-    });
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.role', 'role')
+      .where('user.id = :id', { id })
+      .getOne();
 
     if (!user) {
       throw new NotFoundException('User not found');

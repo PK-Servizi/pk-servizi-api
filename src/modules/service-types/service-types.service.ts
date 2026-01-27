@@ -13,18 +13,21 @@ export class ServiceTypesService {
   ) {}
 
   async findAll(): Promise<any> {
-    const serviceTypes = await this.serviceTypeRepository.find({
-      where: { isActive: true },
-      order: { name: 'ASC' },
-    });
+    const serviceTypes = await this.serviceTypeRepository
+      .createQueryBuilder('serviceType')
+      .where('serviceType.isActive = :isActive', { isActive: true })
+      .orderBy('serviceType.name', 'ASC')
+      .getMany();
     return { success: true, data: serviceTypes };
   }
 
   async findOne(id: string): Promise<any> {
-    const serviceType = await this.serviceTypeRepository.findOne({
-      where: { id },
-      relations: ['services'],
-    });
+    const serviceType = await this.serviceTypeRepository
+      .createQueryBuilder('serviceType')
+      .leftJoinAndSelect('serviceType.services', 'service')
+      .where('serviceType.id = :id', { id })
+      .andWhere('service.isActive = :isActive', { isActive: true })
+      .getOne();
     if (!serviceType) {
       throw new NotFoundException('Service type not found');
     }

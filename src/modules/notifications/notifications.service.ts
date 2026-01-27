@@ -29,7 +29,7 @@ export class NotificationsService {
 
   async getUnreadCount(userId: string): Promise<any> {
     const count = await this.notificationRepository.count({
-      where: { userId, readAt: null },
+      where: { userId, isRead: false },
     });
     return { success: true, count };
   }
@@ -121,9 +121,10 @@ export class NotificationsService {
     });
     const saved = await this.notificationRepository.save(notification);
 
-    // Send email asynchronously (don't wait)
+    // Send email asynchronously (don't wait) - unless explicitly disabled
+    const shouldSendEmail = dto.sendEmail !== false; // Default to true unless explicitly set to false
     const userEmail = dto.userEmail || user.email;
-    if (userEmail) {
+    if (userEmail && shouldSendEmail) {
       setImmediate(() => {
         let htmlContent = dto.htmlContent || `<p>${dto.message}</p>`;
 

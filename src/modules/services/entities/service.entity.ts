@@ -7,12 +7,16 @@ import {
   OneToMany,
   ManyToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { ServiceRequest } from '../../service-requests/entities/service-request.entity';
 import { Appointment } from '../../appointments/entities/appointment.entity';
 import { ServiceType } from '../../service-types/entities/service-type.entity';
 
 @Entity('services')
+@Index(['isActive'])
+@Index(['serviceTypeId'])
+@Index(['isActive', 'serviceTypeId'])
 export class Service {
   @PrimaryGeneratedColumn('uuid')
   id: string;

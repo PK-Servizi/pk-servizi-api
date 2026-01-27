@@ -58,3 +58,10 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 # Uploaded files
 /uploads/*
 !/uploads/.gitkeep
+
+# Temporary schema and migration files
+*-schema.txt
+*.sql
+DATABASE-VERIFICATION-REPORT.md
+MIGRATION-CONSOLIDATION.md
+migrations-backup/

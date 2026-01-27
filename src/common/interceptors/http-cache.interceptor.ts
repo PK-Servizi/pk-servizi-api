@@ -15,7 +15,8 @@ interface CacheEntry {
 @Injectable()
 export class HttpCacheInterceptor implements NestInterceptor {
   private cache = new Map<string, CacheEntry>();
-  private readonly TTL = 60000; // 1 minute cache
+  private readonly TTL = 30000; // 30 seconds cache (optimized from 1 minute)
+  private readonly MAX_CACHE_SIZE = 200; // Increased cache size
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
@@ -26,8 +27,10 @@ export class HttpCacheInterceptor implements NestInterceptor {
       return next.handle();
     }
 
+    // Generate cache key with query params and auth context
     const url = request.url;
-    const key = `${method}:${url}`;
+    const userId = request.user?.id || 'anonymous';
+    const key = `${method}:${url}:${userId}`;
     const now = Date.now();
 
     // Check if we have a valid cached entry
@@ -45,7 +48,7 @@ export class HttpCacheInterceptor implements NestInterceptor {
         });
 
         // Clean up old entries periodically
-        if (this.cache.size > 100) {
+        if (this.cache.size > this.MAX_CACHE_SIZE) {
           this.cleanupCache(now);
         }
       }),
@@ -53,11 +56,13 @@ export class HttpCacheInterceptor implements NestInterceptor {
   }
 
   private cleanupCache(now: number) {
+    const entriesToDelete: string[] = [];
     for (const [key, entry] of this.cache.entries()) {
       if (now - entry.timestamp > this.TTL) {
-        this.cache.delete(key);
+        entriesToDelete.push(key);
       }
     }
+    entriesToDelete.forEach((key) => this.cache.delete(key));
   }
 
   // Method to clear cache manually if needed

@@ -151,27 +151,8 @@ export class ServiceRequestsController {
   }
 
   /**
-   * Get required documents for this service request
-   * Returns only the documents needed for this specific service type
-   */
-  @Get(':id/required-documents')
-  @UseGuards(JwtAuthGuard, PermissionsGuard)
-  @Permissions('service-requests:read')
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ 
-    summary: '[Customer] Get required documents for service request',
-    description: 'Returns the list of required document fields for this service request based on its service type'
-  })
-  getRequiredDocuments(
-    @Param('id') id: string,
-    @CurrentUser() user: UserRequest,
-  ) {
-    return this.serviceRequestsService.getRequiredDocumentsForRequest(id, user.id);
-  }
-
-  /**
-   * Step 3: Upload required documents only
-   * Uploads ONLY required documents after questionnaire completion
+   * Step 3: Upload required documents
+   * Automatically validates which documents are required based on service type
    */
   @Post(':id/documents')
   @UseGuards(JwtAuthGuard, PermissionsGuard)
@@ -181,53 +162,109 @@ export class ServiceRequestsController {
     FileFieldsInterceptor([
       { name: 'identityDocument', maxCount: 1 },
       { name: 'fiscalCode', maxCount: 1 },
+      { name: 'incomeCertificate', maxCount: 1 },
+      { name: 'bankStatement', maxCount: 1 },
+      { name: 'propertyDocument', maxCount: 1 },
+      { name: 'visuraCatastale', maxCount: 1 },
+      { name: 'cuCertificate', maxCount: 1 },
+      { name: 'propertyDeed', maxCount: 1 },
+      { name: 'medicalReceipts', maxCount: 5 },
+      { name: 'expenseReceipts', maxCount: 5 },
       { name: 'incomeDocuments', maxCount: 5 },
-      { name: 'propertyDocuments', maxCount: 3 },
-      { name: 'disabilityCertificates', maxCount: 2 },
       { name: 'familyDocuments', maxCount: 5 },
-      { name: 'otherDocuments', maxCount: 10 },
+      { name: 'otherDocument', maxCount: 10 },
     ])
   )
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ 
     summary: '[Customer] Step 3: Upload required documents',
-    description: `
-      ⚠️ IMPORTANT: Document fields are DYNAMIC based on service type!
-      
-      Steps:
-      1. First call: GET /service-requests/{id}/required-documents
-      2. That response tells you which fields to upload
-      3. Only upload those specific fields (e.g., for ISEE: identityDocument, fiscalCode, incomeDocuments, familyDocuments)
-      4. Different services require different fields!
-      
-      Status flow: awaiting_documents → submitted
-    `
+    description: 'Upload documents after completing questionnaire. System automatically validates which documents are required for the service type. Status flow: awaiting_documents → submitted'
   })
   @ApiBody({
-    description: `
-      ⚠️ DYNAMIC FIELDS: The required fields vary by service type.
-      
-      Call GET /service-requests/{id}/required-documents first to see which fields you need!
-      
-      Possible field names (depends on service):
-      - identityDocument (binary file)
-      - fiscalCode (binary file)  
-      - incomeDocuments (array of binary files)
-      - familyDocuments (array of binary files)
-      - propertyDocuments (array of binary files)
-      - disabilityCertificates (array of binary files)
-      - otherDocuments (array of binary files)
-      
-      Only upload the fields returned by the required-documents endpoint!
-    `,
+    description: 'Upload required documents. Only upload the documents needed for your specific service type.',
     schema: {
       type: 'object',
-      description: 'Upload only the required fields for your specific service type',
-      example: {
-        identityDocument: '(binary file)',
-        fiscalCode: '(binary file)',
-        incomeDocuments: ['(binary file)'],
-        familyDocuments: ['(binary file)']
+      properties: {
+        identityDocument: {
+          type: 'string',
+          format: 'binary',
+          description: 'Identity Document'
+        },
+        fiscalCode: {
+          type: 'string',
+          format: 'binary',
+          description: 'Fiscal Code'
+        },
+        incomeCertificate: {
+          type: 'string',
+          format: 'binary',
+          description: 'Income Certificate'
+        },
+        bankStatement: {
+          type: 'string',
+          format: 'binary',
+          description: 'Bank Statement'
+        },
+        propertyDocument: {
+          type: 'string',
+          format: 'binary',
+          description: 'Property Document'
+        },
+        visuraCatastale: {
+          type: 'string',
+          format: 'binary',
+          description: 'Visura Catastale'
+        },
+        cuCertificate: {
+          type: 'string',
+          format: 'binary',
+          description: 'CU Certificate'
+        },
+        propertyDeed: {
+          type: 'string',
+          format: 'binary',
+          description: 'Property Deed'
+        },
+        medicalReceipts: {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary'
+          },
+          description: 'Medical Receipts (up to 5 files)'
+        },
+        expenseReceipts: {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary'
+          },
+          description: 'Expense Receipts (up to 5 files)'
+        },
+        incomeDocuments: {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary'
+          },
+          description: 'Income Documents (up to 5 files)'
+        },
+        familyDocuments: {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary'
+          },
+          description: 'Family Documents (up to 5 files)'
+        },
+        otherDocument: {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary'
+          },
+          description: 'Other Documents (up to 10 files)'
+        }
       }
     }
   })
@@ -237,11 +274,17 @@ export class ServiceRequestsController {
     @UploadedFiles() files?: {
       identityDocument?: Express.Multer.File[];
       fiscalCode?: Express.Multer.File[];
+      incomeCertificate?: Express.Multer.File[];
+      bankStatement?: Express.Multer.File[];
+      propertyDocument?: Express.Multer.File[];
+      visuraCatastale?: Express.Multer.File[];
+      cuCertificate?: Express.Multer.File[];
+      propertyDeed?: Express.Multer.File[];
+      medicalReceipts?: Express.Multer.File[];
+      expenseReceipts?: Express.Multer.File[];
       incomeDocuments?: Express.Multer.File[];
-      propertyDocuments?: Express.Multer.File[];
-      disabilityCertificates?: Express.Multer.File[];
       familyDocuments?: Express.Multer.File[];
-      otherDocuments?: Express.Multer.File[];
+      otherDocument?: Express.Multer.File[];
     },
   ) {
     return this.serviceRequestsService.uploadRequiredDocuments(id, user.id, files || {});

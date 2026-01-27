@@ -67,6 +67,7 @@ export class AuthService {
       fullName: ValidationUtil.sanitizeString(dto.fullName),
       phone: dto.phone,
       roleId: customerRole.id,
+      skipWelcomeEmail: true, // Skip admin welcome email - we'll send user registration email instead
     });
 
     SafeLogger.log(`User registered successfully: ${dto.email}`, 'AuthService');
@@ -84,6 +85,7 @@ export class AuthService {
         message:
           'Il tuo account è stato creato con successo. Ora puoi accedere a tutti i nostri servizi CAF.',
         type: 'info',
+        sendEmail: false, // Don't send email - already sent via sendWelcomeEmail
       });
     } catch (error) {
       SafeLogger.error(
@@ -129,12 +131,6 @@ export class AuthService {
     if (!isMatch) {
       throw new UnauthorizedException('Invalid email or password');
     }
-
-    // Revoke all existing refresh tokens for this user
-    await this.refreshTokenRepository.update(
-      { userId: user.id, isRevoked: false },
-      { isRevoked: true },
-    );
 
     const userSafe = {
       id: user.id,

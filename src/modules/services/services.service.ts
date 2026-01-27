@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Service } from './entities/service.entity';
@@ -19,19 +23,32 @@ export class ServicesService {
   ) {}
 
   async findActive(): Promise<any> {
-    const services = await this.serviceRepository.find({
-      where: { isActive: true },
-      relations: ['serviceType'],
-      order: { name: 'ASC' },
-    });
+    const services = await this.serviceRepository
+      .createQueryBuilder('service')
+      .select([
+        'service.id',
+        'service.name',
+        'service.code',
+        'service.description',
+        'service.category',
+        'service.basePrice',
+        'service.isActive',
+      ])
+      .leftJoin('service.serviceType', 'serviceType')
+      .addSelect(['serviceType.id', 'serviceType.name'])
+      .where('service.isActive = :isActive', { isActive: true })
+      .orderBy('service.name', 'ASC')
+
+      .getMany();
     return { success: true, data: services };
   }
 
   async findOne(id: string): Promise<any> {
-    const service = await this.serviceRepository.findOne({
-      where: { id },
-      relations: ['serviceType'],
-    });
+    const service = await this.serviceRepository
+      .createQueryBuilder('service')
+      .leftJoinAndSelect('service.serviceType', 'serviceType')
+      .where('service.id = :id', { id })
+      .getOne();
     if (!service) {
       throw new NotFoundException('Service not found');
     }
@@ -39,10 +56,11 @@ export class ServicesService {
   }
 
   async getSchema(id: string): Promise<any> {
-    const service = await this.serviceRepository.findOne({
-      where: { id },
-      select: ['id', 'name', 'formSchema'],
-    });
+    const service = await this.serviceRepository
+      .createQueryBuilder('service')
+      .select(['service.id', 'service.name', 'service.formSchema'])
+      .where('service.id = :id', { id })
+      .getOne();
     if (!service) {
       throw new NotFoundException('Service not found');
     }
@@ -139,10 +157,11 @@ export class ServicesService {
 
   // Extended Operations - Template Management
   async getRequiredDocuments(id: string): Promise<any> {
-    const service = await this.serviceRepository.findOne({
-      where: { id },
-      select: ['id', 'name', 'documentRequirements'],
-    });
+    const service = await this.serviceRepository
+      .createQueryBuilder('service')
+      .select(['service.id', 'service.name', 'service.documentRequirements'])
+      .where('service.id = :id', { id })
+      .getOne();
     if (!service) {
       throw new NotFoundException('Service not found');
     }
