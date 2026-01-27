@@ -664,193 +664,194 @@ export class ConsolidatedSchema1770000000000 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    // Drop all indexes first
-    await queryRunner.query(`DROP INDEX "public"."IDX_faqs_is_active"`);
-    await queryRunner.query(`DROP INDEX "public"."IDX_faqs_service_type_id"`);
+    // Drop all indexes first (with IF EXISTS to avoid errors)
+    await queryRunner.query(`DROP INDEX IF EXISTS "public"."IDX_faqs_is_active"`);
+    await queryRunner.query(`DROP INDEX IF EXISTS "public"."IDX_faqs_service_type_id"`);
     await queryRunner.query(
-      `DROP INDEX "public"."IDX_service_types_is_active"`,
+      `DROP INDEX IF EXISTS "public"."IDX_service_types_is_active"`,
     );
     await queryRunner.query(
-      `DROP INDEX "public"."IDX_services_is_active_service_type_id"`,
+      `DROP INDEX IF EXISTS "public"."IDX_services_is_active_service_type_id"`,
     );
     await queryRunner.query(
-      `DROP INDEX "public"."IDX_services_service_type_id"`,
+      `DROP INDEX IF EXISTS "public"."IDX_services_service_type_id"`,
     );
-    await queryRunner.query(`DROP INDEX "public"."IDX_services_is_active"`);
+    await queryRunner.query(`DROP INDEX IF EXISTS "public"."IDX_services_is_active"`);
     await queryRunner.query(
-      `DROP INDEX "public"."IDX_payments_service_request_id"`,
+      `DROP INDEX IF EXISTS "public"."IDX_payments_service_request_id"`,
     );
-    await queryRunner.query(`DROP INDEX "public"."IDX_payments_status"`);
-    await queryRunner.query(`DROP INDEX "public"."IDX_payments_user_id"`);
-    await queryRunner.query(`DROP INDEX "public"."IDX_documents_status"`);
+    await queryRunner.query(`DROP INDEX IF EXISTS "public"."IDX_payments_status"`);
+    await queryRunner.query(`DROP INDEX IF EXISTS "public"."IDX_payments_user_id"`);
+    await queryRunner.query(`DROP INDEX IF EXISTS "public"."IDX_documents_status"`);
     await queryRunner.query(
-      `DROP INDEX "public"."IDX_documents_service_request_id"`,
-    );
-    await queryRunner.query(
-      `DROP INDEX "public"."IDX_appointments_user_status"`,
-    );
-    await queryRunner.query(`DROP INDEX "public"."IDX_appointments_date"`);
-    await queryRunner.query(`DROP INDEX "public"."IDX_appointments_status"`);
-    await queryRunner.query(
-      `DROP INDEX "public"."IDX_appointments_operator_id"`,
-    );
-    await queryRunner.query(`DROP INDEX "public"."IDX_appointments_user_id"`);
-    await queryRunner.query(`DROP INDEX "public"."IDX_users_is_active"`);
-    await queryRunner.query(`DROP INDEX "public"."IDX_users_role_id"`);
-    await queryRunner.query(`DROP INDEX "public"."IDX_users_email"`);
-    await queryRunner.query(
-      `DROP INDEX "public"."IDX_service_requests_assigned_operator_id"`,
+      `DROP INDEX IF EXISTS "public"."IDX_documents_service_request_id"`,
     );
     await queryRunner.query(
-      `DROP INDEX "public"."IDX_service_requests_user_status"`,
+      `DROP INDEX IF EXISTS "public"."IDX_appointments_user_status"`,
+    );
+    await queryRunner.query(`DROP INDEX IF EXISTS "public"."IDX_appointments_date"`);
+    await queryRunner.query(`DROP INDEX IF EXISTS "public"."IDX_appointments_status"`);
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "public"."IDX_appointments_operator_id"`,
+    );
+    await queryRunner.query(`DROP INDEX IF EXISTS "public"."IDX_appointments_user_id"`);
+    await queryRunner.query(`DROP INDEX IF EXISTS "public"."IDX_users_is_active"`);
+    await queryRunner.query(`DROP INDEX IF EXISTS "public"."IDX_users_role_id"`);
+    await queryRunner.query(`DROP INDEX IF EXISTS "public"."IDX_users_email"`);
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "public"."IDX_service_requests_assigned_operator_id"`,
     );
     await queryRunner.query(
-      `DROP INDEX "public"."IDX_service_requests_service_id"`,
+      `DROP INDEX IF EXISTS "public"."IDX_service_requests_user_status"`,
     );
     await queryRunner.query(
-      `DROP INDEX "public"."IDX_service_requests_status"`,
+      `DROP INDEX IF EXISTS "public"."IDX_service_requests_service_id"`,
     );
     await queryRunner.query(
-      `DROP INDEX "public"."IDX_service_requests_user_id"`,
-    );
-
-    // Drop all foreign keys
-    await queryRunner.query(
-      `ALTER TABLE "faqs" DROP CONSTRAINT "FK_faqs_service_type_id"`,
+      `DROP INDEX IF EXISTS "public"."IDX_service_requests_status"`,
     );
     await queryRunner.query(
-      `ALTER TABLE "modello_730_requests" DROP CONSTRAINT "FK_modello_730_requests_service_request_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "isee_requests" DROP CONSTRAINT "FK_isee_requests_service_request_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "imu_requests" DROP CONSTRAINT "FK_imu_requests_service_request_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "family_members" DROP CONSTRAINT "FK_family_members_user_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "course_enrollments" DROP CONSTRAINT "FK_course_enrollments_course_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "course_enrollments" DROP CONSTRAINT "FK_course_enrollments_user_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "user_permissions" DROP CONSTRAINT "FK_user_permissions_permission_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "user_permissions" DROP CONSTRAINT "FK_user_permissions_user_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "role_permissions" DROP CONSTRAINT "FK_role_permissions_permission_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "role_permissions" DROP CONSTRAINT "FK_role_permissions_role_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "user_subscriptions" DROP CONSTRAINT "FK_user_subscriptions_payment_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "user_subscriptions" DROP CONSTRAINT "FK_user_subscriptions_plan_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "user_subscriptions" DROP CONSTRAINT "FK_user_subscriptions_user_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "refresh_tokens" DROP CONSTRAINT "FK_refresh_tokens_user_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "blacklisted_tokens" DROP CONSTRAINT "FK_blacklisted_tokens_user_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "audit_logs" DROP CONSTRAINT "FK_audit_logs_user_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "notifications" DROP CONSTRAINT "FK_notifications_user_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "payments" DROP CONSTRAINT "FK_payments_invoice_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "payments" DROP CONSTRAINT "FK_payments_service_request_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "payments" DROP CONSTRAINT "FK_payments_user_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "invoices" DROP CONSTRAINT "FK_invoices_service_request_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "appointments" DROP CONSTRAINT "FK_appointments_operator_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "appointments" DROP CONSTRAINT "FK_appointments_service_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "appointments" DROP CONSTRAINT "FK_appointments_user_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "documents" DROP CONSTRAINT "FK_documents_verified_by_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "documents" DROP CONSTRAINT "FK_documents_service_request_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "documents" DROP CONSTRAINT "FK_documents_user_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "request_status_history" DROP CONSTRAINT "FK_request_status_history_changed_by_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "request_status_history" DROP CONSTRAINT "FK_request_status_history_service_request_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "service_requests" DROP CONSTRAINT "FK_service_requests_assigned_operator_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "service_requests" DROP CONSTRAINT "FK_service_requests_service_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "service_requests" DROP CONSTRAINT "FK_service_requests_user_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "services" DROP CONSTRAINT "FK_services_service_type_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "user_profiles" DROP CONSTRAINT "FK_user_profiles_user_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "users" DROP CONSTRAINT "FK_users_role_id"`,
+      `DROP INDEX IF EXISTS "public"."IDX_service_requests_user_id"`,
     );
 
-    // Drop all tables
-    await queryRunner.query(`DROP TABLE "faqs"`);
-    await queryRunner.query(`DROP TABLE "modello_730_requests"`);
-    await queryRunner.query(`DROP TABLE "isee_requests"`);
-    await queryRunner.query(`DROP TABLE "imu_requests"`);
-    await queryRunner.query(`DROP TABLE "family_members"`);
-    await queryRunner.query(`DROP TABLE "course_enrollments"`);
-    await queryRunner.query(`DROP TABLE "courses"`);
-    await queryRunner.query(`DROP TABLE "user_permissions"`);
-    await queryRunner.query(`DROP TABLE "role_permissions"`);
-    await queryRunner.query(`DROP TABLE "permissions"`);
-    await queryRunner.query(`DROP TABLE "user_subscriptions"`);    await queryRunner.query(`DROP TABLE "subscription_plans"`);
-    await queryRunner.query(`DROP TABLE "refresh_tokens"`);
-    await queryRunner.query(`DROP TABLE "blacklisted_tokens"`);
-    await queryRunner.query(`DROP TABLE "audit_logs"`);
-    await queryRunner.query(`DROP TABLE "notifications"`);
-    await queryRunner.query(`DROP TABLE "payments"`);
-    await queryRunner.query(`DROP TABLE "invoices"`);
-    await queryRunner.query(`DROP TABLE "appointments"`);
-    await queryRunner.query(`DROP TABLE "documents"`);
-    await queryRunner.query(`DROP TABLE "request_status_history"`);
-    await queryRunner.query(`DROP TABLE "service_requests"`);
-    await queryRunner.query(`DROP TABLE "services"`);
-    await queryRunner.query(`DROP TABLE "service_types"`);
-    await queryRunner.query(`DROP TABLE "user_profiles"`);
-    await queryRunner.query(`DROP TABLE "users"`);
-    await queryRunner.query(`DROP TABLE "roles"`);
+    // Drop all foreign keys (with IF EXISTS to avoid errors)
+    await queryRunner.query(
+      `ALTER TABLE "faqs" DROP CONSTRAINT IF EXISTS "FK_faqs_service_type_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "modello_730_requests" DROP CONSTRAINT IF EXISTS "FK_modello_730_requests_service_request_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "isee_requests" DROP CONSTRAINT IF EXISTS "FK_isee_requests_service_request_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "imu_requests" DROP CONSTRAINT IF EXISTS "FK_imu_requests_service_request_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "family_members" DROP CONSTRAINT IF EXISTS "FK_family_members_user_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "course_enrollments" DROP CONSTRAINT IF EXISTS "FK_course_enrollments_course_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "course_enrollments" DROP CONSTRAINT IF EXISTS "FK_course_enrollments_user_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "user_permissions" DROP CONSTRAINT IF EXISTS "FK_user_permissions_permission_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "user_permissions" DROP CONSTRAINT IF EXISTS "FK_user_permissions_user_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "role_permissions" DROP CONSTRAINT IF EXISTS "FK_role_permissions_permission_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "role_permissions" DROP CONSTRAINT IF EXISTS "FK_role_permissions_role_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "user_subscriptions" DROP CONSTRAINT IF EXISTS "FK_user_subscriptions_payment_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "user_subscriptions" DROP CONSTRAINT IF EXISTS "FK_user_subscriptions_plan_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "user_subscriptions" DROP CONSTRAINT IF EXISTS "FK_user_subscriptions_user_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "refresh_tokens" DROP CONSTRAINT IF EXISTS "FK_refresh_tokens_user_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "blacklisted_tokens" DROP CONSTRAINT IF EXISTS "FK_blacklisted_tokens_user_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "audit_logs" DROP CONSTRAINT IF EXISTS "FK_audit_logs_user_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "notifications" DROP CONSTRAINT IF EXISTS "FK_notifications_user_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "payments" DROP CONSTRAINT IF EXISTS "FK_payments_invoice_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "payments" DROP CONSTRAINT IF EXISTS "FK_payments_service_request_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "payments" DROP CONSTRAINT IF EXISTS "FK_payments_user_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "invoices" DROP CONSTRAINT IF EXISTS "FK_invoices_service_request_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "appointments" DROP CONSTRAINT IF EXISTS "FK_appointments_operator_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "appointments" DROP CONSTRAINT IF EXISTS "FK_appointments_service_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "appointments" DROP CONSTRAINT IF EXISTS "FK_appointments_user_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "documents" DROP CONSTRAINT IF EXISTS "FK_documents_verified_by_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "documents" DROP CONSTRAINT IF EXISTS "FK_documents_service_request_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "documents" DROP CONSTRAINT IF EXISTS "FK_documents_user_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "request_status_history" DROP CONSTRAINT IF EXISTS "FK_request_status_history_changed_by_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "request_status_history" DROP CONSTRAINT IF EXISTS "FK_request_status_history_service_request_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "service_requests" DROP CONSTRAINT IF EXISTS "FK_service_requests_assigned_operator_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "service_requests" DROP CONSTRAINT IF EXISTS "FK_service_requests_service_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "service_requests" DROP CONSTRAINT IF EXISTS "FK_service_requests_user_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "services" DROP CONSTRAINT IF EXISTS "FK_services_service_type_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "user_profiles" DROP CONSTRAINT IF EXISTS "FK_user_profiles_user_id"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "users" DROP CONSTRAINT IF EXISTS "FK_users_role_id"`,
+    );
+
+    // Drop all tables (with CASCADE to handle any remaining dependencies)
+    await queryRunner.query(`DROP TABLE IF EXISTS "faqs" CASCADE`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "modello_730_requests" CASCADE`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "isee_requests" CASCADE`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "imu_requests" CASCADE`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "family_members" CASCADE`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "course_enrollments" CASCADE`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "courses" CASCADE`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "user_permissions" CASCADE`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "role_permissions" CASCADE`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "permissions" CASCADE`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "user_subscriptions" CASCADE`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "subscription_plans" CASCADE`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "refresh_tokens" CASCADE`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "blacklisted_tokens" CASCADE`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "audit_logs" CASCADE`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "notifications" CASCADE`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "payments" CASCADE`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "invoices" CASCADE`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "appointments" CASCADE`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "documents" CASCADE`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "request_status_history" CASCADE`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "service_requests" CASCADE`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "services" CASCADE`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "service_types" CASCADE`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "user_profiles" CASCADE`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "users" CASCADE`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "roles" CASCADE`);
 
     // Drop extension
     await queryRunner.query(`DROP EXTENSION IF EXISTS "uuid-ossp"`);
