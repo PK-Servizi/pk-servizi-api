@@ -22,8 +22,8 @@ export class ServicesService {
     private faqRepository: Repository<Faq>,
   ) {}
 
-  async findActive(): Promise<any> {
-    const services = await this.serviceRepository
+  async findActive(serviceTypeId?: string): Promise<any> {
+    const query = this.serviceRepository
       .createQueryBuilder('service')
       .select([
         'service.id',
@@ -36,11 +36,56 @@ export class ServicesService {
       ])
       .leftJoin('service.serviceType', 'serviceType')
       .addSelect(['serviceType.id', 'serviceType.name'])
-      .where('service.isActive = :isActive', { isActive: true })
-      .orderBy('service.name', 'ASC')
+      .where('service.isActive = :isActive', { isActive: true });
 
-      .getMany();
+    // Filter by service type if provided
+    if (serviceTypeId) {
+      query.andWhere('service.serviceTypeId = :serviceTypeId', { serviceTypeId });
+    }
+
+    const services = await query.orderBy('service.name', 'ASC').getMany();
+    
     return { success: true, data: services };
+  }
+
+  async findByServiceType(serviceTypeId: string): Promise<any> {
+    // Verify service type exists
+    const serviceType = await this.serviceTypeRepository.findOne({
+      where: { id: serviceTypeId },
+    });
+
+    if (!serviceType) {
+      throw new NotFoundException('Service type not found');
+    }
+
+    const services = await this.serviceRepository
+      .createQueryBuilder('service')
+      .select([
+        'service.id',
+        'service.name',
+        'service.code',
+        'service.description',
+        'service.category',
+        'service.basePrice',
+        'service.isActive',
+      ])
+      .where('service.serviceTypeId = :serviceTypeId', { serviceTypeId })
+      .andWhere('service.isActive = :isActive', { isActive: true })
+      .orderBy('service.name', 'ASC')
+      .getMany();
+
+    return {
+      success: true,
+      data: {
+        serviceType: {
+          id: serviceType.id,
+          name: serviceType.name,
+          description: serviceType.description,
+        },
+        services,
+        count: services.length,
+      },
+    };
   }
 
   async findOne(id: string): Promise<any> {
