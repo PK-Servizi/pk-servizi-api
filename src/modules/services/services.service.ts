@@ -40,11 +40,13 @@ export class ServicesService {
 
     // Filter by service type if provided
     if (serviceTypeId) {
-      query.andWhere('service.serviceTypeId = :serviceTypeId', { serviceTypeId });
+      query.andWhere('service.serviceTypeId = :serviceTypeId', {
+        serviceTypeId,
+      });
     }
 
     const services = await query.orderBy('service.name', 'ASC').getMany();
-    
+
     return { success: true, data: services };
   }
 

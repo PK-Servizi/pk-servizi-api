@@ -11,7 +11,13 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiBody,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { Permissions } from '../../common/decorators/permissions.decorator';
@@ -29,7 +35,11 @@ export class ServicesController {
   // Public/Customer Routes
   @Get()
   @ApiOperation({ summary: '[Public] List active services' })
-  @ApiQuery({ name: 'serviceTypeId', required: false, description: 'Filter by service type ID' })
+  @ApiQuery({
+    name: 'serviceTypeId',
+    required: false,
+    description: 'Filter by service type ID',
+  })
   findActive(@Query('serviceTypeId') serviceTypeId?: string) {
     return this.servicesService.findActive(serviceTypeId);
   }
