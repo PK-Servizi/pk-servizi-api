@@ -29,9 +29,10 @@ const SERVICES_BY_TYPE = {
     {
       name: 'ISEE 2024',
       code: 'ISEE',
-      description: 'Indicatore della Situazione Economica Equivalente for social benefits.',
+      description:
+        'Indicatore della Situazione Economica Equivalente for social benefits.',
       category: 'TAX',
-      basePrice: 45.00,
+      basePrice: 45.0,
       requiredDocuments: [
         {
           category: 'IDENTITY',
@@ -70,30 +71,34 @@ const SERVICES_BY_TYPE = {
               properties: {
                 fullName: { type: 'string', title: 'Full Name' },
                 fiscalCode: { type: 'string', title: 'Fiscal Code' },
-                birthDate: { type: 'string', format: 'date', title: 'Date of Birth' },
-              }
-            }
-          }
-        }
-      }
+                birthDate: {
+                  type: 'string',
+                  format: 'date',
+                  title: 'Date of Birth',
+                },
+              },
+            },
+          },
+        },
+      },
     },
     {
       name: 'Model 730/2024',
       code: '730',
       description: 'Tax declaration for employees and retirees.',
       category: 'TAX',
-      basePrice: 50.00,
+      basePrice: 50.0,
       requiredDocuments: [
         {
           category: 'IDENTITY',
           name: 'Valid ID Document',
-          required: true
+          required: true,
         },
         {
           category: 'INCOME',
           name: 'Certificazione Unica (CU)',
           description: 'CU provided by employer or INPS',
-          required: true
+          required: true,
         },
       ],
       formSchema: {
@@ -102,28 +107,28 @@ const SERVICES_BY_TYPE = {
         properties: {
           employer: {
             type: 'string',
-            title: 'Current Employer'
+            title: 'Current Employer',
           },
           maritalStatus: {
             type: 'string',
             title: 'Marital Status',
-            enum: ['Single', 'Married', 'Divorced', 'Widowed']
+            enum: ['Single', 'Married', 'Divorced', 'Widowed'],
           },
-        }
-      }
+        },
+      },
     },
     {
       name: 'IMU Calculation',
       code: 'IMU',
       description: 'Calculation of municipal property tax.',
       category: 'TAX',
-      basePrice: 20.00,
+      basePrice: 20.0,
       requiredDocuments: [
         {
           category: 'PROPERTY',
           name: 'Visura Catastale',
           description: 'Updated Visura Catastale',
-          required: true
+          required: true,
         },
       ],
       formSchema: {
@@ -138,11 +143,11 @@ const SERVICES_BY_TYPE = {
               properties: {
                 address: { type: 'string', title: 'Address' },
                 city: { type: 'string', title: 'City/Municipality' },
-              }
-            }
-          }
-        }
-      }
+              },
+            },
+          },
+        },
+      },
     },
   ],
   'Business Services': [
@@ -151,17 +156,17 @@ const SERVICES_BY_TYPE = {
       code: 'PIVA_OPEN',
       description: 'VAT number registration for new business',
       category: 'BUSINESS',
-      basePrice: 100.00,
+      basePrice: 100.0,
       requiredDocuments: [
         {
           category: 'IDENTITY',
           name: 'Valid ID Document',
-          required: true
+          required: true,
         },
         {
           category: 'TAX_CODE',
           name: 'Fiscal Code',
-          required: true
+          required: true,
         },
       ],
       formSchema: {
@@ -171,14 +176,14 @@ const SERVICES_BY_TYPE = {
           businessType: {
             type: 'string',
             title: 'Business Type',
-            enum: ['Individual', 'Partnership', 'Company']
+            enum: ['Individual', 'Partnership', 'Company'],
           },
           activityCode: {
             type: 'string',
-            title: 'ATECO Activity Code'
+            title: 'ATECO Activity Code',
           },
-        }
-      }
+        },
+      },
     },
   ],
   'Personal Services': [
@@ -187,12 +192,12 @@ const SERVICES_BY_TYPE = {
       code: 'RESIDENCY',
       description: 'Change of residential address',
       category: 'PERSONAL',
-      basePrice: 30.00,
+      basePrice: 30.0,
       requiredDocuments: [
         {
           category: 'IDENTITY',
           name: 'Valid ID Document',
-          required: true
+          required: true,
         },
       ],
       formSchema: {
@@ -201,8 +206,8 @@ const SERVICES_BY_TYPE = {
         properties: {
           newAddress: { type: 'string', title: 'New Address' },
           city: { type: 'string', title: 'City' },
-        }
-      }
+        },
+      },
     },
   ],
   'Pension Services': [
@@ -211,18 +216,18 @@ const SERVICES_BY_TYPE = {
       code: 'PENSION',
       description: 'Application for retirement pension',
       category: 'PENSION',
-      basePrice: 150.00,
+      basePrice: 150.0,
       requiredDocuments: [
         {
           category: 'IDENTITY',
           name: 'Valid ID Document',
-          required: true
+          required: true,
         },
         {
           category: 'EMPLOYMENT',
           name: 'Employment History',
           description: 'Complete work history documentation',
-          required: true
+          required: true,
         },
       ],
       formSchema: {
@@ -232,10 +237,10 @@ const SERVICES_BY_TYPE = {
           retirementDate: {
             type: 'string',
             format: 'date',
-            title: 'Expected Retirement Date'
+            title: 'Expected Retirement Date',
           },
-        }
-      }
+        },
+      },
     },
   ],
 };
@@ -243,9 +248,9 @@ const SERVICES_BY_TYPE = {
 export async function seedServiceTypes() {
   try {
     console.log('🚀 Starting Service Types and Services seeding...');
-    
+
     if (!AppDataSource.isInitialized) {
-        await AppDataSource.initialize();
+      await AppDataSource.initialize();
     }
 
     const serviceTypeRepo = AppDataSource.getRepository(ServiceType);
@@ -254,8 +259,10 @@ export async function seedServiceTypes() {
     // Step 1: Create Service Type Categories
     console.log('\n📁 Creating Service Type Categories...');
     for (const typeData of SERVICE_TYPE_CATEGORIES) {
-      let serviceType = await serviceTypeRepo.findOne({ where: { name: typeData.name } });
-      
+      let serviceType = await serviceTypeRepo.findOne({
+        where: { name: typeData.name },
+      });
+
       if (!serviceType) {
         serviceType = serviceTypeRepo.create(typeData);
         await serviceTypeRepo.save(serviceType);
@@ -268,17 +275,21 @@ export async function seedServiceTypes() {
     // Step 2: Create Services under each type
     console.log('\n📋 Creating Services under each type...');
     for (const [typeName, services] of Object.entries(SERVICES_BY_TYPE)) {
-      const serviceType = await serviceTypeRepo.findOne({ where: { name: typeName } });
-      
+      const serviceType = await serviceTypeRepo.findOne({
+        where: { name: typeName },
+      });
+
       if (!serviceType) {
         console.log(`   ⚠️  Service type not found: ${typeName}`);
         continue;
       }
 
       console.log(`\n   📂 Processing "${typeName}":`);
-      
+
       for (const serviceData of services) {
-        const existing = await serviceRepo.findOne({ where: { code: serviceData.code } });
+        const existing = await serviceRepo.findOne({
+          where: { code: serviceData.code },
+        });
 
         if (existing) {
           console.log(`      ⏭️  Service exists: ${serviceData.name}`);
@@ -313,7 +324,7 @@ export async function seedServiceTypes() {
 
 // Allow standalone execution
 if (require.main === module) {
-    seedServiceTypes()
-        .then(() => process.exit(0))
-        .catch(() => process.exit(1));
+  seedServiceTypes()
+    .then(() => process.exit(0))
+    .catch(() => process.exit(1));
 }
