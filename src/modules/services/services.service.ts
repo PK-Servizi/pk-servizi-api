@@ -224,4 +224,23 @@ export class ServicesService {
 
     return { success: true, message: 'Form schema updated', data: service };
   }
+
+  async updateDocumentRequirements(
+    id: string,
+    documentRequirements: any,
+  ): Promise<any> {
+    const service = await this.serviceRepository.findOne({ where: { id } });
+    if (!service) {
+      throw new NotFoundException('Service not found');
+    }
+
+    service.documentRequirements = documentRequirements;
+    await this.serviceRepository.save(service);
+
+    return {
+      success: true,
+      message: 'Document requirements updated',
+      data: service,
+    };
+  }
 }

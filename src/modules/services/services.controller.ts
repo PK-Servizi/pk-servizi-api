@@ -92,6 +92,34 @@ export class ServicesController {
     return this.servicesService.updateSchema(id, schema);
   }
 
+  @Put(':id/document-requirements')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('services:write')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: '[Admin] Update document requirements' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      example: [
+        {
+          id: 'doc1',
+          name: 'ID Card',
+          required: true,
+          description: 'Valid identification document',
+        },
+      ],
+    },
+  })
+  updateDocumentRequirements(
+    @Param('id') id: string,
+    @Body() documentRequirements: Record<string, unknown>,
+  ) {
+    return this.servicesService.updateDocumentRequirements(
+      id,
+      documentRequirements,
+    );
+  }
+
   @Delete(':id')
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Permissions('services:delete')
