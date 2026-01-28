@@ -111,15 +111,17 @@ export class ConsolidatedSchema1770000000000 implements MigrationInterface {
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
         "user_id" uuid NOT NULL,
         "service_id" uuid NOT NULL,
-        "status" character varying NOT NULL DEFAULT 'pending',
+        "payment_id" uuid,
+        "status" character varying(20) NOT NULL DEFAULT 'draft',
         "form_data" jsonb,
-        "notes" text,
+        "internal_notes" text,
+        "user_notes" text,
         "assigned_operator_id" uuid,
-        "estimated_completion_date" TIMESTAMP,
-        "completion_date" TIMESTAMP,
-        "priority" character varying DEFAULT 'normal',
-        "workflow_state" character varying,
-        "current_stage" character varying,
+        "priority" character varying(10) DEFAULT 'normal',
+        "submitted_at" TIMESTAMP,
+        "completed_at" TIMESTAMP,
+        "form_completed_at" TIMESTAMP,
+        "documents_uploaded_at" TIMESTAMP,
         "created_at" TIMESTAMP NOT NULL DEFAULT now(),
         "updated_at" TIMESTAMP NOT NULL DEFAULT now(),
         CONSTRAINT "PK_service_requests" PRIMARY KEY ("id")
@@ -458,6 +460,7 @@ export class ConsolidatedSchema1770000000000 implements MigrationInterface {
         "question" text NOT NULL,
         "answer" text NOT NULL,
         "service_type_id" uuid,
+        "category" varchar(100),
         "is_active" boolean NOT NULL DEFAULT true,
         "order" integer NOT NULL DEFAULT 0,
         "created_at" TIMESTAMP NOT NULL DEFAULT now(),
@@ -484,6 +487,9 @@ export class ConsolidatedSchema1770000000000 implements MigrationInterface {
     );
     await queryRunner.query(
       `ALTER TABLE "service_requests" ADD CONSTRAINT "FK_service_requests_assigned_operator_id" FOREIGN KEY ("assigned_operator_id") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "service_requests" ADD CONSTRAINT "FK_service_requests_payment_id" FOREIGN KEY ("payment_id") REFERENCES "payments"("id") ON DELETE SET NULL ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
       `ALTER TABLE "request_status_history" ADD CONSTRAINT "FK_request_status_history_service_request_id" FOREIGN KEY ("service_request_id") REFERENCES "service_requests"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
@@ -593,6 +599,12 @@ export class ConsolidatedSchema1770000000000 implements MigrationInterface {
     await queryRunner.query(
       `CREATE INDEX "IDX_service_requests_assigned_operator_id" ON "service_requests" ("assigned_operator_id")`,
     );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_service_requests_payment_id" ON "service_requests" ("payment_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_service_requests_submitted_at" ON "service_requests" ("submitted_at")`,
+    );
 
     // Users indexes
     await queryRunner.query(
@@ -664,10 +676,16 @@ export class ConsolidatedSchema1770000000000 implements MigrationInterface {
     await queryRunner.query(
       `CREATE INDEX "IDX_faqs_is_active" ON "faqs" ("is_active")`,
     );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_faqs_category" ON "faqs" ("category")`,
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     // Drop all indexes first (with IF EXISTS to avoid errors)
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "public"."IDX_faqs_category"`,
+    );
     await queryRunner.query(
       `DROP INDEX IF EXISTS "public"."IDX_faqs_is_active"`,
     );
