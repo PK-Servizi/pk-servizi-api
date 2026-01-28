@@ -579,7 +579,7 @@ export class ConsolidatedSchema1770000000000 implements MigrationInterface {
       `ALTER TABLE "modello_730_requests" ADD CONSTRAINT "FK_modello_730_requests_service_request_id" FOREIGN KEY ("service_request_id") REFERENCES "service_requests"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "faqs" ADD CONSTRAINT "FK_faqs_service_type_id" FOREIGN KEY ("service_type_id") REFERENCES "service_types"("id") ON DELETE SET NULL ON UPDATE NO ACTION`,
+      `ALTER TABLE "faqs" ADD CONSTRAINT "FK_faqs_service_id" FOREIGN KEY ("service_type_id") REFERENCES "services"("id") ON DELETE SET NULL ON UPDATE NO ACTION`,
     );
 
     // Create Performance Indexes
@@ -759,7 +759,7 @@ export class ConsolidatedSchema1770000000000 implements MigrationInterface {
 
     // Drop all foreign keys (with IF EXISTS to avoid errors)
     await queryRunner.query(
-      `ALTER TABLE "faqs" DROP CONSTRAINT IF EXISTS "FK_faqs_service_type_id"`,
+      `ALTER TABLE "faqs" DROP CONSTRAINT IF EXISTS "FK_faqs_service_id"`,
     );
     await queryRunner.query(
       `ALTER TABLE "modello_730_requests" DROP CONSTRAINT IF EXISTS "FK_modello_730_requests_service_request_id"`,
