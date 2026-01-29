@@ -233,9 +233,10 @@ export class ConsolidatedSchema1770000000000 implements MigrationInterface {
       CREATE TABLE "notifications" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
         "user_id" uuid NOT NULL,
-        "type" character varying NOT NULL,
-        "title" character varying NOT NULL,
+        "type" character varying(50) NOT NULL DEFAULT 'info',
+        "title" character varying(255) NOT NULL,
         "message" text NOT NULL,
+        "action_url" character varying(500),
         "is_read" boolean NOT NULL DEFAULT false,
         "read_at" TIMESTAMP,
         "metadata" jsonb,
