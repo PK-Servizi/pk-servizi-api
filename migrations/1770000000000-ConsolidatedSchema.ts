@@ -190,19 +190,24 @@ export class ConsolidatedSchema1770000000000 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE "invoices" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
-        "service_request_id" uuid NOT NULL,
-        "invoice_number" character varying NOT NULL,
+        "payment_id" uuid NOT NULL,
+        "user_id" uuid NOT NULL,
+        "stripe_invoice_id" character varying(255),
+        "invoice_number" text,
         "amount" numeric(10,2) NOT NULL,
-        "tax_amount" numeric(10,2) NOT NULL DEFAULT 0,
-        "total_amount" numeric(10,2) NOT NULL,
-        "issue_date" TIMESTAMP NOT NULL DEFAULT now(),
-        "due_date" TIMESTAMP NOT NULL,
-        "status" character varying NOT NULL DEFAULT 'pending',
-        "payment_date" TIMESTAMP,
+        "currency" character varying(3) NOT NULL DEFAULT 'EUR',
+        "status" character varying(20) NOT NULL DEFAULT 'draft',
+        "pdf_url" text,
+        "pdf_path" text,
+        "line_items" jsonb,
+        "billing" jsonb,
         "notes" text,
+        "issued_at" TIMESTAMP,
+        "paid_at" TIMESTAMP,
+        "sent_at" TIMESTAMP,
+        "metadata" jsonb,
         "created_at" TIMESTAMP NOT NULL DEFAULT now(),
         "updated_at" TIMESTAMP NOT NULL DEFAULT now(),
-        CONSTRAINT "UQ_invoices_invoice_number" UNIQUE ("invoice_number"),
         CONSTRAINT "PK_invoices" PRIMARY KEY ("id")
       )
     `);
@@ -212,16 +217,17 @@ export class ConsolidatedSchema1770000000000 implements MigrationInterface {
       CREATE TABLE "payments" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
         "user_id" uuid NOT NULL,
+        "subscription_id" uuid,
         "service_request_id" uuid,
-        "invoice_id" uuid,
         "amount" numeric(10,2) NOT NULL,
-        "currency" character varying NOT NULL DEFAULT 'EUR',
-        "status" character varying NOT NULL DEFAULT 'pending',
-        "payment_method" character varying,
-        "transaction_id" character varying,
-        "stripe_payment_intent_id" character varying,
-        "payment_date" TIMESTAMP,
+        "currency" character varying(3) NOT NULL DEFAULT 'EUR',
+        "status" character varying(20) NOT NULL DEFAULT 'pending',
+        "payment_method" character varying(50),
+        "stripe_payment_intent_id" character varying(255),
+        "stripe_charge_id" character varying(255),
+        "description" text,
         "metadata" jsonb,
+        "paid_at" TIMESTAMP,
         "created_at" TIMESTAMP NOT NULL DEFAULT now(),
         "updated_at" TIMESTAMP NOT NULL DEFAULT now(),
         CONSTRAINT "PK_payments" PRIMARY KEY ("id")
@@ -517,16 +523,19 @@ export class ConsolidatedSchema1770000000000 implements MigrationInterface {
       `ALTER TABLE "appointments" ADD CONSTRAINT "FK_appointments_operator_id" FOREIGN KEY ("operator_id") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "invoices" ADD CONSTRAINT "FK_invoices_service_request_id" FOREIGN KEY ("service_request_id") REFERENCES "service_requests"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE "invoices" ADD CONSTRAINT "FK_invoices_payment_id" FOREIGN KEY ("payment_id") REFERENCES "payments"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "invoices" ADD CONSTRAINT "FK_invoices_user_id" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
       `ALTER TABLE "payments" ADD CONSTRAINT "FK_payments_user_id" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "payments" ADD CONSTRAINT "FK_payments_service_request_id" FOREIGN KEY ("service_request_id") REFERENCES "service_requests"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE "payments" ADD CONSTRAINT "FK_payments_subscription_id" FOREIGN KEY ("subscription_id") REFERENCES "user_subscriptions"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "payments" ADD CONSTRAINT "FK_payments_invoice_id" FOREIGN KEY ("invoice_id") REFERENCES "invoices"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE "payments" ADD CONSTRAINT "FK_payments_service_request_id" FOREIGN KEY ("service_request_id") REFERENCES "service_requests"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
       `ALTER TABLE "notifications" ADD CONSTRAINT "FK_notifications_user_id" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
@@ -652,6 +661,23 @@ export class ConsolidatedSchema1770000000000 implements MigrationInterface {
     );
     await queryRunner.query(
       `CREATE INDEX "IDX_payments_service_request_id" ON "payments" ("service_request_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_payments_subscription_id" ON "payments" ("subscription_id")`,
+    );
+
+    // Invoices indexes
+    await queryRunner.query(
+      `CREATE INDEX "IDX_invoices_user_id" ON "invoices" ("user_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_invoices_payment_id" ON "invoices" ("payment_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_invoices_stripe_invoice_id" ON "invoices" ("stripe_invoice_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_invoices_status" ON "invoices" ("status")`,
     );
 
     // Services indexes
