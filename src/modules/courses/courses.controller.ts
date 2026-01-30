@@ -8,6 +8,7 @@ import {
   Param,
   Body,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { CoursesService } from './courses.service';
@@ -17,9 +18,12 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { Permissions } from '../../common/decorators/permissions.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { AuditLog } from '../../common/decorators/audit-log.decorator';
+import { AuditLogInterceptor } from '../../common/interceptors/audit-log.interceptor';
 
 @ApiTags('Courses')
 @Controller('courses')
+@UseInterceptors(AuditLogInterceptor)
 export class CoursesController {
   constructor(private readonly coursesService: CoursesService) {}
 
@@ -48,6 +52,7 @@ export class CoursesController {
   @Permissions('courses:enroll')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Enroll in course' })
+  @AuditLog({ action: 'COURSE_ENROLLED', resourceType: 'course' })
   enroll(@Param('id') id: string, @CurrentUser() user: any) {
     return this.coursesService.enroll(id, user.id);
   }
@@ -66,6 +71,7 @@ export class CoursesController {
   @Permissions('courses:enroll')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Unenroll from course' })
+  @AuditLog({ action: 'COURSE_UNENROLLED', resourceType: 'course' })
   unenroll(@Param('id') id: string, @CurrentUser() user: any) {
     return this.coursesService.unenroll(id, user.id);
   }
@@ -94,6 +100,7 @@ export class CoursesController {
   @Permissions('courses:enroll')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Mark module/lesson complete' })
+  @AuditLog({ action: 'COURSE_MODULE_COMPLETED', resourceType: 'course' })
   @ApiBody({
     schema: {
       type: 'object',
@@ -125,6 +132,7 @@ export class CoursesController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Create course' })
   @ApiBody({ type: CreateCourseDto })
+  @AuditLog({ action: 'COURSE_CREATED', resourceType: 'course' })
   create(@Body() dto: CreateCourseDto) {
     return this.coursesService.create(dto);
   }
@@ -135,6 +143,7 @@ export class CoursesController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Update course' })
   @ApiBody({ type: UpdateCourseDto })
+  @AuditLog({ action: 'COURSE_UPDATED', resourceType: 'course', captureOldValues: true })
   update(@Param('id') id: string, @Body() dto: UpdateCourseDto) {
     return this.coursesService.update(id, dto);
   }
@@ -144,6 +153,7 @@ export class CoursesController {
   @Permissions('courses:delete')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Delete course' })
+  @AuditLog({ action: 'COURSE_DELETED', resourceType: 'course' })
   remove(@Param('id') id: string) {
     return this.coursesService.remove(id);
   }
@@ -162,6 +172,7 @@ export class CoursesController {
   @Permissions('courses:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Publish course' })
+  @AuditLog({ action: 'COURSE_PUBLISHED', resourceType: 'course' })
   publish(@Param('id') id: string) {
     return this.coursesService.publish(id);
   }
@@ -171,6 +182,7 @@ export class CoursesController {
   @Permissions('courses:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Issue certificate' })
+  @AuditLog({ action: 'COURSE_CERTIFICATE_ISSUED', resourceType: 'course' })
   @ApiBody({
     schema: {
       type: 'object',

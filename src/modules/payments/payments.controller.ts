@@ -6,6 +6,7 @@ import {
   Query,
   UseGuards,
   Body,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -19,11 +20,14 @@ import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { Permissions } from '../../common/decorators/permissions.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { PaymentsService } from './payments.service';
+import { AuditLog } from '../../common/decorators/audit-log.decorator';
+import { AuditLogInterceptor } from '../../common/interceptors/audit-log.interceptor';
 
 @ApiTags('Payments')
 @Controller('payments')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiBearerAuth('JWT-auth')
+@UseInterceptors(AuditLogInterceptor)
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
@@ -78,6 +82,7 @@ export class PaymentsController {
   @Post(':id/refund')
   @Permissions('payments:refund')
   @ApiOperation({ summary: '[Admin] Process payment refund' })
+  @AuditLog({ action: 'PAYMENT_REFUNDED', resourceType: 'payment' })
   @ApiBody({
     schema: {
       type: 'object',

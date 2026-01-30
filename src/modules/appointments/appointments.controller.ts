@@ -8,6 +8,7 @@ import {
   Body,
   UseGuards,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -28,9 +29,12 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { Permissions } from '../../common/decorators/permissions.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { AuditLog } from '../../common/decorators/audit-log.decorator';
+import { AuditLogInterceptor } from '../../common/interceptors/audit-log.interceptor';
 
 @ApiTags('Appointments')
 @Controller('appointments')
+@UseInterceptors(AuditLogInterceptor)
 export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) {}
 
@@ -84,6 +88,7 @@ export class AppointmentsController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Book a new appointment' })
   @ApiBody({ type: CreateAppointmentDto })
+  @AuditLog({ action: 'APPOINTMENT_CREATED', resourceType: 'appointment' })
   create(@Body() dto: CreateAppointmentDto, @CurrentUser() user: UserRequest) {
     return this.appointmentsService.create(dto, user.id);
   }
@@ -125,6 +130,7 @@ export class AppointmentsController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Reschedule appointment' })
   @ApiBody({ type: RescheduleAppointmentDto })
+  @AuditLog({ action: 'APPOINTMENT_RESCHEDULED', resourceType: 'appointment', captureOldValues: true })
   reschedule(
     @Param('id') id: string,
     @Body() dto: RescheduleAppointmentDto,
@@ -155,6 +161,7 @@ export class AppointmentsController {
   @ApiBody({
     schema: { type: 'object', properties: { reason: { type: 'string' } } },
   })
+  @AuditLog({ action: 'APPOINTMENT_CANCELLED', resourceType: 'appointment' })
   cancel(
     @Param('id') id: string,
     @CurrentUser() user: UserRequest,
@@ -223,6 +230,7 @@ export class AppointmentsController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Assign operator to appointment' })
   @ApiBody({ type: AssignOperatorDto })
+  @AuditLog({ action: 'APPOINTMENT_ASSIGNED', resourceType: 'appointment' })
   assign(
     @Param('id') id: string,
     @Body() dto: AssignOperatorDto,
@@ -237,6 +245,7 @@ export class AppointmentsController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Update appointment status' })
   @ApiBody({ type: UpdateStatusDto })
+  @AuditLog({ action: 'APPOINTMENT_STATUS_UPDATED', resourceType: 'appointment', captureOldValues: true })
   updateStatus(
     @Param('id') id: string,
     @Body() dto: UpdateStatusDto,

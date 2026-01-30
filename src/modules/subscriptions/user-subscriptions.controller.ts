@@ -7,6 +7,7 @@ import {
   Body,
   UseGuards,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { UserSubscriptionsService } from './user-subscriptions.service';
@@ -16,6 +17,8 @@ import { OverrideLimitsDto } from './dto/override-limits.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { Permissions } from '../../common/decorators/permissions.decorator';
+import { AuditLog } from '../../common/decorators/audit-log.decorator';
+import { AuditLogInterceptor } from '../../common/interceptors/audit-log.interceptor';
 
 /**
  * User Subscriptions Controller - Admin Operations
@@ -26,6 +29,7 @@ import { Permissions } from '../../common/decorators/permissions.decorator';
 @Controller('admin/user-subscriptions')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiBearerAuth('JWT-auth')
+@UseInterceptors(AuditLogInterceptor)
 export class UserSubscriptionsController {
   constructor(
     private readonly userSubscriptionsService: UserSubscriptionsService,
@@ -74,6 +78,7 @@ export class UserSubscriptionsController {
   @Permissions('subscriptions:write')
   @ApiOperation({ summary: '[Admin] Update subscription status' })
   @ApiBody({ type: UpdateSubscriptionStatusDto })
+  @AuditLog({ action: 'SUBSCRIPTION_STATUS_UPDATED', resourceType: 'subscription', captureOldValues: true })
   async updateStatus(
     @Param('id') id: string,
     @Body() dto: UpdateSubscriptionStatusDto,
@@ -88,6 +93,7 @@ export class UserSubscriptionsController {
   @Permissions('subscriptions:write')
   @ApiOperation({ summary: '[Admin] Override subscription usage limits' })
   @ApiBody({ type: OverrideLimitsDto })
+  @AuditLog({ action: 'SUBSCRIPTION_LIMITS_OVERRIDDEN', resourceType: 'subscription' })
   async overrideLimits(
     @Param('id') id: string,
     @Body() dto: OverrideLimitsDto,
@@ -101,6 +107,7 @@ export class UserSubscriptionsController {
   @Post('assign')
   @Permissions('subscriptions:write')
   @ApiOperation({ summary: '[Admin] Manually assign subscription to user' })
+  @AuditLog({ action: 'SUBSCRIPTION_MANUALLY_ASSIGNED', resourceType: 'subscription' })
   @ApiBody({
     schema: {
       type: 'object',

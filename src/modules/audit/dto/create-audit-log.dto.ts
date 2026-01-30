@@ -2,6 +2,11 @@ import { IsString, IsOptional, IsObject, MaxLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateAuditLogDto {
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  userId?: string;
+
   @ApiProperty()
   @IsString()
   @MaxLength(100)

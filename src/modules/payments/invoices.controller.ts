@@ -7,6 +7,7 @@ import {
   Res,
   Post,
   BadRequestException,
+  UseInterceptors,
 } from '@nestjs/common';
 import { Response } from 'express';
 import {
@@ -21,10 +22,13 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Permissions } from '../../common/decorators/permissions.decorator';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
+import { AuditLog } from '../../common/decorators/audit-log.decorator';
+import { AuditLogInterceptor } from '../../common/interceptors/audit-log.interceptor';
 
 @ApiTags('Invoices')
 @Controller('invoices')
 @UseGuards(JwtAuthGuard)
+@UseInterceptors(AuditLogInterceptor)
 export class InvoicesController {
   constructor(private readonly invoiceService: InvoiceService) {}
 
@@ -130,6 +134,7 @@ export class InvoicesController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Re-send invoice email' })
   @ApiParam({ name: 'id', type: 'string' })
+  @AuditLog({ action: 'INVOICE_RESENT', resourceType: 'invoice' })
   async resendInvoice(
     @Param('id') invoiceId: string,
     @CurrentUser() user: any,

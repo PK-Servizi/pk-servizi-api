@@ -35,6 +35,8 @@ import { Permissions } from '../../common/decorators/permissions.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { UserRequest } from '../../common/interfaces/user-request.interface';
 import { ServiceRequestFilters } from '../../common/interfaces/query-filters.interface';
+import { AuditLog } from '../../common/decorators/audit-log.decorator';
+import { AuditLogInterceptor } from '../../common/interceptors/audit-log.interceptor';
 
 /**
  * Service Requests Controller - M3 Implementation
@@ -43,6 +45,7 @@ import { ServiceRequestFilters } from '../../common/interfaces/query-filters.int
 @ApiTags('Service Requests - M3')
 @Controller('service-requests')
 @UseGuards(JwtAuthGuard)
+@UseInterceptors(AuditLogInterceptor)
 export class ServiceRequestsController {
   constructor(
     private readonly serviceRequestsService: ServiceRequestsService,
@@ -89,6 +92,7 @@ export class ServiceRequestsController {
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Permissions('service-requests:create')
   @ApiBearerAuth('JWT-auth')
+  @AuditLog({ action: 'SERVICE_REQUEST_INITIATED', resourceType: 'service_request' })
   @ApiOperation({ 
     summary: '[Customer] Step 1: Initiate service request with payment',
     description: 'User selects service type and creates payment. Status: payment_pending'
@@ -121,6 +125,7 @@ export class ServiceRequestsController {
   @UseGuards(PermissionsGuard)
   @Permissions('service-requests:update')
   @ApiBearerAuth('JWT-auth')
+  @AuditLog({ action: 'QUESTIONNAIRE_SUBMITTED', resourceType: 'service_request' })
   @ApiOperation({ 
     summary: '[Customer] Step 2: Submit questionnaire',
     description: 'Submit form answers after payment is completed. Status: awaiting_form → awaiting_documents'
@@ -158,6 +163,7 @@ export class ServiceRequestsController {
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Permissions('service-requests:update')
   @ApiBearerAuth('JWT-auth')
+  @AuditLog({ action: 'DOCUMENTS_UPLOADED', resourceType: 'service_request' })
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'identityDocument', maxCount: 1 },
@@ -301,6 +307,7 @@ export class ServiceRequestsController {
   @UseGuards(PermissionsGuard)
   @Permissions('service-requests:create')
   @ApiBearerAuth('JWT-auth')
+  @AuditLog({ action: 'SERVICE_REQUEST_CREATED', resourceType: 'service_request' })
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'identityDocument', maxCount: 1 },
@@ -416,6 +423,7 @@ export class ServiceRequestsController {
   @ApiOperation({ summary: '[Customer] Update draft request' })
   @ApiQuery({ name: 'serviceType', required: false })
   @ApiBody({ type: UpdateServiceRequestDto })
+  @AuditLog({ action: 'SERVICE_REQUEST_UPDATED', resourceType: 'service_request', captureOldValues: true })
   update(
     @Param('id') id: string,
     @Body() dto: UpdateServiceRequestDto,
@@ -435,6 +443,7 @@ export class ServiceRequestsController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Submit request for processing' })
   @ApiBody({ type: SubmitServiceRequestDto })
+  @AuditLog({ action: 'SERVICE_REQUEST_SUBMITTED', resourceType: 'service_request' })
   submit(
     @Param('id') id: string,
     @Body() dto: SubmitServiceRequestDto,
@@ -451,6 +460,7 @@ export class ServiceRequestsController {
   @Permissions('service-requests:update')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Delete draft request' })
+  @AuditLog({ action: 'SERVICE_REQUEST_DELETED', resourceType: 'service_request' })
   remove(@Param('id') id: string, @CurrentUser() user: UserRequest) {
     return this.serviceRequestsService.remove(id, user.id);
   }
@@ -532,6 +542,7 @@ export class ServiceRequestsController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Update request status' })
   @ApiBody({ type: UpdateStatusDto })
+  @AuditLog({ action: 'SERVICE_REQUEST_STATUS_UPDATED', resourceType: 'service_request', captureOldValues: true })
   updateStatus(
     @Param('id') id: string,
     @Body() dto: UpdateStatusDto,
@@ -554,6 +565,7 @@ export class ServiceRequestsController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Assign to operator' })
   @ApiBody({ type: AssignOperatorDto })
+  @AuditLog({ action: 'SERVICE_REQUEST_ASSIGNED', resourceType: 'service_request' })
   assign(
     @Param('id') id: string,
     @Body() dto: AssignOperatorDto,

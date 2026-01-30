@@ -31,10 +31,13 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { Permissions } from '../../common/decorators/permissions.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { AuditLog } from '../../common/decorators/audit-log.decorator';
+import { AuditLogInterceptor } from '../../common/interceptors/audit-log.interceptor';
 
 @ApiTags('Family Members')
 @Controller('family-members')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
+@UseInterceptors(AuditLogInterceptor)
 export class FamilyMembersController {
   constructor(private readonly familyMembersService: FamilyMembersService) {}
 
@@ -51,6 +54,7 @@ export class FamilyMembersController {
   @Permissions('family-members:create')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Add family member' })
+  @AuditLog({ action: 'FAMILY_MEMBER_ADDED', resourceType: 'family_member' })
   create(@Body() dto: CreateFamilyMemberDto, @CurrentUser() user: UserRequest) {
     return this.familyMembersService.create(dto, user.id);
   }
@@ -67,6 +71,7 @@ export class FamilyMembersController {
   @Permissions('family-members:update')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Update family member' })
+  @AuditLog({ action: 'FAMILY_MEMBER_UPDATED', resourceType: 'family_member', captureOldValues: true })
   update(
     @Param('id') id: string,
     @Body() dto: UpdateFamilyMemberDto,
@@ -79,6 +84,7 @@ export class FamilyMembersController {
   @Permissions('family-members:delete')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Delete family member' })
+  @AuditLog({ action: 'FAMILY_MEMBER_DELETED', resourceType: 'family_member' })
   remove(@Param('id') id: string, @CurrentUser() user: UserRequest) {
     return this.familyMembersService.remove(id, user.id);
   }
@@ -100,6 +106,7 @@ export class FamilyMembersController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Upload document for family member' })
   @ApiConsumes('multipart/form-data')
+  @AuditLog({ action: 'FAMILY_MEMBER_DOCUMENTS_UPLOADED', resourceType: 'family_member' })
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'identityDocument', maxCount: 1 },

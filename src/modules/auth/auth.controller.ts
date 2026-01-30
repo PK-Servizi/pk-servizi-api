@@ -8,6 +8,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
+import { UseInterceptors } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -18,15 +19,19 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { Permissions } from '../../common/decorators/permissions.decorator';
+import { AuditLog } from '../../common/decorators/audit-log.decorator';
+import { AuditLogInterceptor } from '../../common/interceptors/audit-log.interceptor';
 
 @ApiTags('Authentication')
 @Controller('auth')
+@UseInterceptors(AuditLogInterceptor)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
   @ApiOperation({ summary: '[Public] Register new user' })
   @ApiBody({ type: RegisterDto })
+  @AuditLog({ action: 'USER_REGISTERED', resourceType: 'user' })
   register(@Body() dto: RegisterDto) {
     return this.authService.register(dto);
   }
@@ -35,6 +40,7 @@ export class AuthController {
   @ApiOperation({ summary: '[Public] User login' })
   @ApiBody({ type: LoginDto })
   @HttpCode(HttpStatus.OK)
+  @AuditLog({ action: 'USER_LOGIN', resourceType: 'user' })
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
   }
@@ -59,6 +65,7 @@ export class AuthController {
   @ApiOperation({ summary: '[Public] Reset password' })
   @ApiBody({ type: ResetPasswordDto })
   @HttpCode(HttpStatus.OK)
+  @AuditLog({ action: 'PASSWORD_RESET', resourceType: 'user' })
   resetPassword(@Body() dto: ResetPasswordDto) {
     return this.authService.resetPassword(dto);
   }
@@ -68,6 +75,7 @@ export class AuthController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Logout user' })
   @HttpCode(HttpStatus.OK)
+  @AuditLog({ action: 'USER_LOGOUT', resourceType: 'user' })
   logout(@CurrentUser() user: any) {
     return this.authService.logout(user.id, user.token);
   }
@@ -78,6 +86,7 @@ export class AuthController {
   @ApiOperation({ summary: '[Customer] Change password' })
   @ApiBody({ type: ChangePasswordDto })
   @HttpCode(HttpStatus.OK)
+  @AuditLog({ action: 'PASSWORD_CHANGED', resourceType: 'user' })
   changePassword(@CurrentUser() user: any, @Body() dto: ChangePasswordDto) {
     return this.authService.changePassword(user.id, dto);
   }

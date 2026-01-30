@@ -7,6 +7,7 @@ import {
   Put,
   Delete,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { RolesService } from './roles.service';
@@ -17,10 +18,13 @@ import { AssignRoleDto } from './dto/assign-role.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { Permissions } from '../../common/decorators/permissions.decorator';
+import { AuditLog } from '../../common/decorators/audit-log.decorator';
+import { AuditLogInterceptor } from '../../common/interceptors/audit-log.interceptor';
 
 @ApiTags('Roles & Permissions')
 @Controller()
 @UseGuards(JwtAuthGuard, PermissionsGuard)
+@UseInterceptors(AuditLogInterceptor)
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
@@ -38,6 +42,7 @@ export class RolesController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Create role' })
   @ApiBody({ type: CreateRoleDto })
+  @AuditLog({ action: 'ROLE_CREATED', resourceType: 'role' })
   createRole(@Body() dto: CreateRoleDto) {
     return this.rolesService.create(dto);
   }
@@ -55,6 +60,7 @@ export class RolesController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Update role' })
   @ApiBody({ type: UpdateRoleDto })
+  @AuditLog({ action: 'ROLE_UPDATED', resourceType: 'role', captureOldValues: true })
   updateRole(@Param('id') id: string, @Body() dto: UpdateRoleDto) {
     return this.rolesService.update(id, dto);
   }
@@ -63,6 +69,7 @@ export class RolesController {
   @Permissions('roles:delete')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Delete role' })
+  @AuditLog({ action: 'ROLE_DELETED', resourceType: 'role' })
   removeRole(@Param('id') id: string) {
     return this.rolesService.remove(id);
   }
@@ -81,6 +88,7 @@ export class RolesController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Assign permissions to role' })
   @ApiBody({ type: AssignPermissionsDto })
+  @AuditLog({ action: 'ROLE_PERMISSIONS_ASSIGNED', resourceType: 'role' })
   assignPermissionsToRole(
     @Param('id') id: string,
     @Body() dto: AssignPermissionsDto,
@@ -92,6 +100,7 @@ export class RolesController {
   @Permissions('roles:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Remove permission from role' })
+  @AuditLog({ action: 'ROLE_PERMISSION_REMOVED', resourceType: 'role' })
   removePermissionFromRole(
     @Param('roleId') roleId: string,
     @Param('permissionId') permissionId: string,
@@ -105,6 +114,7 @@ export class RolesController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Assign role to user' })
   @ApiBody({ type: AssignRoleDto })
+  @AuditLog({ action: 'USER_ROLE_ASSIGNED', resourceType: 'user' })
   assignRoleToUser(@Param('id') id: string, @Body() dto: AssignRoleDto) {
     return this.rolesService.assignRoleToUser(id, dto);
   }
@@ -114,6 +124,7 @@ export class RolesController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Assign direct permission to user' })
   @ApiBody({ type: AssignPermissionsDto })
+  @AuditLog({ action: 'USER_PERMISSION_ASSIGNED', resourceType: 'user' })
   assignPermissionToUser(
     @Param('id') id: string,
     @Body() dto: AssignPermissionsDto,

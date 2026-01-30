@@ -6,239 +6,217 @@ import { ServiceType } from '../src/modules/service-types/entities/service-type.
 // First, define service type categories
 const SERVICE_TYPE_CATEGORIES = [
   {
-    name: 'Tax Services',
-    description: 'Tax declarations and fiscal services',
+    name: 'ISEE',
+    description: 'ISEE (Indicatore Situazione Economica Equivalente) - CAF service for social benefits',
   },
   {
-    name: 'Business Services',
-    description: 'Business registration and administrative services',
+    name: '730/PF',
+    description: 'Tax declarations - Model 730 and Persona Fisica (PF)',
   },
   {
-    name: 'Personal Services',
-    description: 'Personal documents and certificates',
-  },
-  {
-    name: 'Pension Services',
-    description: 'Pension and social security services',
+    name: 'IMU',
+    description: 'IMU (Imposta Municipale Unica) - Municipal property tax services',
   },
 ];
 
 // Then, define services under each type
 const SERVICES_BY_TYPE = {
-  'Tax Services': [
+  'ISEE': [
     {
-      name: 'ISEE 2024',
-      code: 'ISEE',
-      description:
-        'Indicatore della Situazione Economica Equivalente for social benefits.',
+      name: 'ISEE Standard',
+      code: 'ISEE_STANDARD',
+      description: 'Standard ISEE for general social benefits and subsidies',
       category: 'TAX',
       basePrice: 45.0,
       requiredDocuments: [
-        {
-          category: 'IDENTITY',
-          name: 'Valid ID Document',
-          description: 'Identity card or Passport of the declarant',
-          required: true,
-        },
-        {
-          category: 'TAX_CODE',
-          name: 'Fiscal Code',
-          description: 'Fiscal code card (Tessera Sanitaria)',
-          required: true,
-        },
-        {
-          category: 'INCOME',
-          name: 'Income Certifications',
-          description: 'CU, 730, or Unico from previous year',
-          required: true,
-        },
-        {
-          category: 'ASSETS',
-          name: 'Bank/Post Office Balance',
-          description: 'Average balance and year-end balance as of 31/12/2022',
-          required: true,
-        },
+        { category: 'IDENTITY', name: 'Valid ID', required: true },
+        { category: 'TAX_CODE', name: 'Fiscal Code', required: true },
+        { category: 'INCOME', name: 'Income Certifications (CU/730)', required: true },
+        { category: 'ASSETS', name: 'Bank Balance (31/12)', required: true },
       ],
       formSchema: {
-        title: 'ISEE Declaration Data',
+        title: 'ISEE Standard Data',
         type: 'object',
         properties: {
-          familyMembers: {
-            type: 'array',
-            title: 'Family Unit Members',
-            items: {
-              type: 'object',
-              properties: {
-                fullName: { type: 'string', title: 'Full Name' },
-                fiscalCode: { type: 'string', title: 'Fiscal Code' },
-                birthDate: {
-                  type: 'string',
-                  format: 'date',
-                  title: 'Date of Birth',
-                },
-              },
-            },
-          },
+          nucleoFamiliare: { type: 'array', title: 'Family Unit' },
+          abitazione: { type: 'object', title: 'Housing' },
+          redditi: { type: 'object', title: 'Income (last 2 years)' },
+          patrimonioMobiliare: { type: 'object', title: 'Movable Assets' },
         },
       },
     },
     {
-      name: 'Model 730/2024',
-      code: '730',
-      description: 'Tax declaration for employees and retirees.',
+      name: 'ISEE Università',
+      code: 'ISEE_UNIVERSITA',
+      description: 'ISEE for university tuition and student benefits',
       category: 'TAX',
       basePrice: 50.0,
       requiredDocuments: [
-        {
-          category: 'IDENTITY',
-          name: 'Valid ID Document',
-          required: true,
-        },
-        {
-          category: 'INCOME',
-          name: 'Certificazione Unica (CU)',
-          description: 'CU provided by employer or INPS',
-          required: true,
-        },
+        { category: 'IDENTITY', name: 'Student ID', required: true },
+        { category: 'EDUCATION', name: 'University Enrollment', required: true },
+        { category: 'INCOME', name: 'Family Income Documents', required: true },
       ],
       formSchema: {
-        title: '730 Declaration Details',
+        title: 'ISEE Università Data',
         type: 'object',
         properties: {
-          employer: {
-            type: 'string',
-            title: 'Current Employer',
-          },
-          maritalStatus: {
-            type: 'string',
-            title: 'Marital Status',
-            enum: ['Single', 'Married', 'Divorced', 'Widowed'],
-          },
+          studente: { type: 'object', title: 'Student Info' },
+          universita: { type: 'string', title: 'University' },
+          nucleoFamiliare: { type: 'array', title: 'Family Unit' },
         },
       },
     },
     {
-      name: 'IMU Calculation',
-      code: 'IMU',
-      description: 'Calculation of municipal property tax.',
+      name: 'ISEE Sociosanitario',
+      code: 'ISEE_SOCIOSANITARIO',
+      description: 'ISEE for healthcare and social-health services',
       category: 'TAX',
-      basePrice: 20.0,
+      basePrice: 55.0,
       requiredDocuments: [
-        {
-          category: 'PROPERTY',
-          name: 'Visura Catastale',
-          description: 'Updated Visura Catastale',
-          required: true,
-        },
+        { category: 'IDENTITY', name: 'Valid ID', required: true },
+        { category: 'HEALTH', name: 'Disability Certificate', required: false },
+        { category: 'INCOME', name: 'Income Documents', required: true },
       ],
       formSchema: {
-        title: 'Property Data',
+        title: 'ISEE Sociosanitario Data',
         type: 'object',
         properties: {
-          properties: {
-            type: 'array',
-            title: 'List of Properties',
-            items: {
-              type: 'object',
-              properties: {
-                address: { type: 'string', title: 'Address' },
-                city: { type: 'string', title: 'City/Municipality' },
-              },
-            },
-          },
+          beneficiario: { type: 'object', title: 'Beneficiary' },
+          disabilita: { type: 'object', title: 'Disability Info' },
+          nucleoFamiliare: { type: 'array', title: 'Family Unit' },
         },
       },
     },
   ],
-  'Business Services': [
+  '730/PF': [
     {
-      name: 'Partita IVA Opening',
-      code: 'PIVA_OPEN',
-      description: 'VAT number registration for new business',
-      category: 'BUSINESS',
-      basePrice: 100.0,
+      name: 'Model 730 Standard',
+      code: '730_STANDARD',
+      description: 'Standard tax declaration for employees and retirees',
+      category: 'TAX',
+      basePrice: 60.0,
       requiredDocuments: [
-        {
-          category: 'IDENTITY',
-          name: 'Valid ID Document',
-          required: true,
-        },
-        {
-          category: 'TAX_CODE',
-          name: 'Fiscal Code',
-          required: true,
-        },
+        { category: 'IDENTITY', name: 'Valid ID', required: true },
+        { category: 'INCOME', name: 'Certificazione Unica (CU)', required: true },
+        { category: 'EXPENSES', name: 'Medical Expenses', required: false },
       ],
       formSchema: {
-        title: 'Business Information',
+        title: '730 Standard Data',
         type: 'object',
         properties: {
-          businessType: {
-            type: 'string',
-            title: 'Business Type',
-            enum: ['Individual', 'Partnership', 'Company'],
-          },
-          activityCode: {
-            type: 'string',
-            title: 'ATECO Activity Code',
-          },
+          datiAnagrafici: { type: 'object', title: 'Personal Data' },
+          redditi: { type: 'object', title: 'Income (CU, INPS)' },
+          speseSanitarie: { type: 'array', title: 'Medical Expenses' },
+          famiglia: { type: 'object', title: 'Family' },
+        },
+      },
+    },
+    {
+      name: 'Model 730 with Property',
+      code: '730_IMMOBILI',
+      description: 'Tax declaration including property income and deductions',
+      category: 'TAX',
+      basePrice: 80.0,
+      requiredDocuments: [
+        { category: 'IDENTITY', name: 'Valid ID', required: true },
+        { category: 'INCOME', name: 'CU + Property Income', required: true },
+        { category: 'PROPERTY', name: 'Property Documents', required: true },
+      ],
+      formSchema: {
+        title: '730 with Property Data',
+        type: 'object',
+        properties: {
+          redditi: { type: 'object', title: 'Income' },
+          immobili: { type: 'array', title: 'Properties' },
+          mutui: { type: 'array', title: 'Mortgages' },
+          bonusCasa: { type: 'object', title: 'Home Bonus' },
+        },
+      },
+    },
+    {
+      name: 'Persona Fisica (PF)',
+      code: 'PF_UNICO',
+      description: 'Complete tax declaration for self-employed and complex situations',
+      category: 'TAX',
+      basePrice: 120.0,
+      requiredDocuments: [
+        { category: 'IDENTITY', name: 'Valid ID', required: true },
+        { category: 'INCOME', name: 'All Income Documents', required: true },
+        { category: 'BUSINESS', name: 'Business Records', required: false },
+      ],
+      formSchema: {
+        title: 'PF Unico Data',
+        type: 'object',
+        properties: {
+          redditi: { type: 'object', title: 'All Income' },
+          altriRedditi: { type: 'array', title: 'Other Income' },
+          speseIstruzione: { type: 'array', title: 'Education Expenses' },
+          assicurazioni: { type: 'object', title: 'Insurance & Pension' },
         },
       },
     },
   ],
-  'Personal Services': [
+  'IMU': [
     {
-      name: 'Residency Change',
-      code: 'RESIDENCY',
-      description: 'Change of residential address',
-      category: 'PERSONAL',
-      basePrice: 30.0,
+      name: 'IMU Calculation Single Property',
+      code: 'IMU_SINGLE',
+      description: 'IMU calculation for single property',
+      category: 'TAX',
+      basePrice: 25.0,
       requiredDocuments: [
-        {
-          category: 'IDENTITY',
-          name: 'Valid ID Document',
-          required: true,
-        },
+        { category: 'PROPERTY', name: 'Visura Catastale', required: true },
+        { category: 'IDENTITY', name: 'Valid ID', required: true },
       ],
       formSchema: {
-        title: 'New Address',
+        title: 'IMU Single Property',
         type: 'object',
         properties: {
-          newAddress: { type: 'string', title: 'New Address' },
-          city: { type: 'string', title: 'City' },
+          contribuente: { type: 'object', title: 'Taxpayer Data' },
+          immobile: { type: 'object', title: 'Property' },
+          utilizzo: { type: 'string', title: 'Property Use' },
+          agevolazioni: { type: 'array', title: 'Tax Benefits' },
         },
       },
     },
-  ],
-  'Pension Services': [
     {
-      name: 'Pension Application',
-      code: 'PENSION',
-      description: 'Application for retirement pension',
-      category: 'PENSION',
-      basePrice: 150.0,
+      name: 'IMU Multiple Properties',
+      code: 'IMU_MULTIPLE',
+      description: 'IMU calculation for multiple properties',
+      category: 'TAX',
+      basePrice: 40.0,
       requiredDocuments: [
-        {
-          category: 'IDENTITY',
-          name: 'Valid ID Document',
-          required: true,
-        },
-        {
-          category: 'EMPLOYMENT',
-          name: 'Employment History',
-          description: 'Complete work history documentation',
-          required: true,
-        },
+        { category: 'PROPERTY', name: 'All Visure Catastali', required: true },
+        { category: 'IDENTITY', name: 'Valid ID', required: true },
       ],
       formSchema: {
-        title: 'Pension Details',
+        title: 'IMU Multiple Properties',
         type: 'object',
         properties: {
-          retirementDate: {
-            type: 'string',
-            format: 'date',
-            title: 'Expected Retirement Date',
-          },
+          contribuente: { type: 'object', title: 'Taxpayer Data' },
+          immobili: { type: 'array', title: 'Properties List' },
+          variazioni: { type: 'array', title: 'Property Changes' },
+        },
+      },
+    },
+    {
+      name: 'IMU with Succession',
+      code: 'IMU_SUCCESSIONE',
+      description: 'IMU calculation including inheritance/succession',
+      category: 'TAX',
+      basePrice: 60.0,
+      requiredDocuments: [
+        { category: 'PROPERTY', name: 'Visura Catastale', required: true },
+        { category: 'LEGAL', name: 'Succession Documents', required: true },
+        { category: 'IDENTITY', name: 'Valid ID', required: true },
+      ],
+      formSchema: {
+        title: 'IMU with Succession',
+        type: 'object',
+        properties: {
+          contribuente: { type: 'object', title: 'Taxpayer Data' },
+          immobili: { type: 'array', title: 'Properties' },
+          successione: { type: 'object', title: 'Succession Details' },
+          pagamentiIMU: { type: 'array', title: 'IMU Payments' },
         },
       },
     },

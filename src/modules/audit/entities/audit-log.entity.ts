@@ -23,10 +23,10 @@ export class AuditLog {
   @Column({ length: 100 })
   action: string;
 
-  @Column({ length: 50, name: 'resource_type' })
+  @Column({ length: 50, name: 'entity_type' })
   resourceType: string;
 
-  @Column({ nullable: true, name: 'resource_id' })
+  @Column({ nullable: true, name: 'entity_id' })
   resourceId: string;
 
   @Column({ type: 'jsonb', nullable: true, name: 'old_values' })

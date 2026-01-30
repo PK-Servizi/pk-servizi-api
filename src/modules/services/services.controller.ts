@@ -25,10 +25,12 @@ import { ServicesService } from './services.service';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
 import { HttpCacheInterceptor } from '../../common/interceptors/http-cache.interceptor';
+import { AuditLog } from '../../common/decorators/audit-log.decorator';
+import { AuditLogInterceptor } from '../../common/interceptors/audit-log.interceptor';
 
 @ApiTags('Services')
 @Controller('services')
-@UseInterceptors(HttpCacheInterceptor)
+@UseInterceptors(HttpCacheInterceptor, AuditLogInterceptor)
 export class ServicesController {
   constructor(private readonly servicesService: ServicesService) {}
 
@@ -74,6 +76,7 @@ export class ServicesController {
   @Permissions('services:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Create service' })
+  @AuditLog({ action: 'SERVICE_CREATED', resourceType: 'service' })
   create(@Body() dto: CreateServiceDto) {
     return this.servicesService.create(dto);
   }
@@ -83,6 +86,7 @@ export class ServicesController {
   @Permissions('services:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Update service' })
+  @AuditLog({ action: 'SERVICE_UPDATED', resourceType: 'service', captureOldValues: true })
   update(@Param('id') id: string, @Body() dto: UpdateServiceDto) {
     return this.servicesService.update(id, dto);
   }
@@ -95,6 +99,7 @@ export class ServicesController {
   @ApiBody({
     schema: { type: 'object', example: { type: 'object', properties: {} } },
   })
+  @AuditLog({ action: 'SERVICE_SCHEMA_UPDATED', resourceType: 'service' })
   updateSchema(
     @Param('id') id: string,
     @Body() schema: Record<string, unknown>,
@@ -107,6 +112,7 @@ export class ServicesController {
   @Permissions('services:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Update document requirements' })
+  @AuditLog({ action: 'SERVICE_DOCUMENT_REQUIREMENTS_UPDATED', resourceType: 'service' })
   @ApiBody({
     schema: {
       type: 'object',
@@ -135,6 +141,7 @@ export class ServicesController {
   @Permissions('services:delete')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Delete service' })
+  @AuditLog({ action: 'SERVICE_DELETED', resourceType: 'service' })
   remove(@Param('id') id: string) {
     return this.servicesService.remove(id);
   }
@@ -144,6 +151,7 @@ export class ServicesController {
   @Permissions('services:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Activate service' })
+  @AuditLog({ action: 'SERVICE_ACTIVATED', resourceType: 'service' })
   activate(@Param('id') id: string) {
     return this.servicesService.activate(id);
   }

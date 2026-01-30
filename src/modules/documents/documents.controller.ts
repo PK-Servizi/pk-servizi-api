@@ -27,10 +27,13 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { Permissions } from '../../common/decorators/permissions.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { AuditLog } from '../../common/decorators/audit-log.decorator';
+import { AuditLogInterceptor } from '../../common/interceptors/audit-log.interceptor';
 
 @ApiTags('Documents')
 @Controller('documents')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
+@UseInterceptors(AuditLogInterceptor)
 export class DocumentsController {
   constructor(private readonly documentsService: DocumentsService) {}
 
@@ -50,6 +53,7 @@ export class DocumentsController {
   @ApiOperation({ summary: '[Customer] Upload multiple documents by type' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: UploadMultipleDocumentsDto })
+  @AuditLog({ action: 'DOCUMENTS_UPLOADED', resourceType: 'document' })
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'identityDocument', maxCount: 1 },
@@ -121,6 +125,7 @@ export class DocumentsController {
   @ApiOperation({ summary: '[Customer] Replace document' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: UploadMultipleDocumentsDto })
+  @AuditLog({ action: 'DOCUMENT_REPLACED', resourceType: 'document' })
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'identityDocument', maxCount: 1 },
@@ -149,6 +154,7 @@ export class DocumentsController {
   @Permissions('documents:delete_own')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Delete document' })
+  @AuditLog({ action: 'DOCUMENT_DELETED', resourceType: 'document' })
   remove(@Param('id') id: string, @CurrentUser() user: any) {
     return this.documentsService.remove(id);
   }
@@ -167,6 +173,7 @@ export class DocumentsController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Approve document' })
   @ApiBody({ type: ApproveDocumentDto })
+  @AuditLog({ action: 'DOCUMENT_APPROVED', resourceType: 'document' })
   approve(@Param('id') id: string, @Body() dto: ApproveDocumentDto) {
     return this.documentsService.approve(id, dto);
   }
@@ -176,6 +183,7 @@ export class DocumentsController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Reject document' })
   @ApiBody({ type: RejectDocumentDto })
+  @AuditLog({ action: 'DOCUMENT_REJECTED', resourceType: 'document' })
   reject(@Param('id') id: string, @Body() dto: RejectDocumentDto) {
     return this.documentsService.reject(id, dto);
   }
