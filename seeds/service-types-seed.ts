@@ -36,13 +36,43 @@ const SERVICES_BY_TYPE = {
       ],
       formSchema: {
         title: 'ISEE Standard Data',
-        type: 'object',
-        properties: {
-          nucleoFamiliare: { type: 'array', title: 'Family Unit' },
-          abitazione: { type: 'object', title: 'Housing' },
-          redditi: { type: 'object', title: 'Income (last 2 years)' },
-          patrimonioMobiliare: { type: 'object', title: 'Movable Assets' },
-        },
+        sections: [
+          {
+            title: 'Nucleo Familiare',
+            fields: [
+              { name: 'familyMembersCount', label: 'Number of family members', type: 'number', required: true },
+              { name: 'familyMembers', label: 'Family members details', type: 'array', required: true },
+            ],
+          },
+          {
+            title: 'Abitazione',
+            fields: [
+              { name: 'housingType', label: 'Housing type', type: 'select', options: ['Owned', 'Rented', 'Other'], required: true },
+              { name: 'address', label: 'Address', type: 'text', required: true },
+              { name: 'cadastralData', label: 'Cadastral data', type: 'text', required: false },
+            ],
+          },
+          {
+            title: 'Redditi (2 anni precedenti)',
+            fields: [
+              { name: 'income2022', label: '2022 Income', type: 'number', required: true },
+              { name: 'income2023', label: '2023 Income', type: 'number', required: true },
+            ],
+          },
+          {
+            title: 'Patrimonio Mobiliare',
+            fields: [
+              { name: 'bankBalance', label: 'Bank balance (31/12)', type: 'number', required: true },
+              { name: 'investments', label: 'Investments', type: 'number', required: false },
+            ],
+          },
+          {
+            title: 'Veicoli',
+            fields: [
+              { name: 'vehicles', label: 'Vehicles owned', type: 'array', required: false },
+            ],
+          },
+        ],
       },
     },
     {
@@ -58,12 +88,30 @@ const SERVICES_BY_TYPE = {
       ],
       formSchema: {
         title: 'ISEE Università Data',
-        type: 'object',
-        properties: {
-          studente: { type: 'object', title: 'Student Info' },
-          universita: { type: 'string', title: 'University' },
-          nucleoFamiliare: { type: 'array', title: 'Family Unit' },
-        },
+        sections: [
+          {
+            title: 'Student Information',
+            fields: [
+              { name: 'studentName', label: 'Student full name', type: 'text', required: true },
+              { name: 'studentFiscalCode', label: 'Student fiscal code', type: 'text', required: true },
+              { name: 'university', label: 'University name', type: 'text', required: true },
+              { name: 'enrollmentYear', label: 'Enrollment year', type: 'number', required: true },
+            ],
+          },
+          {
+            title: 'Nucleo Familiare',
+            fields: [
+              { name: 'familyMembersCount', label: 'Number of family members', type: 'number', required: true },
+              { name: 'familyMembers', label: 'Family members details', type: 'array', required: true },
+            ],
+          },
+          {
+            title: 'Redditi',
+            fields: [
+              { name: 'familyIncome', label: 'Family income', type: 'number', required: true },
+            ],
+          },
+        ],
       },
     },
     {
@@ -79,12 +127,30 @@ const SERVICES_BY_TYPE = {
       ],
       formSchema: {
         title: 'ISEE Sociosanitario Data',
-        type: 'object',
-        properties: {
-          beneficiario: { type: 'object', title: 'Beneficiary' },
-          disabilita: { type: 'object', title: 'Disability Info' },
-          nucleoFamiliare: { type: 'array', title: 'Family Unit' },
-        },
+        sections: [
+          {
+            title: 'Beneficiary Information',
+            fields: [
+              { name: 'beneficiaryName', label: 'Beneficiary full name', type: 'text', required: true },
+              { name: 'beneficiaryFiscalCode', label: 'Fiscal code', type: 'text', required: true },
+            ],
+          },
+          {
+            title: 'Disabilità',
+            fields: [
+              { name: 'hasDisability', label: 'Has disability', type: 'radio', options: ['YES', 'NO'], required: true },
+              { name: 'disabilityType', label: 'Disability type', type: 'text', required: false },
+              { name: 'disabilityCertificate', label: 'Certificate number', type: 'text', required: false },
+            ],
+          },
+          {
+            title: 'Nucleo Familiare',
+            fields: [
+              { name: 'familyMembersCount', label: 'Number of family members', type: 'number', required: true },
+              { name: 'familyMembers', label: 'Family members details', type: 'array', required: true },
+            ],
+          },
+        ],
       },
     },
   ],
@@ -102,13 +168,39 @@ const SERVICES_BY_TYPE = {
       ],
       formSchema: {
         title: '730 Standard Data',
-        type: 'object',
-        properties: {
-          datiAnagrafici: { type: 'object', title: 'Personal Data' },
-          redditi: { type: 'object', title: 'Income (CU, INPS)' },
-          speseSanitarie: { type: 'array', title: 'Medical Expenses' },
-          famiglia: { type: 'object', title: 'Family' },
-        },
+        sections: [
+          {
+            title: 'Dati Anagrafici',
+            fields: [
+              { name: 'fullName', label: 'Full name', type: 'text', required: true },
+              { name: 'fiscalCode', label: 'Fiscal code', type: 'text', required: true },
+              { name: 'birthDate', label: 'Birth date', type: 'date', required: true },
+              { name: 'birthPlace', label: 'Birth place', type: 'text', required: true },
+            ],
+          },
+          {
+            title: 'Redditi (CU, INPS, altri)',
+            fields: [
+              { name: 'employerName', label: 'Employer name', type: 'text', required: true },
+              { name: 'grossIncome', label: 'Gross income', type: 'number', required: true },
+              { name: 'pensionIncome', label: 'Pension income', type: 'number', required: false },
+            ],
+          },
+          {
+            title: 'Spese Sanitarie',
+            fields: [
+              { name: 'medicalExpenses', label: 'Medical expenses', type: 'number', required: false },
+              { name: 'medicineExpenses', label: 'Medicine expenses', type: 'number', required: false },
+            ],
+          },
+          {
+            title: 'Famiglia',
+            fields: [
+              { name: 'maritalStatus', label: 'Marital status', type: 'select', options: ['Single', 'Married', 'Divorced', 'Widowed'], required: true },
+              { name: 'dependents', label: 'Number of dependents', type: 'number', required: false },
+            ],
+          },
+        ],
       },
     },
     {
@@ -124,13 +216,35 @@ const SERVICES_BY_TYPE = {
       ],
       formSchema: {
         title: '730 with Property Data',
-        type: 'object',
-        properties: {
-          redditi: { type: 'object', title: 'Income' },
-          immobili: { type: 'array', title: 'Properties' },
-          mutui: { type: 'array', title: 'Mortgages' },
-          bonusCasa: { type: 'object', title: 'Home Bonus' },
-        },
+        sections: [
+          {
+            title: 'Dati Anagrafici',
+            fields: [
+              { name: 'fullName', label: 'Full name', type: 'text', required: true },
+              { name: 'fiscalCode', label: 'Fiscal code', type: 'text', required: true },
+            ],
+          },
+          {
+            title: 'Redditi',
+            fields: [
+              { name: 'employmentIncome', label: 'Employment income', type: 'number', required: true },
+              { name: 'rentalIncome', label: 'Rental income', type: 'number', required: false },
+            ],
+          },
+          {
+            title: 'Immobili',
+            fields: [
+              { name: 'properties', label: 'Properties list', type: 'array', required: true },
+            ],
+          },
+          {
+            title: 'Mutui & Bonus Casa',
+            fields: [
+              { name: 'mortgageInterest', label: 'Mortgage interest paid', type: 'number', required: false },
+              { name: 'homeBonus', label: 'Home renovation bonus', type: 'number', required: false },
+            ],
+          },
+        ],
       },
     },
     {
@@ -146,13 +260,45 @@ const SERVICES_BY_TYPE = {
       ],
       formSchema: {
         title: 'PF Unico Data',
-        type: 'object',
-        properties: {
-          redditi: { type: 'object', title: 'All Income' },
-          altriRedditi: { type: 'array', title: 'Other Income' },
-          speseIstruzione: { type: 'array', title: 'Education Expenses' },
-          assicurazioni: { type: 'object', title: 'Insurance & Pension' },
-        },
+        sections: [
+          {
+            title: 'Dati Anagrafici',
+            fields: [
+              { name: 'fullName', label: 'Full name', type: 'text', required: true },
+              { name: 'fiscalCode', label: 'Fiscal code', type: 'text', required: true },
+              { name: 'vatNumber', label: 'VAT number (if applicable)', type: 'text', required: false },
+            ],
+          },
+          {
+            title: 'Redditi',
+            fields: [
+              { name: 'employmentIncome', label: 'Employment income', type: 'number', required: false },
+              { name: 'selfEmploymentIncome', label: 'Self-employment income', type: 'number', required: false },
+              { name: 'businessIncome', label: 'Business income', type: 'number', required: false },
+            ],
+          },
+          {
+            title: 'Altri Redditi',
+            fields: [
+              { name: 'rentalIncome', label: 'Rental income', type: 'number', required: false },
+              { name: 'capitalGains', label: 'Capital gains', type: 'number', required: false },
+              { name: 'otherIncome', label: 'Other income', type: 'number', required: false },
+            ],
+          },
+          {
+            title: 'Spese Istruzione',
+            fields: [
+              { name: 'educationExpenses', label: 'Education expenses', type: 'number', required: false },
+            ],
+          },
+          {
+            title: 'Assicurazioni & Previdenza',
+            fields: [
+              { name: 'lifeInsurance', label: 'Life insurance', type: 'number', required: false },
+              { name: 'pensionContributions', label: 'Pension contributions', type: 'number', required: false },
+            ],
+          },
+        ],
       },
     },
   ],
@@ -169,13 +315,36 @@ const SERVICES_BY_TYPE = {
       ],
       formSchema: {
         title: 'IMU Single Property',
-        type: 'object',
-        properties: {
-          contribuente: { type: 'object', title: 'Taxpayer Data' },
-          immobile: { type: 'object', title: 'Property' },
-          utilizzo: { type: 'string', title: 'Property Use' },
-          agevolazioni: { type: 'array', title: 'Tax Benefits' },
-        },
+        sections: [
+          {
+            title: 'Dati Contribuente',
+            fields: [
+              { name: 'fullName', label: 'Full name', type: 'text', required: true },
+              { name: 'fiscalCode', label: 'Fiscal code', type: 'text', required: true },
+              { name: 'address', label: 'Residence address', type: 'text', required: true },
+            ],
+          },
+          {
+            title: 'Immobile',
+            fields: [
+              { name: 'propertyAddress', label: 'Property address', type: 'text', required: true },
+              { name: 'cadastralCategory', label: 'Cadastral category', type: 'text', required: true },
+              { name: 'cadastralIncome', label: 'Cadastral income', type: 'number', required: true },
+            ],
+          },
+          {
+            title: 'Utilizzo Immobile',
+            fields: [
+              { name: 'propertyUse', label: 'Property use', type: 'select', options: ['Main residence', 'Second home', 'Rented', 'Empty'], required: true },
+            ],
+          },
+          {
+            title: 'Agevolazioni',
+            fields: [
+              { name: 'mainResidenceDeduction', label: 'Main residence deduction', type: 'radio', options: ['YES', 'NO'], required: true },
+            ],
+          },
+        ],
       },
     },
     {
@@ -190,12 +359,29 @@ const SERVICES_BY_TYPE = {
       ],
       formSchema: {
         title: 'IMU Multiple Properties',
-        type: 'object',
-        properties: {
-          contribuente: { type: 'object', title: 'Taxpayer Data' },
-          immobili: { type: 'array', title: 'Properties List' },
-          variazioni: { type: 'array', title: 'Property Changes' },
-        },
+        sections: [
+          {
+            title: 'Dati Contribuente',
+            fields: [
+              { name: 'fullName', label: 'Full name', type: 'text', required: true },
+              { name: 'fiscalCode', label: 'Fiscal code', type: 'text', required: true },
+            ],
+          },
+          {
+            title: 'Immobili',
+            fields: [
+              { name: 'propertiesCount', label: 'Number of properties', type: 'number', required: true },
+              { name: 'properties', label: 'Properties details', type: 'array', required: true },
+            ],
+          },
+          {
+            title: 'Variazioni',
+            fields: [
+              { name: 'hasChanges', label: 'Property changes in the year', type: 'radio', options: ['YES', 'NO'], required: true },
+              { name: 'changes', label: 'Changes details', type: 'array', required: false },
+            ],
+          },
+        ],
       },
     },
     {
@@ -211,13 +397,36 @@ const SERVICES_BY_TYPE = {
       ],
       formSchema: {
         title: 'IMU with Succession',
-        type: 'object',
-        properties: {
-          contribuente: { type: 'object', title: 'Taxpayer Data' },
-          immobili: { type: 'array', title: 'Properties' },
-          successione: { type: 'object', title: 'Succession Details' },
-          pagamentiIMU: { type: 'array', title: 'IMU Payments' },
-        },
+        sections: [
+          {
+            title: 'Dati Contribuente',
+            fields: [
+              { name: 'fullName', label: 'Full name', type: 'text', required: true },
+              { name: 'fiscalCode', label: 'Fiscal code', type: 'text', required: true },
+            ],
+          },
+          {
+            title: 'Immobili',
+            fields: [
+              { name: 'properties', label: 'Inherited properties', type: 'array', required: true },
+            ],
+          },
+          {
+            title: 'Successione',
+            fields: [
+              { name: 'deceasedName', label: 'Deceased name', type: 'text', required: true },
+              { name: 'dateOfDeath', label: 'Date of death', type: 'date', required: true },
+              { name: 'successionDate', label: 'Succession declaration date', type: 'date', required: true },
+              { name: 'inheritancePercentage', label: 'Inheritance percentage', type: 'number', required: true },
+            ],
+          },
+          {
+            title: 'Pagamenti IMU',
+            fields: [
+              { name: 'previousPayments', label: 'Previous IMU payments', type: 'array', required: false },
+            ],
+          },
+        ],
       },
     },
   ],
