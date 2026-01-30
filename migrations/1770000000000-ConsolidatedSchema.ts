@@ -10,7 +10,29 @@ export class ConsolidatedSchema1770000000000 implements MigrationInterface {
     // Check if tables already exist
     const tablesExist = await queryRunner.hasTable('roles');
     if (tablesExist) {
-      console.log('Tables already exist. Skipping schema creation.');
+      console.log('Tables already exist. Checking for column fixes...');
+      
+      // Fix request_status_history columns if needed
+      const hasOldStatus = await queryRunner.query(`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name='request_status_history' 
+        AND column_name='old_status'
+      `);
+
+      if (hasOldStatus.length > 0) {
+        console.log('Fixing request_status_history columns...');
+        await queryRunner.query(`
+          ALTER TABLE "request_status_history" 
+          RENAME COLUMN "old_status" TO "from_status"
+        `);
+        await queryRunner.query(`
+          ALTER TABLE "request_status_history" 
+          RENAME COLUMN "new_status" TO "to_status"
+        `);
+        console.log('Columns fixed successfully.');
+      }
+      
       return;
     }
 
@@ -133,8 +155,8 @@ export class ConsolidatedSchema1770000000000 implements MigrationInterface {
       CREATE TABLE "request_status_history" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
         "service_request_id" uuid NOT NULL,
-        "old_status" character varying,
-        "new_status" character varying NOT NULL,
+        "from_status" character varying,
+        "to_status" character varying NOT NULL,
         "changed_by_id" uuid NOT NULL,
         "notes" text,
         "created_at" TIMESTAMP NOT NULL DEFAULT now(),
