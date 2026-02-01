@@ -988,6 +988,7 @@ export class ServiceRequestsService {
 
     // Save to database
     const document = this.documentRepository.create({
+      userId,
       serviceRequestId,
       category: documentType,
       filename: file.originalname,
