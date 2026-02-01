@@ -170,17 +170,16 @@ export class ConsolidatedSchema1770000000000 implements MigrationInterface {
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
         "user_id" uuid NOT NULL,
         "service_request_id" uuid,
-        "file_name" character varying NOT NULL,
-        "file_path" character varying NOT NULL,
+        "category" character varying(100) NOT NULL DEFAULT 'GENERAL',
+        "filename" character varying(255) NOT NULL,
+        "original_filename" character varying(255) NOT NULL,
+        "file_path" character varying(500) NOT NULL,
         "file_size" integer NOT NULL,
-        "mime_type" character varying NOT NULL,
-        "document_type" character varying NOT NULL,
-        "status" character varying NOT NULL DEFAULT 'pending',
-        "upload_date" TIMESTAMP NOT NULL DEFAULT now(),
-        "verified_at" TIMESTAMP,
-        "verified_by_id" uuid,
-        "rejection_reason" text,
-        "metadata" jsonb,
+        "mime_type" character varying(100) NOT NULL,
+        "status" character varying(20) NOT NULL DEFAULT 'pending',
+        "is_required" boolean NOT NULL DEFAULT false,
+        "admin_notes" text,
+        "version" integer NOT NULL DEFAULT 1,
         "created_at" TIMESTAMP NOT NULL DEFAULT now(),
         "updated_at" TIMESTAMP NOT NULL DEFAULT now(),
         CONSTRAINT "PK_documents" PRIMARY KEY ("id")
@@ -533,9 +532,6 @@ export class ConsolidatedSchema1770000000000 implements MigrationInterface {
       `ALTER TABLE "documents" ADD CONSTRAINT "FK_documents_service_request_id" FOREIGN KEY ("service_request_id") REFERENCES "service_requests"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "documents" ADD CONSTRAINT "FK_documents_verified_by_id" FOREIGN KEY ("verified_by_id") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
-    );
-    await queryRunner.query(
       `ALTER TABLE "appointments" ADD CONSTRAINT "FK_appointments_user_id" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
@@ -883,13 +879,10 @@ export class ConsolidatedSchema1770000000000 implements MigrationInterface {
       `ALTER TABLE "appointments" DROP CONSTRAINT IF EXISTS "FK_appointments_user_id"`,
     );
     await queryRunner.query(
-      `ALTER TABLE "documents" DROP CONSTRAINT IF EXISTS "FK_documents_verified_by_id"`,
+      `ALTER TABLE "documents" DROP CONSTRAINT IF EXISTS "FK_documents_user_id"`,
     );
     await queryRunner.query(
       `ALTER TABLE "documents" DROP CONSTRAINT IF EXISTS "FK_documents_service_request_id"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "documents" DROP CONSTRAINT IF EXISTS "FK_documents_user_id"`,
     );
     await queryRunner.query(
       `ALTER TABLE "request_status_history" DROP CONSTRAINT IF EXISTS "FK_request_status_history_changed_by_id"`,

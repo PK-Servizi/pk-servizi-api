@@ -8,13 +8,17 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { ServiceRequest } from '../../service-requests/entities/service-request.entity';
+import { User } from '../../users/entities/user.entity';
 
 @Entity('documents')
 export class Document {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ name: 'service_request_id' })
+  @Column({ name: 'user_id' })
+  userId: string;
+
+  @Column({ name: 'service_request_id', nullable: true })
   serviceRequestId: string;
 
   @Column({ length: 100 })
@@ -46,6 +50,10 @@ export class Document {
 
   @Column({ default: 1 })
   version: number;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 
   @ManyToOne(() => ServiceRequest, (request) => request.documents)
   @JoinColumn({ name: 'service_request_id' })
