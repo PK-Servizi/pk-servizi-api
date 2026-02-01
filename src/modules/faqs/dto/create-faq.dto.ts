@@ -10,8 +10,9 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateFaqDto {
   @ApiPropertyOptional({
-    description: 'Service type ID (optional for general FAQs)',
-    example: '1b76244b-6092-4128-afc9-5066fbd3b7a2',
+    description: 'Service ID (optional - leave empty for general FAQs, or provide a valid service UUID)',
+    example: '',
+    nullable: true,
   })
   @IsOptional()
   @IsUUID()

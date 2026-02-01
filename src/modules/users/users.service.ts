@@ -15,6 +15,8 @@ import { AwsS3FolderService } from '../aws/services/aws-s3-folder.service';
 import { AwsS3UploadService } from '../../common/services/aws-s3-upload.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { EmailService } from '../notifications/email.service';
+import { AuditService } from '../audit/audit.service';
+
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
@@ -38,6 +40,7 @@ export class UsersService {
     private awsS3UploadService: AwsS3UploadService,
     private notificationsService: NotificationsService,
     private emailService: EmailService,
+    private auditService: AuditService,
   ) {}
 
   async create(dto: CreateUserDto) {
@@ -96,7 +99,8 @@ export class UsersService {
         await this.notificationsService.send({
           userId: savedUser.id,
           title: '🎉 Account Creato',
-          message: 'Il tuo account è stato creato da un amministratore. Controlla la tua email per i dettagli di accesso.',
+          message:
+            'Il tuo account è stato creato da un amministratore. Controlla la tua email per i dettagli di accesso.',
           type: 'info',
         });
       } catch (error) {
@@ -195,14 +199,13 @@ export class UsersService {
       ]);
 
     if (search) {
-      query.where(
-        'user.fullName ILIKE :search OR user.email ILIKE :search',
-        { search: `%${search}%` },
-      );
+      query.where('user.fullName ILIKE :search OR user.email ILIKE :search', {
+        search: `%${search}%`,
+      });
     }
 
     const cacheKey = `users-list-${page}-${limit}-${search || 'all'}`;
-    
+
     const [users, total] = await query
       .orderBy('user.createdAt', 'DESC')
       .skip((page - 1) * limit)
@@ -266,6 +269,25 @@ export class UsersService {
     // Update user table
     if (Object.keys(userFields).length > 0) {
       await this.userRepository.update(id, userFields);
+    }
+
+    // Audit log: User updated
+    try {
+      await this.auditService.create({
+        userId: id,
+        action: 'USER_UPDATED',
+        resourceType: 'user',
+        resourceId: id,
+        oldValues: {
+          email: user.email,
+          fullName: user.fullName,
+          phone: user.phone,
+          isActive: user.isActive,
+        },
+        newValues: userFields,
+      });
+    } catch (error) {
+      this.logger.error(`Failed to create audit log: ${error.message}`);
     }
 
     return this.findOne(id);
@@ -644,6 +666,32 @@ export class UsersService {
 
   async activate(id: string) {
     await this.userRepository.update(id, { isActive: true });
+    // Audit log: User deactivated
+    try {
+      await this.auditService.create({
+        userId: id,
+        action: 'USER_DEACTIVATED',
+        resourceType: 'user',
+        resourceId: id,
+        newValues: { isActive: false },
+      });
+    } catch (error) {
+      this.logger.error(`Failed to create audit log: ${error.message}`);
+    }
+
+    // Audit log: User activated
+    try {
+      await this.auditService.create({
+        userId: id,
+        action: 'USER_ACTIVATED',
+        resourceType: 'user',
+        resourceId: id,
+        newValues: { isActive: true },
+      });
+    } catch (error) {
+      this.logger.error(`Failed to create audit log: ${error.message}`);
+    }
+
     return {
       success: true,
       message: 'User activated',
@@ -663,12 +711,13 @@ export class UsersService {
       await this.emailService.sendUserSuspended(
         user.email,
         user.fullName,
-        'Account sospeso dall\'amministratore',
+        "Account sospeso dall'amministratore",
       );
       await this.notificationsService.send({
         userId: id,
         title: '⚠️ Account Sospeso',
-        message: 'Il tuo account è stato sospeso. Contatta il supporto per maggiori informazioni.',
+        message:
+          'Il tuo account è stato sospeso. Contatta il supporto per maggiori informazioni.',
         type: 'warning',
       });
     } catch (error) {
@@ -774,14 +823,12 @@ export class UsersService {
 
     // Send GDPR export request confirmation
     try {
-      await this.emailService.sendGdprExportRequest(
-        user.email,
-        user.fullName,
-      );
+      await this.emailService.sendGdprExportRequest(user.email, user.fullName);
       await this.notificationsService.send({
         userId,
         title: '📊 Richiesta Esportazione Dati',
-        message: 'La tua richiesta di esportazione dati è stata ricevuta. Ti invieremo un link quando sarà pronta.',
+        message:
+          'La tua richiesta di esportazione dati è stata ricevuta. Ti invieremo un link quando sarà pronta.',
         type: 'info',
       });
     } catch (error) {

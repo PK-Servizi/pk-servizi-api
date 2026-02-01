@@ -49,15 +49,14 @@ export class FaqsService {
   async findAll(serviceId?: string, category?: string, isActive?: boolean) {
     const query = this.faqRepository
       .createQueryBuilder('faq')
-      .leftJoinAndSelect('faq.Service', 'Service')
       .orderBy('faq.order', 'ASC')
       .addOrderBy('faq.createdAt', 'DESC');
 
-    if (serviceId) {
+    if (serviceId !== undefined) {
       query.andWhere('faq.serviceId = :serviceId', { serviceId });
     }
 
-    if (category) {
+    if (category !== undefined) {
       query.andWhere('faq.category = :category', { category });
     }
 
@@ -75,25 +74,25 @@ export class FaqsService {
   }
 
   /**
-   * Get active FAQs (public view)
+   * Get all active FAQs (public view)
    */
-  async findActive(serviceId?: string, category?: string) {
-    return this.findAll(serviceId, category, true);
+  async findActive() {
+    return this.findAll(undefined, undefined, true);
   }
 
   /**
-   * Get FAQs by service type code
+   * Get active FAQs by service ID
    */
-  async findByServiceTypeCode(code: string) {
+  async findByServiceId(serviceId: string) {
     const Service = await this.serviceRepository.findOne({
-      where: { code },
+      where: { id: serviceId },
     });
 
     if (!Service) {
-      throw new NotFoundException('Service type not found');
+      throw new NotFoundException('Service not found');
     }
 
-    return this.findActive(Service.id);
+    return this.findAll(serviceId, undefined, true);
   }
 
   /**

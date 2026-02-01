@@ -60,6 +60,7 @@ async function seed() {
         where: { name: RoleEnum.ADMIN },
       });
       const password = await bcrypt.hash('Admin@123', 10);
+
       adminUser = userRepo.create({
         email: adminEmail,
         password,

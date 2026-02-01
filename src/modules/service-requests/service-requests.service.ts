@@ -95,7 +95,7 @@ export class ServiceRequestsService {
   async initiateWithPayment(serviceId: string, userId: string) {
     // Get service and validate price
     const service = await this.getService(serviceId);
-    
+
     if (!service.basePrice || service.basePrice <= 0) {
       throw new BadRequestException('This service does not require payment');
     }
@@ -117,16 +117,17 @@ export class ServiceRequestsService {
     await this.serviceRequestRepository.save(serviceRequest);
 
     // Create Stripe Checkout Session for hosted payment page
-    const checkoutSession = await this.stripeService.createPaymentCheckoutSession({
-      amount: service.basePrice,
-      currency: 'EUR',
-      serviceRequestId: serviceRequest.id,
-      userId,
-      userEmail: user.email,
-      description: `Payment for ${service.name}`,
-      successUrl: undefined, // Uses default
-      cancelUrl: undefined, // Uses default
-    });
+    const checkoutSession =
+      await this.stripeService.createPaymentCheckoutSession({
+        amount: service.basePrice,
+        currency: 'EUR',
+        serviceRequestId: serviceRequest.id,
+        userId,
+        userEmail: user.email,
+        description: `Payment for ${service.name}`,
+        successUrl: undefined, // Uses default
+        cancelUrl: undefined, // Uses default
+      });
 
     this.logger.log(
       `Created Stripe Checkout Session: ${checkoutSession.id} for service request ${serviceRequest.id}`,
@@ -139,7 +140,8 @@ export class ServiceRequestsService {
       amount: service.basePrice,
       currency: 'EUR',
       status: 'pending',
-      stripePaymentIntentId: checkoutSession.payment_intent as string || checkoutSession.id,
+      stripePaymentIntentId:
+        (checkoutSession.payment_intent as string) || checkoutSession.id,
       description: `Payment for ${service.name} service`,
       metadata: {
         serviceId: service.id,
@@ -190,7 +192,11 @@ export class ServiceRequestsService {
   async handlePaymentSuccess(paymentId: string) {
     const payment = await this.paymentRepository.findOne({
       where: { id: paymentId },
-      relations: ['serviceRequest', 'serviceRequest.user', 'serviceRequest.service'],
+      relations: [
+        'serviceRequest',
+        'serviceRequest.user',
+        'serviceRequest.service',
+      ],
     });
 
     if (!payment || !payment.serviceRequest) {
@@ -255,7 +261,11 @@ export class ServiceRequestsService {
   async handlePaymentFailure(paymentId: string) {
     const payment = await this.paymentRepository.findOne({
       where: { id: paymentId },
-      relations: ['serviceRequest', 'serviceRequest.user', 'serviceRequest.service'],
+      relations: [
+        'serviceRequest',
+        'serviceRequest.user',
+        'serviceRequest.service',
+      ],
     });
 
     if (!payment) return;
@@ -298,13 +308,18 @@ export class ServiceRequestsService {
     if (serviceRequest.status !== 'awaiting_form') {
       throw new BadRequestException(
         `Cannot submit questionnaire. Current status: ${serviceRequest.status}. ` +
-        `Expected: awaiting_form`,
+          `Expected: awaiting_form`,
       );
     }
 
     // Validate payment is completed
-    if (!serviceRequest.payment || serviceRequest.payment.status !== 'completed') {
-      throw new BadRequestException('Payment must be completed before submitting questionnaire');
+    if (
+      !serviceRequest.payment ||
+      serviceRequest.payment.status !== 'completed'
+    ) {
+      throw new BadRequestException(
+        'Payment must be completed before submitting questionnaire',
+      );
     }
 
     // Update service request with form data
@@ -350,7 +365,8 @@ export class ServiceRequestsService {
 
     return {
       success: true,
-      message: 'Questionnaire submitted successfully. Please upload required documents.',
+      message:
+        'Questionnaire submitted successfully. Please upload required documents.',
       data: {
         serviceRequestId: serviceRequest.id,
         status: serviceRequest.status,
@@ -367,7 +383,10 @@ export class ServiceRequestsService {
   /**
    * Get required documents for a service request
    */
-  async getRequiredDocumentsForRequest(serviceRequestId: string, userId: string) {
+  async getRequiredDocumentsForRequest(
+    serviceRequestId: string,
+    userId: string,
+  ) {
     const serviceRequest = await this.serviceRequestRepository.findOne({
       where: { id: serviceRequestId, userId },
       relations: ['service'],
@@ -419,46 +438,26 @@ export class ServiceRequestsService {
       throw new NotFoundException('Service request not found');
     }
 
-    // Validate workflow status
-    if (serviceRequest.status !== 'awaiting_documents') {
+    // Allow document upload in any valid status (not just awaiting_documents)
+    const validStatuses = ['draft', 'awaiting_payment', 'awaiting_documents', 'submitted', 'in_progress'];
+    if (!validStatuses.includes(serviceRequest.status)) {
       throw new BadRequestException(
         `Cannot upload documents. Current status: ${serviceRequest.status}. ` +
-        `Expected: awaiting_documents`,
+          `Documents can only be uploaded when status is: ${validStatuses.join(', ')}`,
       );
-    }
-
-    // Validate payment and questionnaire are completed
-    if (!serviceRequest.payment || serviceRequest.payment.status !== 'completed') {
-      throw new BadRequestException('Payment must be completed');
-    }
-
-    if (!serviceRequest.formCompletedAt) {
-      throw new BadRequestException('Questionnaire must be completed first');
     }
 
     const service = serviceRequest.service;
     const documentRequirements = service.documentRequirements || [];
-    const requiredDocs = documentRequirements.filter((doc) => doc.required);
 
-    // Validate ALL required documents are provided
-    const missingDocs = [];
-    
-    for (const docReq of requiredDocs) {
-      if (!files[docReq.fieldName] || files[docReq.fieldName].length === 0) {
-        missingDocs.push(docReq.label);
-      }
-    }
-
-    if (missingDocs.length > 0) {
-      throw new BadRequestException(
-        `Missing required documents: ${missingDocs.join(', ')}`,
-      );
-    }
+    // Note: No strict validation - users can upload any documents at any time
 
     // Validate file types, sizes, and counts for known document types
     for (const [fieldName, uploadedFiles] of Object.entries(files)) {
-      const docReq = documentRequirements.find((r) => r.fieldName === fieldName);
-      
+      const docReq = documentRequirements.find(
+        (r) => r.fieldName === fieldName,
+      );
+
       // If document requirement exists, validate against it
       if (docReq) {
         if (docReq.maxCount && uploadedFiles.length > docReq.maxCount) {
@@ -491,7 +490,9 @@ export class ServiceRequestsService {
 
     try {
       for (const [fieldName, uploadedFiles] of Object.entries(files)) {
-        const docReq = documentRequirements.find((r) => r.fieldName === fieldName);
+        const docReq = documentRequirements.find(
+          (r) => r.fieldName === fieldName,
+        );
         const documentType = docReq ? docReq.documentType : 'other';
 
         for (const file of uploadedFiles) {
@@ -506,21 +507,30 @@ export class ServiceRequestsService {
         }
       }
 
-      // Update service request status
-      serviceRequest.documentsUploadedAt = new Date();
-      serviceRequest.status = 'submitted';
-      serviceRequest.submittedAt = new Date();
+      // Update service request with document upload timestamp
+      const oldStatus = serviceRequest.status;
+      if (!serviceRequest.documentsUploadedAt) {
+        serviceRequest.documentsUploadedAt = new Date();
+      }
+      
+      // Auto-transition to submitted if all conditions are met
+      if (serviceRequest.status === 'awaiting_documents') {
+        serviceRequest.status = 'submitted';
+        serviceRequest.submittedAt = new Date();
+      }
 
       await this.serviceRequestRepository.save(serviceRequest);
 
-      // Record status change
-      await this.statusHistoryRepository.save({
-        serviceRequestId: serviceRequest.id,
-        fromStatus: 'awaiting_documents',
-        toStatus: 'submitted',
-        changedById: userId,
-        notes: `${uploadedDocuments.length} documents uploaded`,
-      });
+      // Record status change if status changed
+      if (oldStatus !== serviceRequest.status) {
+        await this.statusHistoryRepository.save({
+          serviceRequestId: serviceRequest.id,
+          fromStatus: oldStatus,
+          toStatus: serviceRequest.status,
+          changedById: userId,
+          notes: `${uploadedDocuments.length} documents uploaded`,
+        });
+      }
 
       // Send notifications
       await this.emailService.sendServiceRequestSubmitted(
@@ -789,11 +799,12 @@ export class ServiceRequestsService {
 
       // 1. Fetch service type with document requirements
       const service = await this.getService(dto.serviceId);
-      
-      // 2. Validate required documents
-      if (service.documentRequirements?.length > 0) {
-        this.validateDocumentRequirements(service.documentRequirements, files);
-      }
+
+      // 2. Validate document formats (but don't require all documents)
+      // Allow users to upload documents gradually
+      // if (service.documentRequirements?.length > 0) {
+      //   this.validateDocumentRequirements(service.documentRequirements, files);
+      // }
 
       // 3. Create service request
       const serviceRequest = await this.create(dto, userId, serviceCode);
@@ -807,7 +818,7 @@ export class ServiceRequestsService {
 
           // Find document requirement config
           const docReq = service.documentRequirements?.find(
-            (req: any) => req.fieldName === fieldName
+            (req: any) => req.fieldName === fieldName,
           );
 
           for (const file of fileArray) {
@@ -822,9 +833,9 @@ export class ServiceRequestsService {
               requestId,
               userId,
               docReq?.documentType || fieldName.toUpperCase(),
-              docReq?.required || false
+              docReq?.required || false,
             );
-            
+
             uploadedDocuments.push(uploadedDoc);
           }
         }
@@ -832,7 +843,7 @@ export class ServiceRequestsService {
 
       // 5. Send notifications
       const user = await this.userRepository.findOne({ where: { id: userId } });
-      
+
       await this.emailService.sendServiceRequestSubmitted(
         user.email,
         user.fullName || user.email,
@@ -849,7 +860,7 @@ export class ServiceRequestsService {
       });
 
       this.logger.log(
-        `Service request ${requestId} created with ${uploadedDocuments.length} documents`
+        `Service request ${requestId} created with ${uploadedDocuments.length} documents`,
       );
 
       return {
@@ -857,7 +868,7 @@ export class ServiceRequestsService {
         message: `Service request created successfully with ${uploadedDocuments.length} document(s)`,
         data: {
           ...serviceRequest.data,
-          documents: uploadedDocuments.map(doc => ({
+          documents: uploadedDocuments.map((doc) => ({
             id: doc.id,
             filename: doc.filename,
             category: doc.category,
@@ -869,12 +880,14 @@ export class ServiceRequestsService {
     } catch (error) {
       this.logger.error(
         `Failed to create service request with documents: ${error.message}`,
-        error.stack
+        error.stack,
       );
-      throw error instanceof BadRequestException || 
-            error instanceof NotFoundException
+      throw error instanceof BadRequestException ||
+        error instanceof NotFoundException
         ? error
-        : new BadRequestException('Failed to create service request with documents');
+        : new BadRequestException(
+            'Failed to create service request with documents',
+          );
     }
   }
 
@@ -882,16 +895,21 @@ export class ServiceRequestsService {
    * Get service by ID or code
    */
   private async getService(identifier: string): Promise<Service> {
-    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier);
-    
+    const isUUID =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        identifier,
+      );
+
     const service = await this.serviceRepository.findOne({
-      where: isUUID 
+      where: isUUID
         ? { id: identifier, isActive: true }
         : { code: identifier, isActive: true },
     });
 
     if (!service) {
-      throw new NotFoundException(`Service '${identifier}' not found or inactive`);
+      throw new NotFoundException(
+        `Service '${identifier}' not found or inactive`,
+      );
     }
 
     return service;
@@ -902,8 +920,10 @@ export class ServiceRequestsService {
    */
   private validateDocumentRequirements(
     requirements: any[],
-    files?: Record<string, Express.Multer.File[]>
+    files?: Record<string, Express.Multer.File[]>,
   ): void {
+    // Soft validation - just log warnings instead of throwing errors
+    // This allows users to upload documents gradually
     const missingDocs = [];
 
     for (const req of requirements) {
@@ -916,9 +936,10 @@ export class ServiceRequestsService {
     }
 
     if (missingDocs.length > 0) {
-      throw new BadRequestException(
-        `Missing required documents: ${missingDocs.join(', ')}`
+      this.logger.warn(
+        `Missing required documents: ${missingDocs.join(', ')}. User can upload them later.`,
       );
+      // No longer throwing error - allowing flexible document uploads
     }
   }
 
@@ -931,8 +952,8 @@ export class ServiceRequestsService {
       if (!requirement.allowedMimeTypes.includes(file.mimetype)) {
         throw new BadRequestException(
           `Invalid file type for ${requirement.label}. ` +
-          `Allowed: ${requirement.allowedMimeTypes.join(', ')}. ` +
-          `Got: ${file.mimetype}`
+            `Allowed: ${requirement.allowedMimeTypes.join(', ')}. ` +
+            `Got: ${file.mimetype}`,
         );
       }
     }
@@ -943,7 +964,7 @@ export class ServiceRequestsService {
       const fileMB = (file.size / 1048576).toFixed(2);
       throw new BadRequestException(
         `File '${file.originalname}' exceeds maximum size. ` +
-        `Max: ${maxMB} MB, Got: ${fileMB} MB`
+          `Max: ${maxMB} MB, Got: ${fileMB} MB`,
       );
     }
   }
@@ -956,13 +977,13 @@ export class ServiceRequestsService {
     serviceRequestId: string,
     userId: string,
     documentType: string,
-    isRequired: boolean
+    isRequired: boolean,
   ): Promise<Document> {
     // Upload to S3
     const s3Result = await this.awsS3UploadService.uploadServiceRequestDocument(
       userId,
       serviceRequestId,
-      file
+      file,
     );
 
     // Save to database
@@ -1293,7 +1314,9 @@ export class ServiceRequestsService {
 
       // Send email notifications
       try {
-        const user = await this.userRepository.findOne({ where: { id: userId } });
+        const user = await this.userRepository.findOne({
+          where: { id: userId },
+        });
         if (user) {
           // Customer confirmation
           await this.emailService.sendServiceRequestSubmitted(
@@ -1390,7 +1413,9 @@ export class ServiceRequestsService {
 
       // Send email notification to customer about status change
       try {
-        const user = await this.userRepository.findOne({ where: { id: request.userId } });
+        const user = await this.userRepository.findOne({
+          where: { id: request.userId },
+        });
         if (user) {
           await this.emailService.sendServiceRequestStatusUpdate(
             user.email,
@@ -1607,10 +1632,9 @@ export class ServiceRequestsService {
 
       // Search by user email or name
       if (query.search) {
-        qb.andWhere(
-          '(u.email ILIKE :search OR u.fullName ILIKE :search)',
-          { search: `%${query.search}%` },
-        );
+        qb.andWhere('(u.email ILIKE :search OR u.fullName ILIKE :search)', {
+          search: `%${query.search}%`,
+        });
       }
 
       // Sorting

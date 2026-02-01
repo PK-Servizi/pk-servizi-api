@@ -29,35 +29,33 @@ import { HttpCacheInterceptor } from '../../common/interceptors/http-cache.inter
 export class FaqsController {
   constructor(private readonly faqsService: FaqsService) {}
 
-  // 1. PUBLIC: Get active FAQs (optionally filtered by service type)
+  // 1. PUBLIC: Get all active FAQs
   @Get('public')
   @UseInterceptors(HttpCacheInterceptor)
   @ApiOperation({
-    summary: '[Public] Get active FAQs',
-    description:
-      'Get all active FAQs. Filter by service type code (e.g., ISEE) or category',
+    summary: '[Public] Get all active FAQs',
+    description: 'Get all active FAQs',
   })
-  @ApiQuery({
-    name: 'serviceType',
-    required: false,
-    description: 'Service type code (e.g., ISEE, MODELLO_730)',
-  })
-  @ApiQuery({ name: 'category', required: false, description: 'FAQ category' })
-  async getPublicFaqs(
-    @Query('serviceType') serviceType?: string,
-    @Query('category') category?: string,
-  ) {
-    if (serviceType) {
-      return this.faqsService.findByServiceTypeCode(serviceType);
-    }
-    return this.faqsService.findActive(undefined, category);
+  async getPublicFaqs() {
+    return this.faqsService.findActive();
   }
 
-  // 2. ADMIN: Create FAQ
+  // 2. PUBLIC: Get FAQs by service ID
+  @Get('service/:serviceId')
+  @UseInterceptors(HttpCacheInterceptor)
+  @ApiOperation({
+    summary: '[Public] Get FAQs for a specific service',
+    description: 'Get all active FAQs for a specific service',
+  })
+  async getFaqsByService(@Param('serviceId') serviceId: string) {
+    return this.faqsService.findByServiceId(serviceId);
+  }
+
+  // 3. ADMIN: Create FAQ
   @Post()
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Permissions('faqs:create')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: '[Admin] Create FAQ',
     description: 'Create a new FAQ for a service type or general FAQ',
@@ -66,45 +64,24 @@ export class FaqsController {
     return this.faqsService.create(createFaqDto);
   }
 
-  // 3. ADMIN: Get all FAQs (with filters)
+  // 4. ADMIN: Get all FAQs (with filters)
   @Get()
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Permissions('faqs:read')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: '[Admin] Get all FAQs',
-    description: 'Get all FAQs with optional filters for admin management',
+    description: 'Get all FAQs for admin management',
   })
-  @ApiQuery({
-    name: 'serviceTypeId',
-    required: false,
-    description: 'Filter by service type UUID',
-  })
-  @ApiQuery({
-    name: 'category',
-    required: false,
-    description: 'Filter by category',
-  })
-  @ApiQuery({
-    name: 'isActive',
-    required: false,
-    description: 'Filter by active status',
-  })
-  async findAll(
-    @Query('serviceTypeId') serviceTypeId?: string,
-    @Query('category') category?: string,
-    @Query('isActive') isActive?: string,
-  ) {
-    const isActiveBool =
-      isActive !== undefined ? isActive === 'true' : undefined;
-    return this.faqsService.findAll(serviceTypeId, category, isActiveBool);
+  async findAll() {
+    return this.faqsService.findAll();
   }
 
-  // 4. ADMIN: Update FAQ
+  // 5. ADMIN: Update FAQ
   @Patch(':id')
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Permissions('faqs:update')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: '[Admin] Update FAQ',
     description:
@@ -114,11 +91,11 @@ export class FaqsController {
     return this.faqsService.update(id, updateFaqDto);
   }
 
-  // 5. ADMIN: Delete FAQ
+  // 6. ADMIN: Delete FAQ
   @Delete(':id')
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Permissions('faqs:delete')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: '[Admin] Delete FAQ',
     description: 'Permanently delete a FAQ',
