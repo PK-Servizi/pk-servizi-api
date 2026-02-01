@@ -148,6 +148,7 @@ export class PermissionsGuard implements CanActivate {
           'subscriptions:update_own',
           'subscriptions:cancel',
           'subscriptions:cancel_own',
+          'subscriptions:write_own',
 
           // Payments & Invoices
           'payments:read',
