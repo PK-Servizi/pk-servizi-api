@@ -513,10 +513,10 @@ export class ServiceRequestsService {
         serviceRequest.documentsUploadedAt = new Date();
       }
       
-      // Auto-transition to submitted if all conditions are met
+      // Keep status as draft after document upload
+      // User must explicitly submit via /submit endpoint
       if (serviceRequest.status === 'awaiting_documents') {
-        serviceRequest.status = 'submitted';
-        serviceRequest.submittedAt = new Date();
+        serviceRequest.status = 'draft';
       }
 
       await this.serviceRequestRepository.save(serviceRequest);
@@ -532,18 +532,11 @@ export class ServiceRequestsService {
         });
       }
 
-      // Send notifications
-      await this.emailService.sendServiceRequestSubmitted(
-        serviceRequest.user.email,
-        serviceRequest.user.fullName || serviceRequest.user.email,
-        serviceRequest.id,
-        service.name,
-      );
-
+      // Send notification about documents uploaded
       await this.notificationsService.send({
         userId,
-        title: '✅ Service Request Submitted',
-        message: `Your ${service.name} request has been submitted and is under review`,
+        title: '✅ Documents Uploaded',
+        message: `Documents uploaded for ${service.name}. Submit when ready.`,
         type: 'success',
         actionUrl: `/service-requests/${serviceRequest.id}`,
       });
