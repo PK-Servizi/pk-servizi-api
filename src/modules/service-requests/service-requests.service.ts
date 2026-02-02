@@ -628,8 +628,8 @@ export class ServiceRequestsService {
       };
     }
 
-    // Check service limits if configured
-    if (plan.serviceLimits && plan.serviceLimits.monthlyRequests) {
+    // Check service limits if configured (-1 means unlimited)
+    if (plan.serviceLimits && plan.serviceLimits.monthlyRequests !== undefined && plan.serviceLimits.monthlyRequests !== -1) {
       const thisMonth = new Date();
       thisMonth.setDate(1);
       thisMonth.setHours(0, 0, 0, 0);
