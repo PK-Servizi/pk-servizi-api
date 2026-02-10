@@ -4,6 +4,7 @@ import {
   ExecutionContext,
   CallHandler,
   HttpStatus,
+  StreamableFile,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -20,6 +21,11 @@ export class StandardResponseInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       map((data) => {
+        // Don't wrap StreamableFile responses (e.g., PDF downloads)
+        if (data instanceof StreamableFile) {
+          return data;
+        }
+
         // If response already has our standard format, return as-is
         if (data?.success !== undefined) {
           return data;

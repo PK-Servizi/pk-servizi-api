@@ -1,10 +1,10 @@
 import { BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { BaseService } from '../../common/services/base.service';
 import { Payment } from './entities/payment.entity';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
+import * as PDFDocument from 'pdfkit';
 
 /**
  * PaymentsService
@@ -230,78 +230,93 @@ export class PaymentsService {
    * Generate PDF receipt for payment
    */
   private async generateReceiptPDF(payment: any): Promise<Buffer> {
-    // Simple HTML to PDF conversion
-    const html = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <style>
-          body { font-family: Arial, sans-serif; margin: 40px; }
-          .header { text-align: center; margin-bottom: 30px; }
-          .header h1 { color: #2c3e50; margin: 0; }
-          .info { margin: 20px 0; }
-          .info-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; }
-          .label { font-weight: bold; color: #7f8c8d; }
-          .value { color: #2c3e50; }
-          .total { margin-top: 30px; padding: 20px; background: #ecf0f1; border-radius: 5px; }
-          .total-row { display: flex; justify-content: space-between; font-size: 24px; font-weight: bold; }
-          .footer { margin-top: 50px; text-align: center; color: #95a5a6; font-size: 12px; }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <h1>PAYMENT RECEIPT</h1>
-          <p>PK Servizi API</p>
-        </div>
-        
-        <div class="info">
-          <div class="info-row">
-            <span class="label">Receipt ID:</span>
-            <span class="value">${payment.id}</span>
-          </div>
-          <div class="info-row">
-            <span class="label">Payment Date:</span>
-            <span class="value">${new Date(payment.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-          </div>
-          <div class="info-row">
-            <span class="label">Payment Method:</span>
-            <span class="value">Credit Card</span>
-          </div>
-          <div class="info-row">
-            <span class="label">Transaction ID:</span>
-            <span class="value">${payment.stripePaymentIntentId || 'N/A'}</span>
-          </div>
-          <div class="info-row">
-            <span class="label">Service:</span>
-            <span class="value">${payment.serviceRequest?.service?.name || 'Service Request'}</span>
-          </div>
-          <div class="info-row">
-            <span class="label">Status:</span>
-            <span class="value" style="color: ${payment.status === 'completed' ? '#27ae60' : payment.status === 'refunded' ? '#e74c3c' : '#f39c12'}">
-              ${payment.status.toUpperCase()}
-            </span>
-          </div>
-        </div>
-        
-        <div class="total">
-          <div class="total-row">
-            <span>Total Amount Paid:</span>
-            <span>€${(payment.amount / 100).toFixed(2)}</span>
-          </div>
-        </div>
-        
-        <div class="footer">
-          <p>This is an automatically generated receipt.</p>
-          <p>Generated on ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
-        </div>
-      </body>
-      </html>
-    `;
+    return new Promise((resolve, reject) => {
+      try {
+        const doc = new PDFDocument({ margin: 50 });
+        const chunks: Buffer[] = [];
 
-    // For now, return HTML as UTF-8 buffer (you can integrate puppeteer or pdfkit later)
-    // This will display as HTML in browser but can be "printed to PDF"
-    return Buffer.from(html, 'utf-8');
+        doc.on('data', (chunk) => chunks.push(chunk));
+        doc.on('end', () => resolve(Buffer.concat(chunks)));
+        doc.on('error', reject);
+
+        // Header
+        doc.fontSize(24).font('Helvetica-Bold').text('PAYMENT RECEIPT', { align: 'center' });
+        doc.fontSize(12).font('Helvetica').text('PK Servizi API', { align: 'center' });
+        doc.moveDown(2);
+
+        // Receipt details
+        const leftMargin = 50;
+        const rightMargin = 300;
+        let yPosition = doc.y;
+
+        doc.fontSize(10).font('Helvetica-Bold');
+        doc.text('Receipt ID:', leftMargin, yPosition);
+        doc.font('Helvetica').text(payment.id, rightMargin, yPosition, { width: 250 });
+        yPosition += 20;
+
+        doc.font('Helvetica-Bold').text('Payment Date:', leftMargin, yPosition);
+        doc.font('Helvetica').text(
+          new Date(payment.createdAt).toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          }), 
+          rightMargin, 
+          yPosition
+        );
+        yPosition += 20;
+
+        doc.font('Helvetica-Bold').text('Payment Method:', leftMargin, yPosition);
+        doc.font('Helvetica').text('Credit Card', rightMargin, yPosition);
+        yPosition += 20;
+
+        doc.font('Helvetica-Bold').text('Transaction ID:', leftMargin, yPosition);
+        doc.font('Helvetica').text(payment.stripePaymentIntentId || 'N/A', rightMargin, yPosition, { width: 250 });
+        yPosition += 20;
+
+        doc.font('Helvetica-Bold').text('Service:', leftMargin, yPosition);
+        doc.font('Helvetica').text(
+          payment.serviceRequest?.service?.name || 'Service Request', 
+          rightMargin, 
+          yPosition,
+          { width: 250 }
+        );
+        yPosition += 20;
+
+        doc.font('Helvetica-Bold').text('Status:', leftMargin, yPosition);
+        doc.font('Helvetica').text(payment.status.toUpperCase(), rightMargin, yPosition);
+        yPosition += 40;
+
+        // Total section
+        doc.rect(leftMargin - 10, yPosition - 10, 500, 60).fill('#ecf0f1');
+        doc.fillColor('#000000');
+        doc.fontSize(18).font('Helvetica-Bold');
+        doc.text('Total Amount Paid:', leftMargin, yPosition + 10);
+        doc.text(`€${(payment.amount / 100).toFixed(2)}`, rightMargin + 100, yPosition + 10, { align: 'right' });
+        yPosition += 80;
+
+        // Footer
+        doc.fontSize(10).font('Helvetica');
+        doc.fillColor('#95a5a6');
+        doc.text('This is an automatically generated receipt.', leftMargin, yPosition, { align: 'center', width: 500 });
+        doc.text(
+          `Generated on ${new Date().toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })}`,
+          leftMargin,
+          yPosition + 15,
+          { align: 'center', width: 500 }
+        );
+
+        doc.end();
+      } catch (error) {
+        reject(error);
+      }
+    });
   }
 
   /**
@@ -330,105 +345,142 @@ export class PaymentsService {
    * Generate PDF invoice for payment
    */
   private async generateInvoicePDF(payment: any): Promise<Buffer> {
-    const html = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <style>
-          body { font-family: Arial, sans-serif; margin: 40px; }
-          .header { display: flex; justify-content: space-between; margin-bottom: 40px; border-bottom: 3px solid #2c3e50; padding-bottom: 20px; }
-          .company { font-size: 24px; font-weight: bold; color: #2c3e50; }
-          .invoice-title { font-size: 36px; color: #e74c3c; text-align: right; }
-          .details { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin: 30px 0; }
-          .section { padding: 20px; background: #f8f9fa; border-radius: 5px; }
-          .section-title { font-weight: bold; color: #7f8c8d; margin-bottom: 15px; font-size: 14px; }
-          .section-content { color: #2c3e50; line-height: 1.8; }
-          table { width: 100%; border-collapse: collapse; margin: 30px 0; }
-          th { background: #2c3e50; color: white; padding: 15px; text-align: left; }
-          td { padding: 15px; border-bottom: 1px solid #dee2e6; }
-          .total-section { margin-top: 30px; text-align: right; }
-          .total-row { display: flex; justify-content: flex-end; padding: 10px 0; font-size: 18px; }
-          .total-row.grand { font-size: 24px; font-weight: bold; background: #ecf0f1; padding: 20px; margin-top: 10px; border-radius: 5px; }
-          .total-label { margin-right: 50px; }
-          .footer { margin-top: 60px; text-align: center; color: #95a5a6; font-size: 12px; border-top: 1px solid #dee2e6; padding-top: 20px; }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <div>
-            <div class="company">PK SERVIZI</div>
-            <div style="color: #7f8c8d; margin-top: 5px;">Professional Services</div>
-          </div>
-          <div class="invoice-title">INVOICE</div>
-        </div>
-        
-        <div class="details">
-          <div class="section">
-            <div class="section-title">INVOICE TO:</div>
-            <div class="section-content">
-              ${payment.user?.fullName || 'Customer'}<br>
-              ${payment.user?.email || ''}
-            </div>
-          </div>
-          <div class="section">
-            <div class="section-title">INVOICE DETAILS:</div>
-            <div class="section-content">
-              <strong>Invoice #:</strong> INV-${payment.id.substring(0, 8).toUpperCase()}<br>
-              <strong>Date:</strong> ${new Date(payment.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}<br>
-              <strong>Payment ID:</strong> ${payment.id}
-            </div>
-          </div>
-        </div>
-        
-        <table>
-          <thead>
-            <tr>
-              <th>DESCRIPTION</th>
-              <th style="text-align: center;">QTY</th>
-              <th style="text-align: right;">UNIT PRICE</th>
-              <th style="text-align: right;">TOTAL</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>
-                <strong>${payment.serviceRequest?.service?.name || 'Service Request'}</strong><br>
-                <span style="color: #7f8c8d; font-size: 14px;">Service ID: ${payment.serviceRequestId || 'N/A'}</span>
-              </td>
-              <td style="text-align: center;">1</td>
-              <td style="text-align: right;">€${(payment.amount / 100).toFixed(2)}</td>
-              <td style="text-align: right;"><strong>€${(payment.amount / 100).toFixed(2)}</strong></td>
-            </tr>
-          </tbody>
-        </table>
-        
-        <div class="total-section">
-          <div class="total-row">
-            <span class="total-label">Subtotal:</span>
-            <span>€${(payment.amount / 100).toFixed(2)}</span>
-          </div>
-          <div class="total-row">
-            <span class="total-label">Tax (0%):</span>
-            <span>€0.00</span>
-          </div>
-          <div class="total-row grand">
-            <span class="total-label">TOTAL PAID:</span>
-            <span>€${(payment.amount / 100).toFixed(2)}</span>
-          </div>
-        </div>
-        
-        <div class="footer">
-          <p><strong>Payment Method:</strong> Credit Card | <strong>Transaction ID:</strong> ${payment.stripePaymentIntentId || 'N/A'}</p>
-          <p><strong>Status:</strong> ${payment.status.toUpperCase()}${payment.status === 'refunded' ? ' - Amount has been refunded' : ''}</p>
-          <p style="margin-top: 20px;">Thank you for your business!</p>
-          <p>Generated on ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
-        </div>
-      </body>
-      </html>
-    `;
+    return new Promise((resolve, reject) => {
+      try {
+        const doc = new PDFDocument({ margin: 50 });
+        const chunks: Buffer[] = [];
 
-    return Buffer.from(html, 'utf-8');
+        doc.on('data', (chunk) => chunks.push(chunk));
+        doc.on('end', () => resolve(Buffer.concat(chunks)));
+        doc.on('error', reject);
+
+        // Header
+        doc.fontSize(20).font('Helvetica-Bold').text('PK SERVIZI', 50, 50);
+        doc.fontSize(10).font('Helvetica').text('Professional Services', 50, 75);
+        doc.fontSize(32).font('Helvetica-Bold').fillColor('#e74c3c').text('INVOICE', 400, 50, { align: 'right' });
+        
+        // Draw line under header
+        doc.moveTo(50, 100).lineTo(550, 100).strokeColor('#2c3e50').lineWidth(3).stroke();
+        doc.fillColor('#000000');
+        doc.moveDown(3);
+
+        // Invoice details section
+        let yPos = 130;
+        
+        // Invoice to section
+        doc.fontSize(10).font('Helvetica-Bold').fillColor('#7f8c8d').text('INVOICE TO:', 50, yPos);
+        yPos += 15;
+        doc.fontSize(10).font('Helvetica').fillColor('#000000');
+        doc.text(payment.user?.fullName || 'Customer', 50, yPos);
+        yPos += 15;
+        doc.text(payment.user?.email || '', 50, yPos);
+
+        // Invoice details section (right side)
+        let rightYPos = 130;
+        doc.fontSize(10).font('Helvetica-Bold').fillColor('#7f8c8d').text('INVOICE DETAILS:', 350, rightYPos);
+        rightYPos += 15;
+        doc.fontSize(10).font('Helvetica-Bold').fillColor('#000000').text('Invoice #:', 350, rightYPos);
+        doc.font('Helvetica').text(`INV-${payment.id.substring(0, 8).toUpperCase()}`, 430, rightYPos);
+        rightYPos += 15;
+        doc.font('Helvetica-Bold').text('Date:', 350, rightYPos);
+        doc.font('Helvetica').text(
+          new Date(payment.createdAt).toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          }), 
+          430, 
+          rightYPos
+        );
+        rightYPos += 15;
+        doc.font('Helvetica-Bold').text('Payment ID:', 350, rightYPos);
+        doc.font('Helvetica').text(payment.id.substring(0, 20) + '...', 430, rightYPos);
+
+        // Table header
+        yPos = 230;
+        doc.rect(50, yPos, 500, 25).fillAndStroke('#2c3e50', '#2c3e50');
+        doc.fontSize(10).font('Helvetica-Bold').fillColor('#ffffff');
+        doc.text('DESCRIPTION', 60, yPos + 8);
+        doc.text('QTY', 330, yPos + 8, { width: 50, align: 'center' });
+        doc.text('UNIT PRICE', 390, yPos + 8, { width: 70, align: 'right' });
+        doc.text('TOTAL', 470, yPos + 8, { width: 70, align: 'right' });
+
+        // Table content
+        yPos += 25;
+        doc.fillColor('#000000');
+        doc.fontSize(11).font('Helvetica-Bold').text(
+          payment.serviceRequest?.service?.name || 'Service Request',
+          60,
+          yPos + 5,
+          { width: 250 }
+        );
+        doc.fontSize(9).font('Helvetica').fillColor('#7f8c8d').text(
+          `Service ID: ${payment.serviceRequestId?.substring(0, 20) || 'N/A'}`,
+          60,
+          yPos + 20,
+          { width: 250 }
+        );
+        doc.fillColor('#000000');
+        doc.fontSize(10).font('Helvetica').text('1', 330, yPos + 10, { width: 50, align: 'center' });
+        doc.text(`€${(payment.amount / 100).toFixed(2)}`, 390, yPos + 10, { width: 70, align: 'right' });
+        doc.font('Helvetica-Bold').text(`€${(payment.amount / 100).toFixed(2)}`, 470, yPos + 10, { width: 70, align: 'right' });
+        
+        yPos += 45;
+        doc.moveTo(50, yPos).lineTo(550, yPos).strokeColor('#dee2e6').lineWidth(1).stroke();
+
+        // Totals section
+        yPos += 20;
+        doc.fontSize(12).font('Helvetica');
+        doc.text('Subtotal:', 350, yPos);
+        doc.text(`€${(payment.amount / 100).toFixed(2)}`, 470, yPos, { width: 70, align: 'right' });
+        yPos += 20;
+        doc.text('Tax (0%):', 350, yPos);
+        doc.text('€0.00', 470, yPos, { width: 70, align: 'right' });
+        yPos += 30;
+
+        // Grand total
+        doc.rect(350, yPos - 10, 200, 40).fill('#ecf0f1');
+        doc.fillColor('#000000');
+        doc.fontSize(16).font('Helvetica-Bold');
+        doc.text('TOTAL PAID:', 360, yPos);
+        doc.text(`€${(payment.amount / 100).toFixed(2)}`, 470, yPos, { width: 70, align: 'right' });
+
+        // Footer
+        yPos += 60;
+        doc.fontSize(10).font('Helvetica').fillColor('#000000');
+        doc.text(
+          `Payment Method: Credit Card | Transaction ID: ${payment.stripePaymentIntentId || 'N/A'}`,
+          50,
+          yPos,
+          { align: 'center', width: 500 }
+        );
+        yPos += 15;
+        const statusText = `Status: ${payment.status.toUpperCase()}${
+          payment.status === 'refunded' ? ' - Amount has been refunded' : ''
+        }`;
+        doc.text(statusText, 50, yPos, { align: 'center', width: 500 });
+        yPos += 30;
+        doc.text('Thank you for your business!', 50, yPos, { align: 'center', width: 500 });
+        yPos += 15;
+        doc.fillColor('#95a5a6');
+        doc.text(
+          `Generated on ${new Date().toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })}`,
+          50,
+          yPos,
+          { align: 'center', width: 500 }
+        );
+
+        doc.end();
+      } catch (error) {
+        reject(error);
+      }
+    });
   }
 
   /**
