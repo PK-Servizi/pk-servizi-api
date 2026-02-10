@@ -7,7 +7,10 @@ import {
   UseGuards,
   Body,
   UseInterceptors,
+  Res,
+  StreamableFile,
 } from '@nestjs/common';
+import { Response } from 'express';
 import {
   ApiTags,
   ApiOperation,
@@ -47,16 +50,38 @@ export class PaymentsController {
 
   @Get(':id/receipt')
   @Permissions('payments:read_own')
-  @ApiOperation({ summary: '[Customer] Download payment receipt' })
-  downloadReceipt(@Param('id') id: string, @CurrentUser() user: any) {
-    return this.paymentsService.downloadReceipt(id, user.id);
+  @ApiOperation({ summary: '[Customer] Download payment receipt PDF' })
+  async downloadReceipt(
+    @Param('id') id: string,
+    @CurrentUser() user: any,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const pdfBuffer = await this.paymentsService.downloadReceipt(id, user.id);
+    
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="receipt-${id}.pdf"`,
+    });
+    
+    return new StreamableFile(pdfBuffer);
   }
 
   @Get(':id/invoice')
   @Permissions('payments:read_own')
-  @ApiOperation({ summary: '[Customer] Generate formal invoice' })
-  generateInvoice(@Param('id') id: string, @CurrentUser() user: any) {
-    return this.paymentsService.generateInvoice(id, user.id);
+  @ApiOperation({ summary: '[Customer] Download formal invoice PDF' })
+  async generateInvoice(
+    @Param('id') id: string,
+    @CurrentUser() user: any,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const pdfBuffer = await this.paymentsService.generateInvoice(id, user.id);
+    
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="invoice-${id}.pdf"`,
+    });
+    
+    return new StreamableFile(pdfBuffer);
   }
 
   @Post(':id/resend-receipt')

@@ -402,38 +402,6 @@ export class ServiceRequestsController {
   }
 
   /**
-   * Get service request details
-   */
-  @Get(':id')
-  @UseGuards(PermissionsGuard)
-  @Permissions('service-requests:read')
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: '[Customer] Get service request details' })
-  findOne(@Param('id') id: string, @CurrentUser() user: UserRequest) {
-    return this.serviceRequestsService.findOne(id, user.id, user.role);
-  }
-
-  /**
-   * Update draft service request
-   */
-  @Put(':id')
-  @UseGuards(PermissionsGuard)
-  @Permissions('service-requests:update')
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: '[Customer] Update draft request' })
-  @ApiQuery({ name: 'serviceType', required: false })
-  @ApiBody({ type: UpdateServiceRequestDto })
-  @AuditLog({ action: 'SERVICE_REQUEST_UPDATED', resourceType: 'service_request', captureOldValues: true })
-  update(
-    @Param('id') id: string,
-    @Body() dto: UpdateServiceRequestDto,
-    @CurrentUser() user: UserRequest,
-    @Query('serviceType') serviceType?: string,
-  ) {
-    return this.serviceRequestsService.update(id, dto, user.id, serviceType);
-  }
-
-  /**
    * Submit service request for processing
    * Transitions from DRAFT → SUBMITTED
    */
@@ -450,19 +418,6 @@ export class ServiceRequestsController {
     @CurrentUser() user: UserRequest,
   ) {
     return this.serviceRequestsService.submit(id, user.id, dto);
-  }
-
-  /**
-   * Delete draft service request
-   */
-  @Delete(':id')
-  @UseGuards(PermissionsGuard)
-  @Permissions('service-requests:update')
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: '[Customer] Delete draft request' })
-  @AuditLog({ action: 'SERVICE_REQUEST_DELETED', resourceType: 'service_request' })
-  remove(@Param('id') id: string, @CurrentUser() user: UserRequest) {
-    return this.serviceRequestsService.remove(id, user.id);
   }
 
   /**
@@ -493,6 +448,85 @@ export class ServiceRequestsController {
     @CurrentUser() user: UserRequest,
   ) {
     return this.serviceRequestsService.addNote(id, dto, user.id);
+  }
+
+  /**
+   * Request refund (before submission)
+   * Customer can appeal for refund at any time before submission
+   */
+  @Post(':id/refund')
+  @UseGuards(PermissionsGuard)
+  @Permissions('service-requests:update')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ 
+    summary: '[Customer] Request refund and cancel service request',
+    description: 'Request refund for paid service before submission. Refund will be processed immediately.'
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        reason: {
+          type: 'string',
+          description: 'Reason for refund request',
+          example: 'Changed my mind / Service no longer needed'
+        }
+      },
+      required: ['reason']
+    }
+  })
+  @AuditLog({ action: 'REFUND_REQUESTED', resourceType: 'service_request' })
+  requestRefund(
+    @Param('id') id: string,
+    @Body('reason') reason: string,
+    @CurrentUser() user: UserRequest,
+  ) {
+    return this.serviceRequestsService.requestRefund(id, user.id, reason);
+  }
+
+  /**
+   * Get service request details
+   */
+  @Get(':id')
+  @UseGuards(PermissionsGuard)
+  @Permissions('service-requests:read')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: '[Customer] Get service request details' })
+  findOne(@Param('id') id: string, @CurrentUser() user: UserRequest) {
+    return this.serviceRequestsService.findOne(id, user.id, user.role);
+  }
+
+  /**
+   * Update service request (before submission)
+   */
+  @Patch(':id')
+  @UseGuards(PermissionsGuard)
+  @Permissions('service-requests:update')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: '[Customer] Update request (before submission)' })
+  @ApiQuery({ name: 'serviceType', required: false })
+  @ApiBody({ type: UpdateServiceRequestDto })
+  @AuditLog({ action: 'SERVICE_REQUEST_UPDATED', resourceType: 'service_request', captureOldValues: true })
+  update(
+    @Param('id') id: string,
+    @Body() dto: UpdateServiceRequestDto,
+    @CurrentUser() user: UserRequest,
+    @Query('serviceType') serviceType?: string,
+  ) {
+    return this.serviceRequestsService.update(id, dto, user.id, serviceType);
+  }
+
+  /**
+   * Delete service request (before submission)
+   */
+  @Delete(':id')
+  @UseGuards(PermissionsGuard)
+  @Permissions('service-requests:update')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: '[Customer] Delete request (before submission)' })
+  @AuditLog({ action: 'SERVICE_REQUEST_DELETED', resourceType: 'service_request' })
+  remove(@Param('id') id: string, @CurrentUser() user: UserRequest) {
+    return this.serviceRequestsService.remove(id, user.id);
   }
 
   // ========== ADMIN/OPERATOR ROUTES ==========

@@ -1161,7 +1161,8 @@ export class ServiceRequestsService {
   }
 
   /**
-   * Update service request (Draft only)
+   * Update service request (before submission)
+   * Allows updates for any status before 'submitted'
    */
   async update(
     id: string,
@@ -1526,20 +1527,72 @@ export class ServiceRequestsService {
   }
 
   /**
-   * Delete draft request
+   * Delete service request (before submission)
+   * Allows deletion for any status before 'submitted'
+   * Automatically processes refund if payment was made
    */
   async remove(id: string, userId: string): Promise<any> {
     try {
       const request = await this.serviceRequestRepository.findOne({
         where: { id },
+        relations: ['payment', 'user', 'service'],
       });
 
       if (!request) {
         throw new NotFoundException('Service request not found');
       }
 
-      if (request.status !== SERVICE_REQUEST_STATUSES.DRAFT) {
-        throw new ConflictException('Only draft requests can be deleted');
+      // Allow deletion for any status before submission
+      const nonDeletableStatuses = ['submitted', 'in_review', 'missing_documents', 'completed', 'closed', 'rejected'];
+      if (nonDeletableStatuses.includes(request.status)) {
+        throw new ConflictException(
+          `Cannot delete request with status '${request.status}'. Only requests before submission can be deleted.`
+        );
+      }
+
+      // Check if payment exists and process refund
+      let refundProcessed = false;
+      if (request.payment && request.payment.status === 'completed') {
+        try {
+          // Process Stripe refund
+          if (request.payment.stripePaymentIntentId) {
+            await this.stripeService.createRefund(
+              request.payment.stripePaymentIntentId,
+            );
+            this.logger.log(
+              `Stripe refund processed for payment ${request.payment.id}`,
+            );
+          }
+
+          // Update payment status
+          request.payment.status = 'refunded';
+          await this.paymentRepository.save(request.payment);
+          refundProcessed = true;
+
+          // Send refund notification
+          await this.notificationsService.send({
+            userId,
+            title: '💰 Refund Processed',
+            message: `Your payment of €${request.payment.amount} for ${request.service?.name || 'service'} has been refunded.`,
+            type: 'success',
+            actionUrl: `/payments/${request.payment.id}`,
+          });
+
+          this.logger.log(
+            `Refund processed for service request ${id}, payment ${request.payment.id}`,
+          );
+        } catch (error) {
+          this.logger.error(
+            `Failed to process refund for payment ${request.payment.id}: ${error.message}`,
+          );
+          // Continue with deletion but notify about refund failure
+          await this.notificationsService.send({
+            userId,
+            title: '⚠️ Refund Pending',
+            message: `Service request cancelled. Refund will be processed manually by admin.`,
+            type: 'warning',
+          });
+        }
       }
 
       if (request.userId !== userId) {
@@ -1548,11 +1601,19 @@ export class ServiceRequestsService {
 
       await this.serviceRequestRepository.remove(request);
 
-      this.logger.log(`Service request deleted: ${id}`);
+      this.logger.log(
+        `Service request ${id} deleted by user ${userId}${refundProcessed ? ' with refund' : ''}`,
+      );
 
       return {
         success: true,
-        message: 'Service request deleted successfully',
+        message: refundProcessed
+          ? 'Service request deleted and refund processed successfully'
+          : 'Service request deleted successfully',
+        data: {
+          refundProcessed,
+          refundAmount: refundProcessed ? request.payment.amount : 0,
+        },
       };
     } catch (error) {
       this.logger.error(`Failed to delete service request: ${error.message}`);
@@ -1722,6 +1783,107 @@ export class ServiceRequestsService {
 
   async requestDocuments(id: string, dto: any): Promise<any> {
     return { success: true, message: 'Additional documents requested' };
+  }
+
+  /**
+   * Request refund (Customer appeal before submission)
+   * Customer can request refund at any time before submission
+   */
+  async requestRefund(
+    id: string,
+    userId: string,
+    reason: string,
+  ): Promise<any> {
+    const request = await this.serviceRequestRepository.findOne({
+      where: { id, userId },
+      relations: ['payment', 'user', 'service'],
+    });
+
+    if (!request) {
+      throw new NotFoundException('Service request not found');
+    }
+
+    // Only allow refund request before submission
+    const nonRefundableStatuses = ['submitted', 'in_review', 'completed', 'closed', 'rejected'];
+    if (nonRefundableStatuses.includes(request.status)) {
+      throw new ConflictException(
+        `Cannot request refund for status '${request.status}'. Refunds only available before submission.`,
+      );
+    }
+
+    if (!request.payment || request.payment.status !== 'completed') {
+      throw new BadRequestException(
+        'No completed payment found for this request',
+      );
+    }
+
+    // Process refund immediately
+    try {
+      // Process Stripe refund
+      if (request.payment.stripePaymentIntentId) {
+        await this.stripeService.createRefund(
+          request.payment.stripePaymentIntentId,
+        );
+      }
+
+      // Update payment status
+      request.payment.status = 'refunded';
+      await this.paymentRepository.save(request.payment);
+
+      // Add note to service request
+      if (!request.userNotes) {
+        request.userNotes = '';
+      }
+      request.userNotes += `\n[REFUND REQUESTED] ${new Date().toISOString()}: ${reason}`;
+      await this.serviceRequestRepository.save(request);
+
+      // Notify customer
+      await this.notificationsService.send({
+        userId,
+        title: '💰 Refund Approved',
+        message: `Your refund of €${request.payment.amount} has been processed.`,
+        type: 'success',
+        actionUrl: `/payments/${request.payment.id}`,
+      });
+
+      // Notify admin
+      const adminUsers = await this.userRepository.find({
+        where: { role: 'admin' as any },
+      });
+      for (const admin of adminUsers) {
+        await this.notificationsService.send({
+          userId: admin.id,
+          title: '💰 Refund Processed',
+          message: `Refund of €${request.payment.amount} processed for ${request.user.email} - ${request.service?.name}`,
+          type: 'info',
+          actionUrl: `/admin/service-requests/${request.id}`,
+        });
+      }
+
+      this.logger.log(
+        `Refund processed for service request ${id}, payment ${request.payment.id}. Reason: ${reason}`,
+      );
+
+      return {
+        success: true,
+        message: 'Refund processed successfully',
+        data: {
+          serviceRequestId: request.id,
+          paymentId: request.payment.id,
+          refundAmount: request.payment.amount,
+          reason,
+          processedAt: new Date(),
+        },
+      };
+    } catch (error) {
+      this.logger.error(
+        `Failed to process refund: ${error.message}`,
+        error.stack,
+      );
+      throw new BadRequestException(
+        'Failed to process refund. Please contact support.',
+      );
+    }
   }
 
   // Extended Document Workflow Methods
