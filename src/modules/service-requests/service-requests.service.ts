@@ -1180,12 +1180,13 @@ export class ServiceRequestsService {
         throw new NotFoundException('Service request not found');
       }
 
-      // Only allow updates to draft requests
-      if (request.status !== SERVICE_REQUEST_STATUSES.DRAFT) {
-        throw new ConflictException('Can only update draft requests');
+      // Only allow updates before submission
+      const submittedStatuses = ['submitted', 'in_review', 'missing_documents', 'completed', 'closed', 'rejected'];
+      if (submittedStatuses.includes(request.status)) {
+        throw new ConflictException('Cannot update request after submission');
       }
 
-      // Only user can update their own draft
+      // Only user can update their own request
       if (request.userId !== userId) {
         throw new ForbiddenException('Not authorized to update this request');
       }
@@ -1597,6 +1598,12 @@ export class ServiceRequestsService {
 
       if (request.userId !== userId) {
         throw new ForbiddenException('Not authorized to delete this request');
+      }
+
+      // Nullify payment's serviceRequestId to avoid foreign key constraint
+      if (request.payment) {
+        request.payment.serviceRequestId = null;
+        await this.paymentRepository.save(request.payment);
       }
 
       await this.serviceRequestRepository.remove(request);
