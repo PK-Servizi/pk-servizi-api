@@ -89,23 +89,72 @@ export class ServiceRequestsService {
   // ============================================================================
 
   /**
-   * Step 1: Initiate service request with payment
-   * User selects service and creates payment
+   * Step 1: Initiate service request with payment (or skip if free)
+   * - If service has basePrice > 0: User creates payment (payment_pending status)
+   * - If service is FREE (basePrice = 0): Skip payment, go directly to questionnaire (awaiting_form status)
    */
   async initiateWithPayment(serviceId: string, userId: string) {
-    // Get service and validate price
+    // Get service and validate it exists
     const service = await this.getService(serviceId);
 
-    if (!service.basePrice || service.basePrice <= 0) {
-      throw new BadRequestException('This service does not require payment');
-    }
-
-    // Get user for Stripe customer
+    // Get user for notifications and Stripe customer (if payment needed)
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
+    // Check if service is FREE (basePrice = 0)
+    const isFreeService = !service.basePrice || service.basePrice <= 0;
+
+    if (isFreeService) {
+      // FREE SERVICE: Skip payment, go directly to questionnaire
+      const serviceRequest = this.serviceRequestRepository.create({
+        userId,
+        serviceId: service.id,
+        status: 'awaiting_form', // Skip payment_pending status for free services
+        priority: 'normal',
+      });
+
+      await this.serviceRequestRepository.save(serviceRequest);
+
+      // Record status change from draft to awaiting_form
+      await this.statusHistoryRepository.save({
+        serviceRequestId: serviceRequest.id,
+        fromStatus: 'draft',
+        toStatus: 'awaiting_form',
+        changedById: userId,
+        notes: 'Free service - skipped payment step',
+      });
+
+      // Send notification
+      await this.notificationsService.send({
+        userId,
+        title: '✅ Service Request Created',
+        message: `Your request for ${service.name} is ready. Please fill out the questionnaire to continue.`,
+        type: 'success',
+        actionUrl: `/service-requests/${serviceRequest.id}/questionnaire`,
+      });
+
+      this.logger.log(
+        `Free service request ${serviceRequest.id} created for service ${service.name}`,
+      );
+
+      return {
+        success: true,
+        message: 'Service request created successfully. Please complete the questionnaire.',
+        data: {
+          serviceRequestId: serviceRequest.id,
+          serviceName: service.name,
+          basePrice: 0,
+          isFreeService: true,
+          status: 'awaiting_form',
+          nextStep: 'Fill out the questionnaire',
+          formSchema: service.formSchema,
+        },
+      };
+    }
+
+    // PAID SERVICE: Proceed with payment workflow
     // Create service request with payment_pending status
     const serviceRequest = this.serviceRequestRepository.create({
       userId,
@@ -288,7 +337,9 @@ export class ServiceRequestsService {
 
   /**
    * Step 2: Submit questionnaire answers
-   * User fills out the form after payment
+   * User fills out the form after payment (or immediately for free services)
+   * Validates: If service is paid, payment must be completed
+   * If service is free, no payment validation needed
    */
   async submitQuestionnaire(
     serviceRequestId: string,
@@ -312,15 +363,21 @@ export class ServiceRequestsService {
       );
     }
 
-    // Validate payment is completed
-    if (
-      !serviceRequest.payment ||
-      serviceRequest.payment.status !== 'completed'
-    ) {
-      throw new BadRequestException(
-        'Payment must be completed before submitting questionnaire',
-      );
+    // Check if service is paid or free
+    const isPaidService = serviceRequest.service && serviceRequest.service.basePrice > 0;
+
+    // For paid services, validate payment is completed
+    if (isPaidService) {
+      if (
+        !serviceRequest.payment ||
+        serviceRequest.payment.status !== 'completed'
+      ) {
+        throw new BadRequestException(
+          'Payment must be completed before submitting questionnaire',
+        );
+      }
     }
+    // For free services, no payment validation needed
 
     // Update service request with form data
     serviceRequest.formData = formData;
@@ -439,7 +496,13 @@ export class ServiceRequestsService {
     }
 
     // Allow document upload in any valid status (not just awaiting_documents)
-    const validStatuses = ['draft', 'awaiting_payment', 'awaiting_documents', 'submitted', 'in_progress'];
+    const validStatuses = [
+      'draft',
+      'awaiting_payment',
+      'awaiting_documents',
+      'submitted',
+      'in_progress',
+    ];
     if (!validStatuses.includes(serviceRequest.status)) {
       throw new BadRequestException(
         `Cannot upload documents. Current status: ${serviceRequest.status}. ` +
@@ -512,7 +575,7 @@ export class ServiceRequestsService {
       if (!serviceRequest.documentsUploadedAt) {
         serviceRequest.documentsUploadedAt = new Date();
       }
-      
+
       // Keep status as draft after document upload
       // User must explicitly submit via /submit endpoint
       if (serviceRequest.status === 'awaiting_documents') {
@@ -629,7 +692,11 @@ export class ServiceRequestsService {
     }
 
     // Check service limits if configured (-1 means unlimited)
-    if (plan.serviceLimits && plan.serviceLimits.monthlyRequests !== undefined && plan.serviceLimits.monthlyRequests !== -1) {
+    if (
+      plan.serviceLimits &&
+      plan.serviceLimits.monthlyRequests !== undefined &&
+      plan.serviceLimits.monthlyRequests !== -1
+    ) {
       const thisMonth = new Date();
       thisMonth.setDate(1);
       thisMonth.setHours(0, 0, 0, 0);
@@ -1181,7 +1248,14 @@ export class ServiceRequestsService {
       }
 
       // Only allow updates before submission
-      const submittedStatuses = ['submitted', 'in_review', 'missing_documents', 'completed', 'closed', 'rejected'];
+      const submittedStatuses = [
+        'submitted',
+        'in_review',
+        'missing_documents',
+        'completed',
+        'closed',
+        'rejected',
+      ];
       if (submittedStatuses.includes(request.status)) {
         throw new ConflictException('Cannot update request after submission');
       }
@@ -1544,10 +1618,17 @@ export class ServiceRequestsService {
       }
 
       // Allow deletion for any status before submission
-      const nonDeletableStatuses = ['submitted', 'in_review', 'missing_documents', 'completed', 'closed', 'rejected'];
+      const nonDeletableStatuses = [
+        'submitted',
+        'in_review',
+        'missing_documents',
+        'completed',
+        'closed',
+        'rejected',
+      ];
       if (nonDeletableStatuses.includes(request.status)) {
         throw new ConflictException(
-          `Cannot delete request with status '${request.status}'. Only requests before submission can be deleted.`
+          `Cannot delete request with status '${request.status}'. Only requests before submission can be deleted.`,
         );
       }
 
@@ -1811,7 +1892,13 @@ export class ServiceRequestsService {
     }
 
     // Only allow refund request before submission
-    const nonRefundableStatuses = ['submitted', 'in_review', 'completed', 'closed', 'rejected'];
+    const nonRefundableStatuses = [
+      'submitted',
+      'in_review',
+      'completed',
+      'closed',
+      'rejected',
+    ];
     if (nonRefundableStatuses.includes(request.status)) {
       throw new ConflictException(
         `Cannot request refund for status '${request.status}'. Refunds only available before submission.`,

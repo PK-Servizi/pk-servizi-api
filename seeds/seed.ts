@@ -9,6 +9,7 @@ import { RoleEnum } from '../src/modules/roles/role.enum';
 
 import { seedServiceTypes } from './service-types-seed';
 import { seedRolePermissions } from './role-permission-seed';
+import { seedServicesWithDocuments } from './services-with-documents-seed';
 
 async function seed() {
   await AppDataSource.initialize(); // Initialize connection once
@@ -80,6 +81,12 @@ async function seed() {
 
     // Run service types seed
     await seedServiceTypes();
+
+    // Run services with documents seed
+    await seedServicesWithDocuments();
+
+    // Run ISEE All Types seed (Ordinario, Universitario, Socio-Sanitario)
+    // await seedISEEAllTypes(); // Using seed-final-complete.ts instead
 
     // Run subscription plans seed
     const { seedSubscriptionPlans } = await import('./subscription-plans-seed');

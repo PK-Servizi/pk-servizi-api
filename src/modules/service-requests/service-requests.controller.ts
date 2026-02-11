@@ -85,8 +85,19 @@ export class ServiceRequestsController {
   // ========== PAYMENT → QUESTIONNAIRE → DOCUMENTS WORKFLOW ==========
 
   /**
-   * Step 1: Initiate service request with payment
-   * Creates service request and payment record
+   * Step 1: Initiate service request
+   * - If service price > 0: Creates payment workflow (payment_pending status) → User completes payment → Step 2
+   * - If service price = 0: Skips payment entirely, goes directly to questionnaire (awaiting_form status) → Step 2
+   * 
+   * FREE SERVICES (price = 0): Only 2 steps total
+   *   1. Initiate (this endpoint) → awaiting_form status
+   *   2. Submit questionnaire → awaiting_documents status
+   *   3. Upload documents → submitted status
+   * 
+   * PAID SERVICES (price > 0): 3 steps total
+   *   1. Initiate (this endpoint) → payment_pending status → Complete payment → awaiting_form status
+   *   2. Submit questionnaire → awaiting_documents status
+   *   3. Upload documents → submitted status
    */
   @Post('initiate')
   @UseGuards(JwtAuthGuard, PermissionsGuard)
@@ -94,8 +105,8 @@ export class ServiceRequestsController {
   @ApiBearerAuth('JWT-auth')
   @AuditLog({ action: 'SERVICE_REQUEST_INITIATED', resourceType: 'service_request' })
   @ApiOperation({ 
-    summary: '[Customer] Step 1: Initiate service request with payment',
-    description: 'User selects service type and creates payment. Status: payment_pending'
+    summary: '[Customer] Step 1: Initiate service request - Payment for paid services (price > 0) OR direct to questionnaire for free services (price = 0)',
+    description: 'FREE SERVICES (price=0): Skip payment, go directly to Step 2 (questionnaire). PAID SERVICES (price>0): Create payment, complete payment, then proceed to Step 2 (questionnaire).'
   })
   @ApiBody({
     schema: {
@@ -104,7 +115,7 @@ export class ServiceRequestsController {
         serviceId: { 
           type: 'string',
           description: 'Service type ID (UUID) or code',
-          example: 'ISEE'
+          example: 'ISEE_ORD_2026'
         }
       },
       required: ['serviceId']
@@ -118,8 +129,11 @@ export class ServiceRequestsController {
   }
 
   /**
-   * Step 2: Submit questionnaire after payment
-   * Submits form answers after successful payment
+   * Step 2: Submit questionnaire
+   * - For PAID services: Submit after payment is completed
+   * - For FREE services: Submit immediately after Step 1 (no payment required)
+   * 
+   * This is Step 2 for both free and paid services
    */
   @Patch(':id/questionnaire')
   @UseGuards(PermissionsGuard)
@@ -127,8 +141,8 @@ export class ServiceRequestsController {
   @ApiBearerAuth('JWT-auth')
   @AuditLog({ action: 'QUESTIONNAIRE_SUBMITTED', resourceType: 'service_request' })
   @ApiOperation({ 
-    summary: '[Customer] Step 2: Submit questionnaire',
-    description: 'Submit form answers after payment is completed. Status: awaiting_form → awaiting_documents'
+    summary: '[Customer] Step 2: Submit questionnaire (for both free and paid services)',
+    description: 'FREE SERVICES: Submit immediately after initiation. PAID SERVICES: Submit after payment completed. Status: awaiting_form → awaiting_documents'
   })
   @ApiBody({
     schema: {
@@ -158,6 +172,7 @@ export class ServiceRequestsController {
   /**
    * Step 3: Upload required documents
    * Automatically validates which documents are required based on service type
+   * This is Step 3 for both free and paid services
    */
   @Post(':id/documents')
   @UseGuards(JwtAuthGuard, PermissionsGuard)
