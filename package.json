@@ -20,7 +20,7 @@
     "migration:revert": "npm run typeorm -- migration:revert",
     "migration:clean": "ts-node -r tsconfig-paths/register ./scripts/clean-database.ts",
     "migration:reset": "npm run migration:revert && npm run migration:clean && npm run migration:run",
-    "seed": "ts-node ./seeds/seed.ts",
+    "seed": "ts-node ./seeds/run-all-seeds.ts",
     "seed:permissions": "ts-node seeds/permissions-seed.ts",
     "seed:isee": "ts-node seeds/isee-ordinario-2026-seed.ts",
     "seed:isee-all": "ts-node seeds/isee-all-types-seed.ts",

@@ -857,7 +857,8 @@ const SERVICES_DATA = [
           '09. Copia del versamento del contributo di € 250,00',
           '10. Certificato di lingua italiana livello B1',
           '11. Marca da bollo da € 16,00',
-          '12. Documento di riconoscimento del coniuge'
+          '12. Documento di riconoscimento del coniuge',
+          '13. Codice fiscale/tessera sanitaria del coniuge'
         ],
         faqs: [],
       },
@@ -878,7 +879,24 @@ const SERVICES_DATA = [
           'Permette ai familiari di cittadini extracomunitari di ottenere visto e permesso',
         category: 'IMMIGRATION',
         basePrice: 99.99,
-        requiredDocuments: [],
+        requiredDocuments: [
+          '01. Passaporto del richiedente',
+          '02. Permesso di soggiorno del richiedente (durata complessiva di almeno un anno, o ricevuta di rinnovo/rilascio)',
+          '03. Stato di famiglia',
+          '04. Passaporto del/i familiare',
+          '05. Ultima dichiarazione dei redditi (ove posseduta) oppure Ultima CU (ex CUD)',
+          '06. Modello Unilav se lavoratore dipendente',
+          '07. Ultime 3 buste paga se lavoratore dipendente',
+          '08. Modello S3 firmato dal datore di lavoro se lavoratore dipendente',
+          '09. Bollettino di versamento dei contributi INPS relativi al trimestre precedente (ultimi 3 mesi) se lavoratore domestico',
+          '10. Certificato di Iscrizione alla Camera di Commercio se lavoratore autonomo',
+          '11. Certificato di attribuzione P.IVA se lavoratore autonomo',
+          '12. Contratto di locazione o contratto di comodato gratuito o atto di proprietà dell\'alloggio',
+          '13. Idoneità abitativa e certificazione igienico-sanitaria',
+          '14. Nel caso il richiedente sia ospitato: dichiarazione autenticata del titolare dell\'alloggio con consenso al ricongiungimento',
+          '15. Modello S2 - Dichiarazione di consenso alloggio per i familiari ricongiunti',
+          '16. Modello S1 - Dichiarazione di assenso del proprietario dell\'alloggio all\'ospitalità di un minore di 14 anni'
+        ],
         faqs: [],
       },
     ],
@@ -897,7 +915,12 @@ const SERVICES_DATA = [
         description: 'Test di conoscenza della lingua italiana per stranieri',
         category: 'IMMIGRATION',
         basePrice: 19.99,
-        requiredDocuments: [],
+        requiredDocuments: [
+          '01. Carta d\'identità del richiedente',
+          '02. Codice Fiscale del richiedente',
+          '03. Permesso di soggiorno del richiedente',
+          '04. Passaporto del richiedente'
+        ],
         faqs: [],
       },
     ],
@@ -916,7 +939,11 @@ const SERVICES_DATA = [
         description: 'Elaborazione delle buste paga per colf e badanti',
         category: 'HR',
         basePrice: 18.3,
-        requiredDocuments: [],
+        requiredDocuments: [
+          '01. Contratto di lavoro (mansioni, orario, retribuzione)',
+          '02. Registro presenze con ore lavorate, straordinari e assenze',
+          '03. Dati personali di colf/badante (nome, cognome, codice fiscale, dati anagrafici)'
+        ],
         faqs: [],
       },
       {
@@ -925,7 +952,11 @@ const SERVICES_DATA = [
         description: 'Bollettino MAV trimestrale per contributi previdenziali',
         category: 'HR',
         basePrice: 12.2,
-        requiredDocuments: [],
+        requiredDocuments: [
+          '01. Dati personali datore di lavoro (nome, cognome, codice fiscale o P.IVA, indirizzo)',
+          '02. Dati personali lavoratore (nome, cognome, codice fiscale, data di nascita, residenza)',
+          '03. Registro presenze o giornaliero con ore lavorate nel trimestre'
+        ],
         faqs: [],
       },
       {
@@ -934,7 +965,14 @@ const SERVICES_DATA = [
         description: 'Comunicazione di assunzione all\'INPS',
         category: 'HR',
         basePrice: 49.99,
-        requiredDocuments: [],
+        requiredDocuments: [
+          '01. Documento di riconoscimento datore di lavoro (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          '02. Codice fiscale datore di lavoro',
+          '03. Eventuale permesso di soggiorno del datore di lavoro',
+          '04. Documento di riconoscimento lavoratore (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          '05. Codice fiscale lavoratore',
+          '06. Eventuale permesso di soggiorno del lavoratore'
+        ],
         faqs: [],
       },
       {
@@ -943,7 +981,10 @@ const SERVICES_DATA = [
         description: 'Certificazione Unica per colf e badanti',
         category: 'HR',
         basePrice: 36.6,
-        requiredDocuments: [],
+        requiredDocuments: [
+          '01. Documento di riconoscimento (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          '02. Codice fiscale richiedente'
+        ],
         faqs: [],
       },
       {
@@ -952,7 +993,14 @@ const SERVICES_DATA = [
         description: 'Redazione lettera di assunzione',
         category: 'HR',
         basePrice: 49.99,
-        requiredDocuments: [],
+        requiredDocuments: [
+          '01. Dati personali del datore di lavoro (nome, cognome, codice fiscale o P.IVA, indirizzo)',
+          '02. Dati personali del lavoratore (nome, cognome, codice fiscale, data di nascita, residenza, qualifiche)',
+          '03. Mansioni e compiti da svolgere',
+          '04. Orario di lavoro, giorni di riposo ed eventuali turni',
+          '05. Retribuzione e modalita\' di pagamento',
+          '06. Durata del contratto (determinato o indeterminato)'
+        ],
         faqs: [],
       },
       {
@@ -961,7 +1009,13 @@ const SERVICES_DATA = [
         description: 'Cessazione del rapporto di lavoro domestico',
         category: 'HR',
         basePrice: 36.6,
-        requiredDocuments: [],
+        requiredDocuments: [
+          '01. Documento di riconoscimento del datore di lavoro (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          '02. Codice fiscale del datore di lavoro',
+          '03. Eventuale permesso di soggiorno del datore di lavoro',
+          '04. Codice fiscale del lavoratore',
+          '05. Comunicazione di assunzione INPS'
+        ],
         faqs: [],
       },
       {
@@ -970,7 +1024,15 @@ const SERVICES_DATA = [
         description: 'Variazione del rapporto di lavoro domestico',
         category: 'HR',
         basePrice: 36.6,
-        requiredDocuments: [],
+        requiredDocuments: [
+          '01. Documento di riconoscimento datore di lavoro (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          '02. Codice fiscale datore di lavoro',
+          '03. Eventuale permesso di soggiorno del datore di lavoro',
+          '04. Documento di riconoscimento lavoratore (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          '05. Codice fiscale lavoratore',
+          '06. Eventuale permesso di soggiorno del lavoratore',
+          '07. Comunicazione di assunzione INPS'
+        ],
         faqs: [],
       },
     ],
@@ -989,7 +1051,13 @@ const SERVICES_DATA = [
         description: 'Assegno di maternità INPS',
         category: 'SOCIAL',
         basePrice: 29.99,
-        requiredDocuments: [],
+        requiredDocuments: [
+          '01. Carta d\'identità dichiarante',
+          '02. Codice Fiscale dichiarante',
+          '03. Permesso/Carta di soggiorno dichiarante',
+          '04. Codice fiscale neonato',
+          '05. Attestazione ISEE non superiore a euro 17.416,66'
+        ],
         faqs: [],
       },
       {
@@ -998,7 +1066,13 @@ const SERVICES_DATA = [
         description: 'Bonus per nuovi nati',
         category: 'SOCIAL',
         basePrice: 29.99,
-        requiredDocuments: [],
+        requiredDocuments: [
+          '01. Documento d\'identita\' valido del genitore richiedente',
+          '02. Codice fiscale del genitore richiedente e del bambino/i',
+          '03. Attestazione ISEE minorenni in corso di validita\' (non superiore a 40.000 euro)',
+          '04. Permesso di soggiorno valido (per cittadini non UE)',
+          '05. IBAN del genitore richiedente'
+        ],
         faqs: [],
       },
       {
@@ -1007,7 +1081,13 @@ const SERVICES_DATA = [
         description: 'Congedo parentale per dipendenti',
         category: 'HR',
         basePrice: 29.99,
-        requiredDocuments: [],
+        requiredDocuments: [
+          '01. Documento di riconoscimento (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          '02. Codice fiscale richiedente',
+          '03. Codice fiscale altro genitore se presente',
+          '04. Codice fiscale del minore',
+          '05. Buste paga'
+        ],
         faqs: [],
       },
       {
@@ -1016,7 +1096,7 @@ const SERVICES_DATA = [
         description: 'Maternità obbligatoria dopo il parto',
         category: 'HR',
         basePrice: 29.99,
-        requiredDocuments: [],
+        requiredDocuments: ['01. Codice fiscale del neonato/dei neonati'],
         faqs: [],
       },
       {
@@ -1025,7 +1105,13 @@ const SERVICES_DATA = [
         description: 'Indennità di maternità obbligatoria per dipendenti',
         category: 'HR',
         basePrice: 29.99,
-        requiredDocuments: [],
+        requiredDocuments: [
+          '01. Documento di riconoscimento (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          '02. Codice fiscale richiedente',
+          '03. Eventuale permesso di soggiorno',
+          '04. Certificato di gravidanza telematico con data presunta del parto',
+          '05. Eventuale certificato medico o autodichiarazione del datore di lavoro per lavorare fino all\'inizio maternita\''
+        ],
         faqs: [],
       },
       {
@@ -1034,7 +1120,14 @@ const SERVICES_DATA = [
         description: 'Maternità anticipata per dipendenti',
         category: 'HR',
         basePrice: 29.99,
-        requiredDocuments: [],
+        requiredDocuments: [
+          '01. Documento di riconoscimento (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          '02. Codice fiscale richiedente',
+          '03. Eventuale permesso di soggiorno',
+          '04. Certificato di gravidanza telematico con data presunta del parto',
+          '05. Certificato medico ASL o direzione territoriale competente con gravi complicanze',
+          '06. Certificato di interdizione anticipata per condizioni di lavoro pesante o pericoloso'
+        ],
         faqs: [],
       },
       {
@@ -1043,7 +1136,12 @@ const SERVICES_DATA = [
         description: 'Congedo parentale gestione separata',
         category: 'HR',
         basePrice: 29.99,
-        requiredDocuments: [],
+        requiredDocuments: [
+          '01. Documento di riconoscimento (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          '02. Codice fiscale richiedente',
+          '03. Codice fiscale altro genitore se presente',
+          '04. Codice fiscale del minore'
+        ],
         faqs: [],
       },
       {
@@ -1052,7 +1150,12 @@ const SERVICES_DATA = [
         description: 'Congedo parentale per autonomi',
         category: 'HR',
         basePrice: 29.99,
-        requiredDocuments: [],
+        requiredDocuments: [
+          '01. Documento di riconoscimento (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          '02. Codice fiscale richiedente',
+          '03. Codice fiscale altro genitore se presente',
+          '04. Codice fiscale del minore'
+        ],
         faqs: [],
       },
     ],
@@ -1080,7 +1183,12 @@ const SERVICES_DATA = [
         description: 'Permessi per assistenza familiari disabili',
         category: 'HR',
         basePrice: 29.99,
-        requiredDocuments: [],
+        requiredDocuments: [
+          '01. Documento di riconoscimento del familiare disabile (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          '02. Codice fiscale del familiare disabile',
+          '03. Verbale riconoscimento Handicap',
+          '04. Busta paga dell\'attuale datore di lavoro'
+        ],
         faqs: [],
       },
     ],
@@ -1099,7 +1207,10 @@ const SERVICES_DATA = [
         description: 'Estratto conto certificato e calcolo della pensione',
         category: 'PENSION',
         basePrice: 62,
-        requiredDocuments: [],
+        requiredDocuments: [
+          '01. Documento di riconoscimento (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          '02. Codice fiscale richiedente'
+        ],
         faqs: [],
       },
       {
@@ -1117,7 +1228,14 @@ const SERVICES_DATA = [
         description: 'Pensione ai superstiti',
         category: 'PENSION',
         basePrice: 0,
-        requiredDocuments: [],
+        requiredDocuments: [
+          '01. Carta d\'identità richiedente',
+          '02. Codice fiscale/Tessera Sanitaria del richiedente',
+          '03. Carta d\'identità della persona deceduta',
+          '04. Codice fiscale/Tessera Sanitaria della persona deceduta',
+          '05. Codice IBAN del titolare (dichiarante) della pensione',
+          '06. Codice fiscale/Tessera Sanitaria dei familiari che hanno diritto alla pensione'
+        ],
         faqs: [],
       },
       {
@@ -1126,7 +1244,12 @@ const SERVICES_DATA = [
         description: 'Ricostituzione reddituale INPS',
         category: 'PENSION',
         basePrice: 29.99,
-        requiredDocuments: [],
+        requiredDocuments: [
+          '01. Documento d\'identità valido del richiedente (fronte e retro)',
+          '02. Codice fiscale del richiedente',
+          '03. Codice fiscale del coniuge e dei familiari a carico (se rilevante)',
+          '04. Eventuale lettera ricevuta da INPS'
+        ],
         faqs: [],
       },
     ],
@@ -1145,7 +1268,30 @@ const SERVICES_DATA = [
         description: 'Dichiarazione redditi per persone fisiche senza P.IVA',
         category: 'TAX',
         basePrice: 129.99,
-        requiredDocuments: [],
+        requiredDocuments: [
+          '01. Documento di riconoscimento (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          '02. Codice fiscale richiedente',
+          '03. CU 2023 redditi 2022',
+          '04. Codice fiscale dei familiari a carico',
+          '05. Spese sanitarie',
+          '06. Contratto di locazione',
+          '07. Interessi passivi su mutui (contratto compravendita, contratto mutuo, oneri accessori, quietanze interessi, fatture ristrutturazione/costruzione)',
+          '08. Spese funebri',
+          '09. Spese frequenza di scuole dell\'infanzia, del primo ciclo di istruzione e della scuola secondaria di secondo grado',
+          '10. Spese frequenza corsi istruzione universitaria presso università statali e non statali',
+          '11. Spese per addetti all\'assistenza personale',
+          '12. Spese per attività sportive dei ragazzi',
+          '13. Spese veterinarie',
+          '14. Spese asili nido',
+          '15. Versamenti onlus',
+          '16. Contributi previdenziali assistenziali',
+          '17. Assegni periodici corrisposti al coniuge (sentenza e quietanze, cod. fisc. ex-coniuge)',
+          '18. Contributi servizi domestici',
+          '19. Spese mediche e di assistenza di persone con disabilità',
+          '20. Spese 36% - 50% - 65% per interventi di recupero del patrimonio edilizio',
+          '21. Spese 50% per la pace contributiva e le colonne per la ricarica',
+          '22. Spese 50% per l\'arredo immobili (comprese giovani coppie) e IVA per acquisto abitazione A o B; spese 55% - 65% per risparmio energetico'
+        ],
         faqs: [],
       },
       {
@@ -1154,7 +1300,32 @@ const SERVICES_DATA = [
         description: 'Dichiarazione redditi per regime forfettario',
         category: 'TAX',
         basePrice: 50,
-        requiredDocuments: [],
+        requiredDocuments: [
+          '01. Documento di riconoscimento (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          '02. Codice fiscale richiedente',
+          '03. CU 2023 redditi 2022',
+          '04. Eventuale certificato di attribuzione P.IVA',
+          '05. Eventuali fatture emesse nell\'anno 2022',
+          '06. Codice fiscale dei familiari a carico',
+          '07. Spese sanitarie',
+          '08. Contratto di locazione',
+          '09. Interessi passivi su mutui (contratto compravendita, contratto mutuo, oneri accessori, quietanze interessi, fatture ristrutturazione/costruzione)',
+          '10. Spese funebri',
+          '11. Spese frequenza di scuole dell\'infanzia, del primo ciclo di istruzione e della scuola secondaria di secondo grado',
+          '12. Spese frequenza corsi istruzione universitaria presso università statali e non statali',
+          '13. Spese per addetti all\'assistenza personale',
+          '14. Spese per attività sportive dei ragazzi',
+          '15. Spese veterinarie',
+          '16. Spese asili nido',
+          '17. Versamenti onlus',
+          '18. Contributi previdenziali assistenziali',
+          '19. Assegni periodici corrisposti al coniuge (sentenza e quietanze, cod. fisc. ex-coniuge)',
+          '20. Contributi servizi domestici',
+          '21. Spese mediche e di assistenza di persone con disabilità',
+          '22. Spese 36% - 50% - 65% per interventi di recupero del patrimonio edilizio',
+          '23. Spese 50% per la pace contributiva e le colonne per la ricarica',
+          '24. Spese 50% per l\'arredo immobili (comprese giovani coppie) e IVA per acquisto abitazione A o B; spese 55% - 65% per risparmio energetico'
+        ],
         faqs: [],
       },
       {
@@ -1163,7 +1334,30 @@ const SERVICES_DATA = [
         description: 'Integrazione alla dichiarazione dei redditi',
         category: 'TAX',
         basePrice: 29.99,
-        requiredDocuments: [],
+        requiredDocuments: [
+          '01. Documento di riconoscimento (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          '02. Codice fiscale richiedente',
+          '03. CU 2023 redditi 2022',
+          '04. Codice fiscale dei familiari a carico',
+          '05. Spese sanitarie',
+          '06. Contratto di locazione',
+          '07. Interessi passivi su mutui (contratto compravendita, contratto mutuo, oneri accessori, quietanze interessi, fatture ristrutturazione/costruzione)',
+          '08. Spese funebri',
+          '09. Spese frequenza di scuole dell\'infanzia, del primo ciclo di istruzione e della scuola secondaria di secondo grado',
+          '10. Spese frequenza corsi istruzione universitaria presso università statali e non statali',
+          '11. Spese per addetti all\'assistenza personale',
+          '12. Spese per attività sportive dei ragazzi',
+          '13. Spese veterinarie',
+          '14. Spese asili nido',
+          '15. Versamenti onlus',
+          '16. Contributi previdenziali assistenziali',
+          '17. Assegni periodici corrisposti al coniuge (sentenza e quietanze, cod. fisc. ex-coniuge)',
+          '18. Contributi servizi domestici',
+          '19. Spese mediche e di assistenza di persone con disabilità',
+          '20. Spese 36% - 50% - 65% per interventi di recupero del patrimonio edilizio',
+          '21. Spese 50% per la pace contributiva e le colonne per la ricarica',
+          '22. Spese 50% per l\'arredo immobili (comprese giovani coppie) e IVA per acquisto abitazione A o B; spese 55% - 65% per risparmio energetico'
+        ],
         faqs: [],
       },
       {
@@ -1172,7 +1366,12 @@ const SERVICES_DATA = [
         description: 'F24 per cedolare secca',
         category: 'TAX',
         basePrice: 29.99,
-        requiredDocuments: [],
+        requiredDocuments: [
+          '01. Carta d\'identità',
+          '02. Codice fiscale',
+          '03. Contratto di locazione',
+          '04. Registrazione del contratto di locazione'
+        ],
         faqs: [],
       },
       {
@@ -1181,7 +1380,12 @@ const SERVICES_DATA = [
         description: 'Dichiarazione e calcolo IMU',
         category: 'TAX',
         basePrice: 0,
-        requiredDocuments: [],
+        requiredDocuments: [
+          '01. Carta d\'identità',
+          '02. Codice Fiscale',
+          '03. Visura Catastale Aggiornata',
+          '04. Dati dei Pagamenti Precedenti'
+        ],
         faqs: [],
       },
     ],

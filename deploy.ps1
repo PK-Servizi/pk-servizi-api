@@ -29,3 +29,4 @@ ssh -i $KEY $SERVER $sshCommand
 
 Write-Host "`nDeployment complete!" -ForegroundColor Green
 Write-Host "Check logs with: pm2 logs pk-servizi-api" -ForegroundColor Yellow
+
