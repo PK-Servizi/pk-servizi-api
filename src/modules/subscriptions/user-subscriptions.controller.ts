@@ -78,7 +78,11 @@ export class UserSubscriptionsController {
   @Permissions('subscriptions:write')
   @ApiOperation({ summary: '[Admin] Update subscription status' })
   @ApiBody({ type: UpdateSubscriptionStatusDto })
-  @AuditLog({ action: 'SUBSCRIPTION_STATUS_UPDATED', resourceType: 'subscription', captureOldValues: true })
+  @AuditLog({
+    action: 'SUBSCRIPTION_STATUS_UPDATED',
+    resourceType: 'subscription',
+    captureOldValues: true,
+  })
   async updateStatus(
     @Param('id') id: string,
     @Body() dto: UpdateSubscriptionStatusDto,
@@ -93,7 +97,10 @@ export class UserSubscriptionsController {
   @Permissions('subscriptions:write')
   @ApiOperation({ summary: '[Admin] Override subscription usage limits' })
   @ApiBody({ type: OverrideLimitsDto })
-  @AuditLog({ action: 'SUBSCRIPTION_LIMITS_OVERRIDDEN', resourceType: 'subscription' })
+  @AuditLog({
+    action: 'SUBSCRIPTION_LIMITS_OVERRIDDEN',
+    resourceType: 'subscription',
+  })
   async overrideLimits(
     @Param('id') id: string,
     @Body() dto: OverrideLimitsDto,
@@ -107,7 +114,10 @@ export class UserSubscriptionsController {
   @Post('assign')
   @Permissions('subscriptions:write')
   @ApiOperation({ summary: '[Admin] Manually assign subscription to user' })
-  @AuditLog({ action: 'SUBSCRIPTION_MANUALLY_ASSIGNED', resourceType: 'subscription' })
+  @AuditLog({
+    action: 'SUBSCRIPTION_MANUALLY_ASSIGNED',
+    resourceType: 'subscription',
+  })
   @ApiBody({
     schema: {
       type: 'object',

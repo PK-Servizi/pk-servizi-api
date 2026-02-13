@@ -114,14 +114,14 @@ export class SubscriptionsController {
   }
 
   /**
-   * Upgrade/downgrade subscription plan
+   * Upgrade subscription plan
    */
   @Post('upgrade')
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Permissions('subscriptions:write_own')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({
-    summary: '[Customer] Upgrade or downgrade subscription plan',
+    summary: '[Customer] Upgrade subscription plan (requires payment)',
   })
   @ApiBody({ type: UpgradeSubscriptionDto })
   async upgradeSubscription(
@@ -129,6 +129,24 @@ export class SubscriptionsController {
     @CurrentUser() user: any,
   ) {
     return this.subscriptionsService.upgradeSubscription(dto, user.id);
+  }
+
+  /**
+   * Downgrade subscription plan
+   */
+  @Post('downgrade')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('subscriptions:write_own')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: '[Customer] Downgrade subscription plan (receives account credit)',
+  })
+  @ApiBody({ type: UpgradeSubscriptionDto })
+  async downgradeSubscription(
+    @Body() dto: UpgradeSubscriptionDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.subscriptionsService.downgradeSubscription(dto, user.id);
   }
 
   /**

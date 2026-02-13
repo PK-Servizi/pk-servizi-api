@@ -104,6 +104,101 @@ export class WebhooksService {
   }
 
   /**
+   * Handle subscription upgrade completion
+   */
+  private async handleSubscriptionUpgradeCompleted(
+    session: StripeCheckoutSession,
+  ): Promise<WebhookResponse> {
+    try {
+      const { userId, newPlanId, subscriptionId, proratedAmount } =
+        session.metadata;
+
+      this.logger.log(`Processing subscription upgrade for user ${userId}`);
+
+      // Get the subscription and update it
+      const subscription = await this.userSubscriptionRepository.findOne({
+        where: { id: subscriptionId },
+        relations: ['plan', 'user'],
+      });
+
+      if (!subscription) {
+        throw new Error('Subscription not found for upgrade');
+      }
+
+      const oldPlan = subscription.plan;
+
+      // Update subscription to new plan
+      subscription.planId = newPlanId;
+      await this.userSubscriptionRepository.save(subscription);
+
+      // Get new plan details
+      const newPlan = await this.userSubscriptionRepository.findOne({
+        where: { id: subscriptionId },
+        relations: ['plan'],
+      });
+
+      // Create payment record for the upgrade
+      const payment = this.paymentRepository.create({
+        userId,
+        subscriptionId,
+        amount: parseFloat(proratedAmount),
+        currency: session.currency.toUpperCase(),
+        status: 'completed',
+        stripePaymentIntentId: session.payment_intent as string,
+        description: `Upgrade from ${oldPlan.name} to ${newPlan.plan.name} (Prorated)`,
+        paidAt: new Date(),
+        metadata: {
+          type: 'subscription_upgrade',
+          checkoutSessionId: session.id,
+          oldPlanId: oldPlan.id,
+          newPlanId,
+          proratedAmount,
+        },
+      });
+
+      const savedPayment = await this.paymentRepository.save(payment);
+
+      // Send upgrade confirmation email
+      try {
+        const user = subscription.user;
+        if (user) {
+          await this.notificationsService.send({
+            userId: user.id,
+            userEmail: user.email,
+            title: '🚀 Subscription Upgraded Successfully',
+            message: `Your subscription has been upgraded from ${oldPlan.name} to ${newPlan.plan.name}. The prorated amount of €${proratedAmount} has been charged.`,
+            type: 'success',
+            data: {
+              oldPlan: oldPlan.name,
+              newPlan: newPlan.plan.name,
+              proratedAmount,
+              paymentId: savedPayment.id,
+            },
+          });
+        }
+      } catch (error) {
+        this.logger.error(`Failed to send upgrade email: ${error.message}`);
+      }
+
+      this.logger.log(`Subscription upgrade completed for user ${userId}`);
+
+      return {
+        received: true,
+        processed: true,
+        action: 'subscription_upgraded',
+        subscriptionId,
+        paymentId: savedPayment.id,
+      };
+    } catch (error) {
+      this.logger.error(
+        `Error handling subscription upgrade: ${error.message}`,
+        error.stack,
+      );
+      throw error;
+    }
+  }
+
+  /**
    * Handle checkout.session.completed event
    * This is triggered when a user completes the Stripe Checkout payment
    */
@@ -124,8 +219,10 @@ export class WebhooksService {
 
       // Handle service request payment
       if (serviceRequestId) {
-        this.logger.log('Processing service request payment: ' + serviceRequestId);
-        
+        this.logger.log(
+          'Processing service request payment: ' + serviceRequestId,
+        );
+
         // Find payment by checkout session or service request
         const payment = await this.paymentRepository.findOne({
           where: { serviceRequestId },
@@ -133,7 +230,9 @@ export class WebhooksService {
         });
 
         if (!payment) {
-          this.logger.error('Payment not found for service request: ' + serviceRequestId);
+          this.logger.error(
+            'Payment not found for service request: ' + serviceRequestId,
+          );
           return {
             received: true,
             processed: false,
@@ -150,7 +249,9 @@ export class WebhooksService {
         }
         await this.paymentRepository.save(payment);
 
-        this.logger.log('Payment completed for service request: ' + serviceRequestId);
+        this.logger.log(
+          'Payment completed for service request: ' + serviceRequestId,
+        );
 
         // Trigger service request workflow update
         await this.serviceRequestsService.handlePaymentSuccess(payment.id);
@@ -161,6 +262,12 @@ export class WebhooksService {
       }
 
       // Handle subscription payment (existing logic)
+      // Check if this is a subscription upgrade
+      const upgradeType = session.metadata?.type;
+      if (upgradeType === 'subscription_upgrade') {
+        return await this.handleSubscriptionUpgradeCompleted(session);
+      }
+
       // Find the pending subscription for this user
       this.logger.log('Looking for pending subscription for user: ' + userId);
 
@@ -223,7 +330,9 @@ export class WebhooksService {
 
       // Send subscription activated email
       try {
-        const user = await this.userRepository.findOne({ where: { id: userId } });
+        const user = await this.userRepository.findOne({
+          where: { id: userId },
+        });
         if (user) {
           await this.emailService.sendSubscriptionActivated(
             user.email,
@@ -233,7 +342,9 @@ export class WebhooksService {
           );
         }
       } catch (error) {
-        this.logger.error(`Failed to send subscription email: ${error.message}`);
+        this.logger.error(
+          `Failed to send subscription email: ${error.message}`,
+        );
       }
 
       // Create payment record
@@ -428,9 +539,13 @@ export class WebhooksService {
 
         // Send payment success email
         try {
-          const user = await this.userRepository.findOne({ where: { id: payment.userId } });
+          const user = await this.userRepository.findOne({
+            where: { id: payment.userId },
+          });
           if (user) {
-            const updatedPayment = await this.paymentRepository.findOne({ where: { id: payment.id } });
+            const updatedPayment = await this.paymentRepository.findOne({
+              where: { id: payment.id },
+            });
             await this.emailService.sendPaymentSuccess(
               user.email,
               user.fullName,
@@ -495,7 +610,9 @@ export class WebhooksService {
 
       // Send payment failed emails
       try {
-        const user = await this.userRepository.findOne({ where: { id: payment.userId } });
+        const user = await this.userRepository.findOne({
+          where: { id: payment.userId },
+        });
         if (user) {
           // Customer notification
           await this.emailService.sendPaymentFailed(
@@ -512,7 +629,9 @@ export class WebhooksService {
           );
         }
       } catch (error) {
-        this.logger.error(`Failed to send payment failed email: ${error.message}`);
+        this.logger.error(
+          `Failed to send payment failed email: ${error.message}`,
+        );
       }
     }
 
@@ -546,7 +665,9 @@ export class WebhooksService {
           });
         }
       } catch (error) {
-        this.logger.error(`Failed to send subscription update email: ${error.message}`);
+        this.logger.error(
+          `Failed to send subscription update email: ${error.message}`,
+        );
       }
     }
 
@@ -587,7 +708,9 @@ export class WebhooksService {
           );
         }
       } catch (error) {
-        this.logger.error(`Failed to send subscription cancelled email: ${error.message}`);
+        this.logger.error(
+          `Failed to send subscription cancelled email: ${error.message}`,
+        );
       }
     }
 

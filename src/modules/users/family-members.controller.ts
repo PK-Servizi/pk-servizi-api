@@ -71,7 +71,11 @@ export class FamilyMembersController {
   @Permissions('family-members:update')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Update family member' })
-  @AuditLog({ action: 'FAMILY_MEMBER_UPDATED', resourceType: 'family_member', captureOldValues: true })
+  @AuditLog({
+    action: 'FAMILY_MEMBER_UPDATED',
+    resourceType: 'family_member',
+    captureOldValues: true,
+  })
   update(
     @Param('id') id: string,
     @Body() dto: UpdateFamilyMemberDto,
@@ -106,7 +110,10 @@ export class FamilyMembersController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Upload document for family member' })
   @ApiConsumes('multipart/form-data')
-  @AuditLog({ action: 'FAMILY_MEMBER_DOCUMENTS_UPLOADED', resourceType: 'family_member' })
+  @AuditLog({
+    action: 'FAMILY_MEMBER_DOCUMENTS_UPLOADED',
+    resourceType: 'family_member',
+  })
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'identityDocument', maxCount: 1 },

@@ -7,10 +7,7 @@ import { Service } from '../services/entities/service.entity';
 import { GuardsModule } from '../../common/modules/guards.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Faq, Service]),
-    GuardsModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Faq, Service]), GuardsModule],
   controllers: [FaqsController],
   providers: [FaqsService],
   exports: [FaqsService],

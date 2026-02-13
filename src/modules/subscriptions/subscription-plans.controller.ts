@@ -71,7 +71,10 @@ export class SubscriptionPlansController {
   @Permissions('subscription_plans:write')
   @ApiOperation({ summary: '[Admin] Create new subscription plan' })
   @ApiBody({ type: CreateSubscriptionPlanDto })
-  @AuditLog({ action: 'SUBSCRIPTION_PLAN_CREATED', resourceType: 'subscription_plan' })
+  @AuditLog({
+    action: 'SUBSCRIPTION_PLAN_CREATED',
+    resourceType: 'subscription_plan',
+  })
   async create(@Body() dto: CreateSubscriptionPlanDto) {
     return this.plansService.create(dto);
   }
@@ -83,7 +86,11 @@ export class SubscriptionPlansController {
   @Permissions('subscription_plans:write')
   @ApiOperation({ summary: '[Admin] Update subscription plan' })
   @ApiBody({ type: UpdateSubscriptionPlanDto })
-  @AuditLog({ action: 'SUBSCRIPTION_PLAN_UPDATED', resourceType: 'subscription_plan', captureOldValues: true })
+  @AuditLog({
+    action: 'SUBSCRIPTION_PLAN_UPDATED',
+    resourceType: 'subscription_plan',
+    captureOldValues: true,
+  })
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateSubscriptionPlanDto,
@@ -98,7 +105,10 @@ export class SubscriptionPlansController {
   @Delete(':id')
   @Permissions('subscription_plans:delete')
   @ApiOperation({ summary: '[Admin] Deactivate subscription plan' })
-  @AuditLog({ action: 'SUBSCRIPTION_PLAN_DEACTIVATED', resourceType: 'subscription_plan' })
+  @AuditLog({
+    action: 'SUBSCRIPTION_PLAN_DEACTIVATED',
+    resourceType: 'subscription_plan',
+  })
   async deactivate(@Param('id') id: string) {
     return this.plansService.deactivate(id);
   }
@@ -132,7 +142,10 @@ export class SubscriptionPlansController {
   @ApiBody({
     schema: { type: 'object', properties: { name: { type: 'string' } } },
   })
-  @AuditLog({ action: 'SUBSCRIPTION_PLAN_CLONED', resourceType: 'subscription_plan' })
+  @AuditLog({
+    action: 'SUBSCRIPTION_PLAN_CLONED',
+    resourceType: 'subscription_plan',
+  })
   async clone(@Param('id') id: string, @Body('name') name: string) {
     return this.plansService.clone(id, name);
   }

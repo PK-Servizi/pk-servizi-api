@@ -163,7 +163,10 @@ export class NotificationsService {
             actionUrl: dto.actionUrl,
           })
           .catch((error) => {
-            this.logger.error(`Failed to send email: ${error.message}`, error.stack);
+            this.logger.error(
+              `Failed to send email: ${error.message}`,
+              error.stack,
+            );
           });
       });
     }
@@ -199,7 +202,10 @@ export class NotificationsService {
               message: dto.message,
             })
             .catch((error) => {
-              this.logger.error(`Failed to send email to ${user.email}: ${error.message}`, error.stack);
+              this.logger.error(
+                `Failed to send email to ${user.email}: ${error.message}`,
+                error.stack,
+              );
             });
         }
       });

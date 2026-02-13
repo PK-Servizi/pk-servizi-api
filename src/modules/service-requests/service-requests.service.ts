@@ -141,7 +141,8 @@ export class ServiceRequestsService {
 
       return {
         success: true,
-        message: 'Service request created successfully. Please complete the questionnaire.',
+        message:
+          'Service request created successfully. Please complete the questionnaire.',
         data: {
           serviceRequestId: serviceRequest.id,
           serviceName: service.name,
@@ -364,7 +365,8 @@ export class ServiceRequestsService {
     }
 
     // Check if service is paid or free
-    const isPaidService = serviceRequest.service && serviceRequest.service.basePrice > 0;
+    const isPaidService =
+      serviceRequest.service && serviceRequest.service.basePrice > 0;
 
     // For paid services, validate payment is completed
     if (isPaidService) {
@@ -1357,7 +1359,7 @@ export class ServiceRequestsService {
       const service = request.service;
       const basePriceNum = parseFloat(String(service?.basePrice || 0));
       const isFreeService = basePriceNum === 0;
-      
+
       // Check if user has a direct payment for this request
       let hasValidPayment = false;
       if (request.paymentId) {
@@ -1366,14 +1368,20 @@ export class ServiceRequestsService {
         });
         // Payment must exist and be in 'completed' status
         hasValidPayment = payment && payment.status === 'completed';
-        this.logger.debug(`Payment check - ID: ${request.paymentId}, Found: ${!!payment}, Status: ${payment?.status}, Valid: ${hasValidPayment}`);
+        this.logger.debug(
+          `Payment check - ID: ${request.paymentId}, Found: ${!!payment}, Status: ${payment?.status}, Valid: ${hasValidPayment}`,
+        );
       }
-      
-      this.logger.debug(`Access check - Service: ${service?.name} (${service?.code}), BasePrice: ${service?.basePrice} (parsed: ${basePriceNum}), Free: ${isFreeService}, HasPayment: ${hasValidPayment}`);
-      
+
+      this.logger.debug(
+        `Access check - Service: ${service?.name} (${service?.code}), BasePrice: ${service?.basePrice} (parsed: ${basePriceNum}), Free: ${isFreeService}, HasPayment: ${hasValidPayment}`,
+      );
+
       // If service is FREE, allow to submit
       if (!isFreeService && !hasValidPayment) {
-        this.logger.warn(`Subscription check required for paid service without direct payment: ${service?.code}`);
+        this.logger.warn(
+          `Subscription check required for paid service without direct payment: ${service?.code}`,
+        );
         // Only check subscription if: service is PAID AND user hasn't paid directly
         const serviceCode = service?.code || 'ISEE';
         const subscriptionCheck = await this.verifySubscriptionAccess(

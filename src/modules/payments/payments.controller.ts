@@ -57,12 +57,12 @@ export class PaymentsController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const pdfBuffer = await this.paymentsService.downloadReceipt(id, user.id);
-    
+
     res.set({
       'Content-Type': 'application/pdf',
       'Content-Disposition': `attachment; filename="receipt-${id}.pdf"`,
     });
-    
+
     return new StreamableFile(pdfBuffer);
   }
 
@@ -75,12 +75,12 @@ export class PaymentsController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const pdfBuffer = await this.paymentsService.generateInvoice(id, user.id);
-    
+
     res.set({
       'Content-Type': 'application/pdf',
       'Content-Disposition': `attachment; filename="invoice-${id}.pdf"`,
     });
-    
+
     return new StreamableFile(pdfBuffer);
   }
 

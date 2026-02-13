@@ -34,7 +34,8 @@ describe('Customer All Routes E2E Test - Real Data', () => {
   let familyMemberId: string;
   let serviceTypeId: string;
   let serviceRequestId: string;
-  let documentId: string;
+  // Remove unused variable
+  // const documentId = 'doc-123';
   let appointmentId: string;
   let subscriptionId: string;
   let paymentId: string;

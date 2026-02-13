@@ -70,7 +70,6 @@ export class PaymentsService {
     const [data, total] = await qb.getManyAndCount();
 
     return {
-
       data,
       pagination: {
         page,
@@ -212,7 +211,7 @@ export class PaymentsService {
       where: { id },
       relations: ['user', 'serviceRequest', 'serviceRequest.service'],
     });
-    
+
     if (!payment) {
       throw new Error(`Payment ${id} not found`);
     }
@@ -240,8 +239,14 @@ export class PaymentsService {
         doc.on('error', reject);
 
         // Header
-        doc.fontSize(24).font('Helvetica-Bold').text('PAYMENT RECEIPT', { align: 'center' });
-        doc.fontSize(12).font('Helvetica').text('PK Servizi API', { align: 'center' });
+        doc
+          .fontSize(24)
+          .font('Helvetica-Bold')
+          .text('PAYMENT RECEIPT', { align: 'center' });
+        doc
+          .fontSize(12)
+          .font('Helvetica')
+          .text('PK Servizi API', { align: 'center' });
         doc.moveDown(2);
 
         // Receipt details
@@ -251,40 +256,57 @@ export class PaymentsService {
 
         doc.fontSize(10).font('Helvetica-Bold');
         doc.text('Receipt ID:', leftMargin, yPosition);
-        doc.font('Helvetica').text(payment.id, rightMargin, yPosition, { width: 250 });
+        doc
+          .font('Helvetica')
+          .text(payment.id, rightMargin, yPosition, { width: 250 });
         yPosition += 20;
 
         doc.font('Helvetica-Bold').text('Payment Date:', leftMargin, yPosition);
         doc.font('Helvetica').text(
-          new Date(payment.createdAt).toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-          }), 
-          rightMargin, 
-          yPosition
+          new Date(payment.createdAt).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
+          rightMargin,
+          yPosition,
         );
         yPosition += 20;
 
-        doc.font('Helvetica-Bold').text('Payment Method:', leftMargin, yPosition);
+        doc
+          .font('Helvetica-Bold')
+          .text('Payment Method:', leftMargin, yPosition);
         doc.font('Helvetica').text('Credit Card', rightMargin, yPosition);
         yPosition += 20;
 
-        doc.font('Helvetica-Bold').text('Transaction ID:', leftMargin, yPosition);
-        doc.font('Helvetica').text(payment.stripePaymentIntentId || 'N/A', rightMargin, yPosition, { width: 250 });
+        doc
+          .font('Helvetica-Bold')
+          .text('Transaction ID:', leftMargin, yPosition);
+        doc
+          .font('Helvetica')
+          .text(
+            payment.stripePaymentIntentId || 'N/A',
+            rightMargin,
+            yPosition,
+            { width: 250 },
+          );
         yPosition += 20;
 
         doc.font('Helvetica-Bold').text('Service:', leftMargin, yPosition);
-        doc.font('Helvetica').text(
-          payment.serviceRequest?.service?.name || 'Service Request', 
-          rightMargin, 
-          yPosition,
-          { width: 250 }
-        );
+        doc
+          .font('Helvetica')
+          .text(
+            payment.serviceRequest?.service?.name || 'Service Request',
+            rightMargin,
+            yPosition,
+            { width: 250 },
+          );
         yPosition += 20;
 
         doc.font('Helvetica-Bold').text('Status:', leftMargin, yPosition);
-        doc.font('Helvetica').text(payment.status.toUpperCase(), rightMargin, yPosition);
+        doc
+          .font('Helvetica')
+          .text(payment.status.toUpperCase(), rightMargin, yPosition);
         yPosition += 40;
 
         // Total section
@@ -292,24 +314,34 @@ export class PaymentsService {
         doc.fillColor('#000000');
         doc.fontSize(18).font('Helvetica-Bold');
         doc.text('Total Amount Paid:', leftMargin, yPosition + 10);
-        doc.text(`€${(payment.amount / 100).toFixed(2)}`, rightMargin + 100, yPosition + 10, { align: 'right' });
+        doc.text(
+          `€${(payment.amount / 100).toFixed(2)}`,
+          rightMargin + 100,
+          yPosition + 10,
+          { align: 'right' },
+        );
         yPosition += 80;
 
         // Footer
         doc.fontSize(10).font('Helvetica');
         doc.fillColor('#95a5a6');
-        doc.text('This is an automatically generated receipt.', leftMargin, yPosition, { align: 'center', width: 500 });
         doc.text(
-          `Generated on ${new Date().toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'long', 
+          'This is an automatically generated receipt.',
+          leftMargin,
+          yPosition,
+          { align: 'center', width: 500 },
+        );
+        doc.text(
+          `Generated on ${new Date().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
             day: 'numeric',
             hour: '2-digit',
-            minute: '2-digit'
+            minute: '2-digit',
           })}`,
           leftMargin,
           yPosition + 15,
-          { align: 'center', width: 500 }
+          { align: 'center', width: 500 },
         );
 
         doc.end();
@@ -327,7 +359,7 @@ export class PaymentsService {
       where: { id },
       relations: ['user', 'serviceRequest', 'serviceRequest.service'],
     });
-    
+
     if (!payment) {
       throw new Error(`Payment ${id} not found`);
     }
@@ -356,19 +388,35 @@ export class PaymentsService {
 
         // Header
         doc.fontSize(20).font('Helvetica-Bold').text('PK SERVIZI', 50, 50);
-        doc.fontSize(10).font('Helvetica').text('Professional Services', 50, 75);
-        doc.fontSize(32).font('Helvetica-Bold').fillColor('#e74c3c').text('INVOICE', 400, 50, { align: 'right' });
-        
+        doc
+          .fontSize(10)
+          .font('Helvetica')
+          .text('Professional Services', 50, 75);
+        doc
+          .fontSize(32)
+          .font('Helvetica-Bold')
+          .fillColor('#e74c3c')
+          .text('INVOICE', 400, 50, { align: 'right' });
+
         // Draw line under header
-        doc.moveTo(50, 100).lineTo(550, 100).strokeColor('#2c3e50').lineWidth(3).stroke();
+        doc
+          .moveTo(50, 100)
+          .lineTo(550, 100)
+          .strokeColor('#2c3e50')
+          .lineWidth(3)
+          .stroke();
         doc.fillColor('#000000');
         doc.moveDown(3);
 
         // Invoice details section
         let yPos = 130;
-        
+
         // Invoice to section
-        doc.fontSize(10).font('Helvetica-Bold').fillColor('#7f8c8d').text('INVOICE TO:', 50, yPos);
+        doc
+          .fontSize(10)
+          .font('Helvetica-Bold')
+          .fillColor('#7f8c8d')
+          .text('INVOICE TO:', 50, yPos);
         yPos += 15;
         doc.fontSize(10).font('Helvetica').fillColor('#000000');
         doc.text(payment.user?.fullName || 'Customer', 50, yPos);
@@ -377,24 +425,40 @@ export class PaymentsService {
 
         // Invoice details section (right side)
         let rightYPos = 130;
-        doc.fontSize(10).font('Helvetica-Bold').fillColor('#7f8c8d').text('INVOICE DETAILS:', 350, rightYPos);
+        doc
+          .fontSize(10)
+          .font('Helvetica-Bold')
+          .fillColor('#7f8c8d')
+          .text('INVOICE DETAILS:', 350, rightYPos);
         rightYPos += 15;
-        doc.fontSize(10).font('Helvetica-Bold').fillColor('#000000').text('Invoice #:', 350, rightYPos);
-        doc.font('Helvetica').text(`INV-${payment.id.substring(0, 8).toUpperCase()}`, 430, rightYPos);
+        doc
+          .fontSize(10)
+          .font('Helvetica-Bold')
+          .fillColor('#000000')
+          .text('Invoice #:', 350, rightYPos);
+        doc
+          .font('Helvetica')
+          .text(
+            `INV-${payment.id.substring(0, 8).toUpperCase()}`,
+            430,
+            rightYPos,
+          );
         rightYPos += 15;
         doc.font('Helvetica-Bold').text('Date:', 350, rightYPos);
         doc.font('Helvetica').text(
-          new Date(payment.createdAt).toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-          }), 
-          430, 
-          rightYPos
+          new Date(payment.createdAt).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
+          430,
+          rightYPos,
         );
         rightYPos += 15;
         doc.font('Helvetica-Bold').text('Payment ID:', 350, rightYPos);
-        doc.font('Helvetica').text(payment.id.substring(0, 20) + '...', 430, rightYPos);
+        doc
+          .font('Helvetica')
+          .text(payment.id.substring(0, 20) + '...', 430, rightYPos);
 
         // Table header
         yPos = 230;
@@ -408,31 +472,57 @@ export class PaymentsService {
         // Table content
         yPos += 25;
         doc.fillColor('#000000');
-        doc.fontSize(11).font('Helvetica-Bold').text(
-          payment.serviceRequest?.service?.name || 'Service Request',
-          60,
-          yPos + 5,
-          { width: 250 }
-        );
-        doc.fontSize(9).font('Helvetica').fillColor('#7f8c8d').text(
-          `Service ID: ${payment.serviceRequestId?.substring(0, 20) || 'N/A'}`,
-          60,
-          yPos + 20,
-          { width: 250 }
-        );
+        doc
+          .fontSize(11)
+          .font('Helvetica-Bold')
+          .text(
+            payment.serviceRequest?.service?.name || 'Service Request',
+            60,
+            yPos + 5,
+            { width: 250 },
+          );
+        doc
+          .fontSize(9)
+          .font('Helvetica')
+          .fillColor('#7f8c8d')
+          .text(
+            `Service ID: ${payment.serviceRequestId?.substring(0, 20) || 'N/A'}`,
+            60,
+            yPos + 20,
+            { width: 250 },
+          );
         doc.fillColor('#000000');
-        doc.fontSize(10).font('Helvetica').text('1', 330, yPos + 10, { width: 50, align: 'center' });
-        doc.text(`€${(payment.amount / 100).toFixed(2)}`, 390, yPos + 10, { width: 70, align: 'right' });
-        doc.font('Helvetica-Bold').text(`€${(payment.amount / 100).toFixed(2)}`, 470, yPos + 10, { width: 70, align: 'right' });
-        
+        doc
+          .fontSize(10)
+          .font('Helvetica')
+          .text('1', 330, yPos + 10, { width: 50, align: 'center' });
+        doc.text(`€${(payment.amount / 100).toFixed(2)}`, 390, yPos + 10, {
+          width: 70,
+          align: 'right',
+        });
+        doc
+          .font('Helvetica-Bold')
+          .text(`€${(payment.amount / 100).toFixed(2)}`, 470, yPos + 10, {
+            width: 70,
+            align: 'right',
+          });
+
         yPos += 45;
-        doc.moveTo(50, yPos).lineTo(550, yPos).strokeColor('#dee2e6').lineWidth(1).stroke();
+        doc
+          .moveTo(50, yPos)
+          .lineTo(550, yPos)
+          .strokeColor('#dee2e6')
+          .lineWidth(1)
+          .stroke();
 
         // Totals section
         yPos += 20;
         doc.fontSize(12).font('Helvetica');
         doc.text('Subtotal:', 350, yPos);
-        doc.text(`€${(payment.amount / 100).toFixed(2)}`, 470, yPos, { width: 70, align: 'right' });
+        doc.text(`€${(payment.amount / 100).toFixed(2)}`, 470, yPos, {
+          width: 70,
+          align: 'right',
+        });
         yPos += 20;
         doc.text('Tax (0%):', 350, yPos);
         doc.text('€0.00', 470, yPos, { width: 70, align: 'right' });
@@ -443,7 +533,10 @@ export class PaymentsService {
         doc.fillColor('#000000');
         doc.fontSize(16).font('Helvetica-Bold');
         doc.text('TOTAL PAID:', 360, yPos);
-        doc.text(`€${(payment.amount / 100).toFixed(2)}`, 470, yPos, { width: 70, align: 'right' });
+        doc.text(`€${(payment.amount / 100).toFixed(2)}`, 470, yPos, {
+          width: 70,
+          align: 'right',
+        });
 
         // Footer
         yPos += 60;
@@ -452,7 +545,7 @@ export class PaymentsService {
           `Payment Method: Credit Card | Transaction ID: ${payment.stripePaymentIntentId || 'N/A'}`,
           50,
           yPos,
-          { align: 'center', width: 500 }
+          { align: 'center', width: 500 },
         );
         yPos += 15;
         const statusText = `Status: ${payment.status.toUpperCase()}${
@@ -460,20 +553,23 @@ export class PaymentsService {
         }`;
         doc.text(statusText, 50, yPos, { align: 'center', width: 500 });
         yPos += 30;
-        doc.text('Thank you for your business!', 50, yPos, { align: 'center', width: 500 });
+        doc.text('Thank you for your business!', 50, yPos, {
+          align: 'center',
+          width: 500,
+        });
         yPos += 15;
         doc.fillColor('#95a5a6');
         doc.text(
-          `Generated on ${new Date().toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'long', 
+          `Generated on ${new Date().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
             day: 'numeric',
             hour: '2-digit',
-            minute: '2-digit'
+            minute: '2-digit',
           })}`,
           50,
           yPos,
-          { align: 'center', width: 500 }
+          { align: 'center', width: 500 },
         );
 
         doc.end();

@@ -143,7 +143,11 @@ export class CoursesController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Update course' })
   @ApiBody({ type: UpdateCourseDto })
-  @AuditLog({ action: 'COURSE_UPDATED', resourceType: 'course', captureOldValues: true })
+  @AuditLog({
+    action: 'COURSE_UPDATED',
+    resourceType: 'course',
+    captureOldValues: true,
+  })
   update(@Param('id') id: string, @Body() dto: UpdateCourseDto) {
     return this.coursesService.update(id, dto);
   }

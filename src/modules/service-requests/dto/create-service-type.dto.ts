@@ -14,7 +14,10 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 export class DocumentRequirement {
-  @ApiProperty({ description: 'Field name for upload', example: 'identityDocument' })
+  @ApiProperty({
+    description: 'Field name for upload',
+    example: 'identityDocument',
+  })
   @IsString()
   fieldName: string;
 
@@ -35,21 +38,27 @@ export class DocumentRequirement {
   @IsNumber()
   maxCount?: number;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     description: 'Allowed MIME types',
     example: ['application/pdf', 'image/jpeg'],
-    type: [String]
+    type: [String],
   })
   @IsOptional()
   @IsArray()
   allowedMimeTypes?: string[];
 
-  @ApiPropertyOptional({ description: 'Max file size in bytes', example: 5242880 })
+  @ApiPropertyOptional({
+    description: 'Max file size in bytes',
+    example: 5242880,
+  })
   @IsOptional()
   @IsNumber()
   maxSizeBytes?: number;
 
-  @ApiPropertyOptional({ description: 'Help text for user', example: 'Valid ID card or passport' })
+  @ApiPropertyOptional({
+    description: 'Help text for user',
+    example: 'Valid ID card or passport',
+  })
   @IsOptional()
   @IsString()
   description?: string;
@@ -80,24 +89,25 @@ export class CreateServiceTypeDto {
   @MaxLength(50, { message: 'Category cannot exceed 50 characters' })
   category?: string;
 
-  @ApiPropertyOptional({ description: 'Base price in euros', example: 50.00 })
+  @ApiPropertyOptional({ description: 'Base price in euros', example: 50.0 })
   @IsOptional()
   @IsNumber({}, { message: 'Base price must be a number' })
   @Min(0, { message: 'Base price must be positive' })
   basePrice?: number;
 
   @ApiPropertyOptional({
-    description: 'Required documents list (legacy - use documentRequirements instead)',
+    description:
+      'Required documents list (legacy - use documentRequirements instead)',
     example: ['identityDocument', 'fiscalCode'],
-    type: [String]
+    type: [String],
   })
   @IsOptional()
   @IsArray()
   requiredDocuments?: string[];
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     description: 'Detailed document requirements with validation rules',
-    type: [DocumentRequirement]
+    type: [DocumentRequirement],
   })
   @IsOptional()
   @IsArray()

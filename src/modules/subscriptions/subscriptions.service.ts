@@ -1,4 +1,9 @@
-import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
@@ -13,6 +18,7 @@ import { UserSubscription } from './entities/user-subscription.entity';
 import { Payment } from '../payments/entities/payment.entity';
 import { User } from '../users/entities/user.entity';
 import { StripeService } from '../payments/stripe.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class SubscriptionsService {
@@ -29,6 +35,7 @@ export class SubscriptionsService {
     private userRepository: Repository<User>,
     private stripeService: StripeService,
     private configService: ConfigService,
+    private notificationsService: NotificationsService,
   ) {}
 
   async getAvailablePlans(): Promise<any> {
@@ -223,16 +230,232 @@ export class SubscriptionsService {
   async upgradeSubscription(
     dto: UpgradeSubscriptionDto,
     userId: string,
-  ): Promise<UserSubscription> {
-    await this.userSubscriptionRepository.update(
-      { userId },
-      { planId: dto.newPlanId },
-    );
-    const updated = await this.userSubscriptionRepository.findOne({
-      where: { userId },
-      relations: ['plan'],
-    });
-    return updated!;
+  ): Promise<any> {
+    try {
+      // Get current subscription
+      const currentSubscription = await this.userSubscriptionRepository.findOne(
+        {
+          where: { userId, status: 'active' },
+          relations: ['plan'],
+        },
+      );
+
+      if (!currentSubscription) {
+        throw new NotFoundException('No active subscription found');
+      }
+
+      // Get new plan
+      const newPlan = await this.planRepository.findOne({
+        where: { id: dto.newPlanId },
+      });
+
+      if (!newPlan) {
+        throw new NotFoundException('New plan not found');
+      }
+
+      const currentPlan = currentSubscription.plan;
+
+      // Check if it's actually an upgrade (higher price)
+      if (newPlan.priceMonthly <= currentPlan.priceMonthly) {
+        throw new BadRequestException(
+          'This is not an upgrade - use downgrade instead',
+        );
+      }
+
+      // Calculate prorated amount
+      const daysRemaining = this.calculateDaysRemaining(
+        currentSubscription.endDate,
+      );
+      const proratedAmount = this.calculateProratedAmount(
+        currentPlan.priceMonthly,
+        newPlan.priceMonthly,
+        daysRemaining,
+      );
+
+      this.logger.log(
+        `Upgrade: ${currentPlan.name} -> ${newPlan.name}, Prorated: €${proratedAmount}, Days: ${daysRemaining}`,
+      );
+
+      // Create Stripe checkout for prorated amount
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+      const frontendUrl =
+        this.configService.get('FRONTEND_URL') || 'http://localhost:3000';
+
+      const session = await this.stripeService.createOneTimePayment({
+        amount: Math.round(proratedAmount * 100), // Convert to cents
+        currency: 'eur',
+        customerEmail: user.email,
+        description: `Upgrade to ${newPlan.name} - Prorated amount`,
+        successUrl: `${frontendUrl}/subscription/upgrade-success?session_id={CHECKOUT_SESSION_ID}`,
+        cancelUrl: `${frontendUrl}/subscription/upgrade-cancel`,
+        metadata: {
+          type: 'subscription_upgrade',
+          userId,
+          currentPlanId: currentPlan.id,
+          newPlanId: newPlan.id,
+          subscriptionId: currentSubscription.id,
+          proratedAmount: proratedAmount.toString(),
+        },
+      });
+
+      return {
+        success: true,
+        message: 'Upgrade payment required',
+        data: {
+          sessionId: session.id,
+          checkoutUrl: session.url,
+          currentPlan: currentPlan.name,
+          newPlan: newPlan.name,
+          proratedAmount,
+          daysRemaining,
+        },
+      };
+    } catch (error) {
+      this.logger.error(
+        `Failed to upgrade subscription: ${error.message}`,
+        error.stack,
+      );
+      throw error;
+    }
+  }
+
+  private calculateDaysRemaining(endDate: Date): number {
+    const now = new Date();
+    const diffTime = endDate.getTime() - now.getTime();
+    return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+  }
+
+  async downgradeSubscription(
+    dto: UpgradeSubscriptionDto,
+    userId: string,
+  ): Promise<any> {
+    try {
+      // Get current subscription
+      const currentSubscription = await this.userSubscriptionRepository.findOne(
+        {
+          where: { userId, status: 'active' },
+          relations: ['plan'],
+        },
+      );
+
+      if (!currentSubscription) {
+        throw new NotFoundException('No active subscription found');
+      }
+
+      // Get new plan
+      const newPlan = await this.planRepository.findOne({
+        where: { id: dto.newPlanId },
+      });
+
+      if (!newPlan) {
+        throw new NotFoundException('New plan not found');
+      }
+
+      const currentPlan = currentSubscription.plan;
+
+      // Check if it's actually a downgrade (lower price)
+      if (newPlan.priceMonthly >= currentPlan.priceMonthly) {
+        throw new BadRequestException(
+          'This is not a downgrade - use upgrade instead',
+        );
+      }
+
+      // Calculate credit amount
+      const daysRemaining = this.calculateDaysRemaining(
+        currentSubscription.endDate,
+      );
+      const creditAmount = this.calculateCreditAmount(
+        currentPlan.priceMonthly,
+        newPlan.priceMonthly,
+        daysRemaining,
+      );
+
+      this.logger.log(
+        `Downgrade: ${currentPlan.name} -> ${newPlan.name}, Credit: €${creditAmount}, Days: ${daysRemaining}`,
+      );
+
+      // Update subscription immediately
+      currentSubscription.planId = newPlan.id;
+      await this.userSubscriptionRepository.save(currentSubscription);
+
+      // Create credit record (store credit, not refund)
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+
+      // In most SaaS businesses, downgrades give ACCOUNT CREDIT, not cash refunds
+      const creditRecord = this.paymentRepository.create({
+        userId,
+        subscriptionId: currentSubscription.id,
+        amount: -creditAmount, // Negative amount = credit
+        currency: 'EUR',
+        status: 'completed',
+        description: `Downgrade credit: ${currentPlan.name} to ${newPlan.name}`,
+        paidAt: new Date(),
+        metadata: {
+          type: 'subscription_downgrade_credit',
+          oldPlanId: currentPlan.id,
+          newPlanId: newPlan.id,
+          creditAmount: creditAmount.toString(),
+          daysRemaining: daysRemaining.toString(),
+        },
+      });
+
+      const savedCredit = await this.paymentRepository.save(creditRecord);
+
+      // Send downgrade confirmation
+      try {
+        await this.notificationsService.send({
+          userId,
+          userEmail: user.email,
+          title: '📉 Subscription Downgraded',
+          message: `Your subscription has been downgraded from ${currentPlan.name} to ${newPlan.name}. You have received €${creditAmount} account credit.`,
+          type: 'info',
+          data: {
+            oldPlan: currentPlan.name,
+            newPlan: newPlan.name,
+            creditAmount,
+            creditId: savedCredit.id,
+          },
+        });
+      } catch (error) {
+        this.logger.error(`Failed to send downgrade email: ${error.message}`);
+      }
+
+      return {
+        success: true,
+        message: 'Subscription downgraded successfully',
+        data: {
+          oldPlan: currentPlan.name,
+          newPlan: newPlan.name,
+          creditAmount,
+          creditApplied: true,
+          downgradeEffective: 'immediately',
+        },
+      };
+    } catch (error) {
+      this.logger.error(
+        `Failed to downgrade subscription: ${error.message}`,
+        error.stack,
+      );
+      throw error;
+    }
+  }
+
+  private calculateCreditAmount(
+    currentPrice: number,
+    newPrice: number,
+    daysRemaining: number,
+  ): number {
+    const dailyDifference = (currentPrice - newPrice) / 30; // Assuming 30-day month
+    return Math.max(0, dailyDifference * daysRemaining);
+  }
+
+  private calculateProratedAmount(
+    currentPrice: number,
+    newPrice: number,
+    daysRemaining: number,
+  ): number {
+    const dailyDifference = (newPrice - currentPrice) / 30; // Assuming 30-day month
+    return dailyDifference * daysRemaining;
   }
 
   async getMyPayments(userId: string): Promise<any> {

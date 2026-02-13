@@ -59,7 +59,11 @@ export class UsersController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Update own profile' })
   @ApiBody({ type: UpdateUserDto })
-  @AuditLog({ action: 'PROFILE_UPDATED', resourceType: 'user', captureOldValues: true })
+  @AuditLog({
+    action: 'PROFILE_UPDATED',
+    resourceType: 'user',
+    captureOldValues: true,
+  })
   updateProfile(@CurrentUser() user: UserRequest, @Body() dto: UpdateUserDto) {
     return this.usersService.updateProfile(user.id, dto);
   }
@@ -77,7 +81,11 @@ export class UsersController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Update extended profile' })
   @ApiBody({ type: UpdateUserProfileDto })
-  @AuditLog({ action: 'EXTENDED_PROFILE_UPDATED', resourceType: 'user_profile', captureOldValues: true })
+  @AuditLog({
+    action: 'EXTENDED_PROFILE_UPDATED',
+    resourceType: 'user_profile',
+    captureOldValues: true,
+  })
   updateExtendedProfile(
     @CurrentUser() user: any,
     @Body() dto: UpdateUserProfileDto,
@@ -127,7 +135,11 @@ export class UsersController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Update consent preferences' })
   @ApiBody({ type: UpdateGdprConsentDto })
-  @AuditLog({ action: 'GDPR_CONSENT_UPDATED', resourceType: 'user', captureOldValues: true })
+  @AuditLog({
+    action: 'GDPR_CONSENT_UPDATED',
+    resourceType: 'user',
+    captureOldValues: true,
+  })
   updateGdprConsent(
     @CurrentUser() user: UserRequest,
     @Body() dto: UpdateGdprConsentDto,
@@ -204,7 +216,11 @@ export class UsersController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Update user' })
   @ApiBody({ type: UpdateUserDto })
-  @AuditLog({ action: 'USER_UPDATED', resourceType: 'user', captureOldValues: true })
+  @AuditLog({
+    action: 'USER_UPDATED',
+    resourceType: 'user',
+    captureOldValues: true,
+  })
   update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
     return this.usersService.update(id, dto);
   }

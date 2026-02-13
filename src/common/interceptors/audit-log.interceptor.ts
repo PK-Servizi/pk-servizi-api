@@ -9,7 +9,10 @@ import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { AuditService } from '../../modules/audit/audit.service';
-import { AUDIT_LOG_KEY, AuditLogMetadata } from '../decorators/audit-log.decorator';
+import {
+  AUDIT_LOG_KEY,
+  AuditLogMetadata,
+} from '../decorators/audit-log.decorator';
 
 @Injectable()
 export class AuditLogInterceptor implements NestInterceptor {
@@ -41,20 +44,23 @@ export class AuditLogInterceptor implements NestInterceptor {
     return next.handle().pipe(
       tap((response) => {
         // Fire and forget - don't await
-        this.auditService.create({
-          userId: user?.id,
-          action,
-          resourceType,
-          resourceId,
-          oldValues: captureOldValues ? request.body : undefined,
-          newValues: response?.data || response,
-          ipAddress,
-          userAgent,
-        }).then(() => {
-          this.logger.debug(`Audit log created: ${action}`);
-        }).catch((error) => {
-          this.logger.error(`Failed to create audit log: ${error.message}`);
-        });
+        this.auditService
+          .create({
+            userId: user?.id,
+            action,
+            resourceType,
+            resourceId,
+            oldValues: captureOldValues ? request.body : undefined,
+            newValues: response?.data || response,
+            ipAddress,
+            userAgent,
+          })
+          .then(() => {
+            this.logger.debug(`Audit log created: ${action}`);
+          })
+          .catch((error) => {
+            this.logger.error(`Failed to create audit log: ${error.message}`);
+          });
       }),
     );
   }

@@ -88,12 +88,12 @@ export class ServiceRequestsController {
    * Step 1: Initiate service request
    * - If service price > 0: Creates payment workflow (payment_pending status) → User completes payment → Step 2
    * - If service price = 0: Skips payment entirely, goes directly to questionnaire (awaiting_form status) → Step 2
-   * 
+   *
    * FREE SERVICES (price = 0): Only 2 steps total
    *   1. Initiate (this endpoint) → awaiting_form status
    *   2. Submit questionnaire → awaiting_documents status
    *   3. Upload documents → submitted status
-   * 
+   *
    * PAID SERVICES (price > 0): 3 steps total
    *   1. Initiate (this endpoint) → payment_pending status → Complete payment → awaiting_form status
    *   2. Submit questionnaire → awaiting_documents status
@@ -103,23 +103,28 @@ export class ServiceRequestsController {
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Permissions('service-requests:create')
   @ApiBearerAuth('JWT-auth')
-  @AuditLog({ action: 'SERVICE_REQUEST_INITIATED', resourceType: 'service_request' })
-  @ApiOperation({ 
-    summary: '[Customer] Step 1: Initiate service request - Payment for paid services (price > 0) OR direct to questionnaire for free services (price = 0)',
-    description: 'FREE SERVICES (price=0): Skip payment, go directly to Step 2 (questionnaire). PAID SERVICES (price>0): Create payment, complete payment, then proceed to Step 2 (questionnaire).'
+  @AuditLog({
+    action: 'SERVICE_REQUEST_INITIATED',
+    resourceType: 'service_request',
+  })
+  @ApiOperation({
+    summary:
+      '[Customer] Step 1: Initiate service request - Payment for paid services (price > 0) OR direct to questionnaire for free services (price = 0)',
+    description:
+      'FREE SERVICES (price=0): Skip payment, go directly to Step 2 (questionnaire). PAID SERVICES (price>0): Create payment, complete payment, then proceed to Step 2 (questionnaire).',
   })
   @ApiBody({
     schema: {
       type: 'object',
       properties: {
-        serviceId: { 
+        serviceId: {
           type: 'string',
           description: 'Service type ID (UUID) or code',
-          example: 'ISEE_ORD_2026'
-        }
+          example: 'ISEE_ORD_2026',
+        },
       },
-      required: ['serviceId']
-    }
+      required: ['serviceId'],
+    },
   })
   initiateWithPayment(
     @Body('serviceId') serviceId: string,
@@ -132,41 +137,50 @@ export class ServiceRequestsController {
    * Step 2: Submit questionnaire
    * - For PAID services: Submit after payment is completed
    * - For FREE services: Submit immediately after Step 1 (no payment required)
-   * 
+   *
    * This is Step 2 for both free and paid services
    */
   @Patch(':id/questionnaire')
   @UseGuards(PermissionsGuard)
   @Permissions('service-requests:update')
   @ApiBearerAuth('JWT-auth')
-  @AuditLog({ action: 'QUESTIONNAIRE_SUBMITTED', resourceType: 'service_request' })
-  @ApiOperation({ 
-    summary: '[Customer] Step 2: Submit questionnaire (for both free and paid services)',
-    description: 'FREE SERVICES: Submit immediately after initiation. PAID SERVICES: Submit after payment completed. Status: awaiting_form → awaiting_documents'
+  @AuditLog({
+    action: 'QUESTIONNAIRE_SUBMITTED',
+    resourceType: 'service_request',
+  })
+  @ApiOperation({
+    summary:
+      '[Customer] Step 2: Submit questionnaire (for both free and paid services)',
+    description:
+      'FREE SERVICES: Submit immediately after initiation. PAID SERVICES: Submit after payment completed. Status: awaiting_form → awaiting_documents',
   })
   @ApiBody({
     schema: {
       type: 'object',
       properties: {
-        formData: { 
+        formData: {
           type: 'object',
           description: 'Questionnaire answers as JSON object',
           example: {
             familyMembers: 4,
             hasDisabledMembers: true,
-            income: 25000
-          }
-        }
+            income: 25000,
+          },
+        },
       },
-      required: ['formData']
-    }
+      required: ['formData'],
+    },
   })
   submitQuestionnaire(
     @Param('id') id: string,
     @Body('formData') formData: any,
     @CurrentUser() user: UserRequest,
   ) {
-    return this.serviceRequestsService.submitQuestionnaire(id, user.id, formData);
+    return this.serviceRequestsService.submitQuestionnaire(
+      id,
+      user.id,
+      formData,
+    );
   }
 
   /**
@@ -194,105 +208,108 @@ export class ServiceRequestsController {
       { name: 'incomeDocuments', maxCount: 5 },
       { name: 'familyDocuments', maxCount: 5 },
       { name: 'otherDocument', maxCount: 10 },
-    ])
+    ]),
   )
   @ApiConsumes('multipart/form-data')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: '[Customer] Step 3: Upload required documents',
-    description: 'Upload documents after completing questionnaire. System automatically validates which documents are required for the service type. Status flow: awaiting_documents → submitted'
+    description:
+      'Upload documents after completing questionnaire. System automatically validates which documents are required for the service type. Status flow: awaiting_documents → submitted',
   })
   @ApiBody({
-    description: 'Upload required documents. Only upload the documents needed for your specific service type.',
+    description:
+      'Upload required documents. Only upload the documents needed for your specific service type.',
     schema: {
       type: 'object',
       properties: {
         identityDocument: {
           type: 'string',
           format: 'binary',
-          description: 'Identity Document'
+          description: 'Identity Document',
         },
         fiscalCode: {
           type: 'string',
           format: 'binary',
-          description: 'Fiscal Code'
+          description: 'Fiscal Code',
         },
         incomeCertificate: {
           type: 'string',
           format: 'binary',
-          description: 'Income Certificate'
+          description: 'Income Certificate',
         },
         bankStatement: {
           type: 'string',
           format: 'binary',
-          description: 'Bank Statement'
+          description: 'Bank Statement',
         },
         propertyDocument: {
           type: 'string',
           format: 'binary',
-          description: 'Property Document'
+          description: 'Property Document',
         },
         visuraCatastale: {
           type: 'string',
           format: 'binary',
-          description: 'Visura Catastale'
+          description: 'Visura Catastale',
         },
         cuCertificate: {
           type: 'string',
           format: 'binary',
-          description: 'CU Certificate'
+          description: 'CU Certificate',
         },
         propertyDeed: {
           type: 'string',
           format: 'binary',
-          description: 'Property Deed'
+          description: 'Property Deed',
         },
         medicalReceipts: {
           type: 'array',
           items: {
             type: 'string',
-            format: 'binary'
+            format: 'binary',
           },
-          description: 'Medical Receipts (up to 5 files)'
+          description: 'Medical Receipts (up to 5 files)',
         },
         expenseReceipts: {
           type: 'array',
           items: {
             type: 'string',
-            format: 'binary'
+            format: 'binary',
           },
-          description: 'Expense Receipts (up to 5 files)'
+          description: 'Expense Receipts (up to 5 files)',
         },
         incomeDocuments: {
           type: 'array',
           items: {
             type: 'string',
-            format: 'binary'
+            format: 'binary',
           },
-          description: 'Income Documents (up to 5 files)'
+          description: 'Income Documents (up to 5 files)',
         },
         familyDocuments: {
           type: 'array',
           items: {
             type: 'string',
-            format: 'binary'
+            format: 'binary',
           },
-          description: 'Family Documents (up to 5 files)'
+          description: 'Family Documents (up to 5 files)',
         },
         otherDocument: {
           type: 'array',
           items: {
             type: 'string',
-            format: 'binary'
+            format: 'binary',
           },
-          description: 'Other Documents (up to 10 files)'
-        }
-      }
-    }
+          description: 'Other Documents (up to 10 files)',
+        },
+      },
+    },
   })
   uploadRequiredDocuments(
     @Param('id') id: string,
     @CurrentUser() user: UserRequest,
-    @UploadedFiles() files?: {
+    @UploadedFiles()
+    files?: {
       identityDocument?: Express.Multer.File[];
       fiscalCode?: Express.Multer.File[];
       incomeCertificate?: Express.Multer.File[];
@@ -308,7 +325,11 @@ export class ServiceRequestsController {
       otherDocument?: Express.Multer.File[];
     },
   ) {
-    return this.serviceRequestsService.uploadRequiredDocuments(id, user.id, files || {});
+    return this.serviceRequestsService.uploadRequiredDocuments(
+      id,
+      user.id,
+      files || {},
+    );
   }
 
   // ========== LEGACY ENDPOINT (For backward compatibility) ==========
@@ -322,7 +343,10 @@ export class ServiceRequestsController {
   @UseGuards(PermissionsGuard)
   @Permissions('service-requests:create')
   @ApiBearerAuth('JWT-auth')
-  @AuditLog({ action: 'SERVICE_REQUEST_CREATED', resourceType: 'service_request' })
+  @AuditLog({
+    action: 'SERVICE_REQUEST_CREATED',
+    resourceType: 'service_request',
+  })
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'identityDocument', maxCount: 1 },
@@ -332,73 +356,77 @@ export class ServiceRequestsController {
       { name: 'disabilityCertificates', maxCount: 2 },
       { name: 'familyDocuments', maxCount: 5 },
       { name: 'otherDocuments', maxCount: 10 },
-    ])
+    ]),
   )
   @ApiConsumes('multipart/form-data')
-  @ApiOperation({ summary: '[Customer] Create new service request with documents' })
+  @ApiOperation({
+    summary: '[Customer] Create new service request with documents',
+  })
   @ApiBody({
     schema: {
       type: 'object',
       properties: {
-        serviceId: { 
+        serviceId: {
           type: 'string',
-          description: 'Service type ID (UUID) or service type code (ISEE, MODELLO_730, IMU)',
-          example: 'dae8b64-57f7-4562-b3fc-2c96f368afa8'
+          description:
+            'Service type ID (UUID) or service type code (ISEE, MODELLO_730, IMU)',
+          example: 'dae8b64-57f7-4562-b3fc-2c96f368afa8',
         },
-        formData: { 
+        formData: {
           type: 'string',
           description: 'JSON string of form data',
-          example: '{\"familyMembers\":4,\"hasDisabledMembers\":true}'
+          example: '{\"familyMembers\":4,\"hasDisabledMembers\":true}',
         },
         userNotes: { type: 'string', description: 'User notes' },
-        status: { 
-          type: 'string', 
+        status: {
+          type: 'string',
           enum: ['draft', 'submitted'],
-          description: 'Initial status (default: draft)' 
+          description: 'Initial status (default: draft)',
         },
-        identityDocument: { 
-          type: 'string', 
+        identityDocument: {
+          type: 'string',
           format: 'binary',
-          description: 'Identity card or passport' 
+          description: 'Identity card or passport',
         },
-        fiscalCode: { 
-          type: 'string', 
+        fiscalCode: {
+          type: 'string',
           format: 'binary',
-          description: 'Codice Fiscale document' 
+          description: 'Codice Fiscale document',
         },
-        incomeDocuments: { 
+        incomeDocuments: {
           type: 'array',
           items: { type: 'string', format: 'binary' },
-          description: 'CU, 730, income statements (max 5)'
+          description: 'CU, 730, income statements (max 5)',
         },
-        propertyDocuments: { 
+        propertyDocuments: {
           type: 'array',
           items: { type: 'string', format: 'binary' },
-          description: 'Property deeds, IMU receipts (max 3)'
+          description: 'Property deeds, IMU receipts (max 3)',
         },
-        disabilityCertificates: { 
+        disabilityCertificates: {
           type: 'array',
           items: { type: 'string', format: 'binary' },
-          description: 'Disability certificates (max 2)'
+          description: 'Disability certificates (max 2)',
         },
-        familyDocuments: { 
+        familyDocuments: {
           type: 'array',
           items: { type: 'string', format: 'binary' },
-          description: 'Family certificates, marriage, etc (max 5)'
+          description: 'Family certificates, marriage, etc (max 5)',
         },
-        otherDocuments: { 
+        otherDocuments: {
           type: 'array',
           items: { type: 'string', format: 'binary' },
-          description: 'Additional documents (max 10)'
+          description: 'Additional documents (max 10)',
         },
       },
-      required: ['serviceId']
-    }
+      required: ['serviceId'],
+    },
   })
   create(
     @Body() dto: CreateServiceRequestDto,
     @CurrentUser() user: UserRequest,
-    @UploadedFiles() files?: {
+    @UploadedFiles()
+    files?: {
       identityDocument?: Express.Multer.File[];
       fiscalCode?: Express.Multer.File[];
       incomeDocuments?: Express.Multer.File[];
@@ -409,10 +437,10 @@ export class ServiceRequestsController {
     },
   ) {
     return this.serviceRequestsService.createWithDocuments(
-      dto, 
-      user.id, 
+      dto,
+      user.id,
       undefined,
-      files
+      files,
     );
   }
 
@@ -426,7 +454,10 @@ export class ServiceRequestsController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Submit request for processing' })
   @ApiBody({ type: SubmitServiceRequestDto })
-  @AuditLog({ action: 'SERVICE_REQUEST_SUBMITTED', resourceType: 'service_request' })
+  @AuditLog({
+    action: 'SERVICE_REQUEST_SUBMITTED',
+    resourceType: 'service_request',
+  })
   submit(
     @Param('id') id: string,
     @Body() dto: SubmitServiceRequestDto,
@@ -473,9 +504,10 @@ export class ServiceRequestsController {
   @UseGuards(PermissionsGuard)
   @Permissions('service-requests:update')
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: '[Customer] Request refund and cancel service request',
-    description: 'Request refund for paid service before submission. Refund will be processed immediately.'
+    description:
+      'Request refund for paid service before submission. Refund will be processed immediately.',
   })
   @ApiBody({
     schema: {
@@ -484,11 +516,11 @@ export class ServiceRequestsController {
         reason: {
           type: 'string',
           description: 'Reason for refund request',
-          example: 'Changed my mind / Service no longer needed'
-        }
+          example: 'Changed my mind / Service no longer needed',
+        },
       },
-      required: ['reason']
-    }
+      required: ['reason'],
+    },
   })
   @AuditLog({ action: 'REFUND_REQUESTED', resourceType: 'service_request' })
   requestRefund(
@@ -521,7 +553,11 @@ export class ServiceRequestsController {
   @ApiOperation({ summary: '[Customer] Update request (before submission)' })
   @ApiQuery({ name: 'serviceType', required: false })
   @ApiBody({ type: UpdateServiceRequestDto })
-  @AuditLog({ action: 'SERVICE_REQUEST_UPDATED', resourceType: 'service_request', captureOldValues: true })
+  @AuditLog({
+    action: 'SERVICE_REQUEST_UPDATED',
+    resourceType: 'service_request',
+    captureOldValues: true,
+  })
   update(
     @Param('id') id: string,
     @Body() dto: UpdateServiceRequestDto,
@@ -539,7 +575,10 @@ export class ServiceRequestsController {
   @Permissions('service-requests:update')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Delete request (before submission)' })
-  @AuditLog({ action: 'SERVICE_REQUEST_DELETED', resourceType: 'service_request' })
+  @AuditLog({
+    action: 'SERVICE_REQUEST_DELETED',
+    resourceType: 'service_request',
+  })
   remove(@Param('id') id: string, @CurrentUser() user: UserRequest) {
     return this.serviceRequestsService.remove(id, user.id);
   }
@@ -591,7 +630,11 @@ export class ServiceRequestsController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Update request status' })
   @ApiBody({ type: UpdateStatusDto })
-  @AuditLog({ action: 'SERVICE_REQUEST_STATUS_UPDATED', resourceType: 'service_request', captureOldValues: true })
+  @AuditLog({
+    action: 'SERVICE_REQUEST_STATUS_UPDATED',
+    resourceType: 'service_request',
+    captureOldValues: true,
+  })
   updateStatus(
     @Param('id') id: string,
     @Body() dto: UpdateStatusDto,
@@ -614,7 +657,10 @@ export class ServiceRequestsController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Assign to operator' })
   @ApiBody({ type: AssignOperatorDto })
-  @AuditLog({ action: 'SERVICE_REQUEST_ASSIGNED', resourceType: 'service_request' })
+  @AuditLog({
+    action: 'SERVICE_REQUEST_ASSIGNED',
+    resourceType: 'service_request',
+  })
   assign(
     @Param('id') id: string,
     @Body() dto: AssignOperatorDto,

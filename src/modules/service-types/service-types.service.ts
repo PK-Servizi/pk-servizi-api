@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ServiceType } from './entities/service-type.entity';
@@ -39,9 +43,11 @@ export class ServiceTypesService {
     const existing = await this.serviceTypeRepository.findOne({
       where: { name: dto.name },
     });
-    
+
     if (existing) {
-      throw new ConflictException(`Service type with name "${dto.name}" already exists`);
+      throw new ConflictException(
+        `Service type with name "${dto.name}" already exists`,
+      );
     }
 
     const serviceType = this.serviceTypeRepository.create(dto);
@@ -62,9 +68,11 @@ export class ServiceTypesService {
       const existing = await this.serviceTypeRepository.findOne({
         where: { name: dto.name },
       });
-      
+
       if (existing) {
-        throw new ConflictException(`Service type with name "${dto.name}" already exists`);
+        throw new ConflictException(
+          `Service type with name "${dto.name}" already exists`,
+        );
       }
     }
 

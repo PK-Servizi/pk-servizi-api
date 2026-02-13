@@ -60,7 +60,11 @@ export class RolesController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Update role' })
   @ApiBody({ type: UpdateRoleDto })
-  @AuditLog({ action: 'ROLE_UPDATED', resourceType: 'role', captureOldValues: true })
+  @AuditLog({
+    action: 'ROLE_UPDATED',
+    resourceType: 'role',
+    captureOldValues: true,
+  })
   updateRole(@Param('id') id: string, @Body() dto: UpdateRoleDto) {
     return this.rolesService.update(id, dto);
   }

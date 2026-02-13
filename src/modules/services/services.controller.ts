@@ -86,7 +86,11 @@ export class ServicesController {
   @Permissions('services:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Update service' })
-  @AuditLog({ action: 'SERVICE_UPDATED', resourceType: 'service', captureOldValues: true })
+  @AuditLog({
+    action: 'SERVICE_UPDATED',
+    resourceType: 'service',
+    captureOldValues: true,
+  })
   update(@Param('id') id: string, @Body() dto: UpdateServiceDto) {
     return this.servicesService.update(id, dto);
   }
@@ -112,7 +116,10 @@ export class ServicesController {
   @Permissions('services:write')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Update document requirements' })
-  @AuditLog({ action: 'SERVICE_DOCUMENT_REQUIREMENTS_UPDATED', resourceType: 'service' })
+  @AuditLog({
+    action: 'SERVICE_DOCUMENT_REQUIREMENTS_UPDATED',
+    resourceType: 'service',
+  })
   @ApiBody({
     schema: {
       type: 'object',

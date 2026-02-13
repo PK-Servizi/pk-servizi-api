@@ -130,7 +130,11 @@ export class AppointmentsController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Reschedule appointment' })
   @ApiBody({ type: RescheduleAppointmentDto })
-  @AuditLog({ action: 'APPOINTMENT_RESCHEDULED', resourceType: 'appointment', captureOldValues: true })
+  @AuditLog({
+    action: 'APPOINTMENT_RESCHEDULED',
+    resourceType: 'appointment',
+    captureOldValues: true,
+  })
   reschedule(
     @Param('id') id: string,
     @Body() dto: RescheduleAppointmentDto,
@@ -245,7 +249,11 @@ export class AppointmentsController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Update appointment status' })
   @ApiBody({ type: UpdateStatusDto })
-  @AuditLog({ action: 'APPOINTMENT_STATUS_UPDATED', resourceType: 'appointment', captureOldValues: true })
+  @AuditLog({
+    action: 'APPOINTMENT_STATUS_UPDATED',
+    resourceType: 'appointment',
+    captureOldValues: true,
+  })
   updateStatus(
     @Param('id') id: string,
     @Body() dto: UpdateStatusDto,

@@ -261,6 +261,54 @@ export class StripeService {
   }
 
   /**
+   * Create one-time payment checkout session (for upgrades, etc.)
+   */
+  async createOneTimePayment(params: {
+    amount: number; // in cents
+    currency: string;
+    customerEmail: string;
+    description: string;
+    successUrl: string;
+    cancelUrl: string;
+    metadata?: Record<string, string>;
+  }): Promise<Stripe.Checkout.Session> {
+    if (!this.stripe) {
+      throw new Error('Stripe not configured');
+    }
+
+    try {
+      const session = await this.stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: [
+          {
+            price_data: {
+              currency: params.currency,
+              unit_amount: params.amount,
+              product_data: {
+                name: params.description,
+              },
+            },
+            quantity: 1,
+          },
+        ],
+        mode: 'payment',
+        success_url: params.successUrl,
+        cancel_url: params.cancelUrl,
+        customer_email: params.customerEmail,
+        metadata: params.metadata || {},
+      });
+
+      this.logger.log(`One-time payment session ${session.id} created`);
+      return session;
+    } catch (error) {
+      this.logger.error(
+        `Failed to create one-time payment session: ${error.message}`,
+      );
+      throw new BadRequestException('Failed to create payment session');
+    }
+  }
+
+  /**
    * Create payment intent
    */
   async createPaymentIntent(
@@ -301,7 +349,8 @@ export class StripeService {
       throw new Error('Stripe not configured');
     }
 
-    const frontendUrl = this.configService.get('FRONTEND_URL') || 'http://localhost:3001';
+    const frontendUrl =
+      this.configService.get('FRONTEND_URL') || 'http://localhost:3001';
     const successUrl =
       params.successUrl ||
       `${frontendUrl}/service-requests/${params.serviceRequestId}/payment-success?session_id={CHECKOUT_SESSION_ID}`;
@@ -341,8 +390,12 @@ export class StripeService {
       );
       return session;
     } catch (error) {
-      this.logger.error(`Failed to create payment checkout session: ${error.message}`);
-      throw new BadRequestException('Failed to create payment checkout session');
+      this.logger.error(
+        `Failed to create payment checkout session: ${error.message}`,
+      );
+      throw new BadRequestException(
+        'Failed to create payment checkout session',
+      );
     }
   }
 
