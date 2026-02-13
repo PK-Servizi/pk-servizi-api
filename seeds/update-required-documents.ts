@@ -108,7 +108,7 @@ const DOCUMENTS_MAP = {
   ]
 };
 
-async function updateRequiredDocuments() {
+export async function updateRequiredDocuments() {
   try {
     console.log('🚀 Updating Required Documents...');
 
@@ -131,12 +131,21 @@ async function updateRequiredDocuments() {
     }
 
     console.log('\n✅ All required documents updated!');
-    await AppDataSource.destroy();
-    process.exit(0);
   } catch (error) {
     console.error('❌ Error:', error);
-    process.exit(1);
+    throw error;
   }
 }
 
-updateRequiredDocuments();
+// Only run directly if this file is executed directly
+if (require.main === module) {
+  updateRequiredDocuments()
+    .then(() => {
+      AppDataSource.destroy();
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error(error);
+      process.exit(1);
+    });
+}

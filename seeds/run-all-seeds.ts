@@ -9,6 +9,7 @@ import { seedRolePermissions } from './role-permission-seed';
 import { seedServicesWithDocuments } from './services-with-documents-seed';
 import { seedPermissions } from './permissions-seed';
 import { seedAllServices } from './seed-final-complete';
+import { seedSubscriptionPlans } from './subscription-plans-seed';
 
 async function runAllSeeds() {
   console.log('🚀 Starting all seed operations...\n');
@@ -82,8 +83,16 @@ async function runAllSeeds() {
 
     // 9. Seed subscription plans
     console.log('\n📦 Seeding subscription plans...');
-    const { seedSubscriptionPlans } = await import('./subscription-plans-seed');
     await seedSubscriptionPlans();
+
+    // 10. Update required documents
+    console.log('\n📦 Updating required documents...');
+    try {
+      const { updateRequiredDocuments } = await import('./update-required-documents');
+      await updateRequiredDocuments();
+    } catch (error) {
+      console.log('⚠️  Required documents update skipped:', error.message);
+    }
 
     console.log('\n✅ All seed operations completed successfully!');
   } catch (error) {

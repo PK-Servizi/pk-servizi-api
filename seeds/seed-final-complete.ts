@@ -3,6 +3,7 @@ import { AppDataSource } from '../src/config/data-source';
 import { Service } from '../src/modules/services/entities/service.entity';
 import { ServiceType } from '../src/modules/service-types/entities/service-type.entity';
 import { Faq } from '../src/modules/faqs/entities/faq.entity';
+import { FORM_SCHEMAS } from './form-schemas';
 
 const SERVICES_DATA = [
   // 1. ISEE
@@ -94,6 +95,7 @@ const SERVICES_DATA = [
             category: 'Residenza',
           },
         ],
+        formSchema: FORM_SCHEMAS.ISEE_ORD_2026,
       },
       {
         name: 'ISEE Universitario 2026',
@@ -156,6 +158,7 @@ const SERVICES_DATA = [
             category: 'Utilizzo',
           },
         ],
+        formSchema: FORM_SCHEMAS.ISEE_UNI_2026,
       },
       {
         name: 'ISEE Socio-Sanitario 2026',
@@ -199,6 +202,7 @@ const SERVICES_DATA = [
             category: 'Tempi',
           },
         ],
+        formSchema: FORM_SCHEMAS.ISEE_SOC_2026,
       },
       {
         name: 'ISEE Minorenni 2026',
@@ -259,6 +263,7 @@ const SERVICES_DATA = [
             category: 'Documenti',
           },
         ],
+        formSchema: FORM_SCHEMAS.ISEE_MIN_2026,
       },
       {
         name: 'ISEE Corrente 2026',
@@ -309,6 +314,7 @@ const SERVICES_DATA = [
             category: 'Validità',
           },
         ],
+        formSchema: FORM_SCHEMAS.ISEE_COR_2026,
       },
     ],
   },
@@ -431,6 +437,7 @@ const SERVICES_DATA = [
             category: 'Occupazione',
           },
         ],
+        formSchema: FORM_SCHEMAS.NASP_2026,
       },
       {
         name: 'Disoccupazione Agricola',
@@ -445,6 +452,7 @@ const SERVICES_DATA = [
           '03. Iban richiedente',
         ],
         faqs: [],
+        formSchema: FORM_SCHEMAS.DAGRN_2026,
       },
       {
         name: 'Anticipo NASPI',
@@ -461,6 +469,7 @@ const SERVICES_DATA = [
           "05. Certificato che attesta l'inizio attività (Visura camerale attiva, iscrizione gestione separata inps ecc)",
         ],
         faqs: [],
+        formSchema: FORM_SCHEMAS.ANTNAS_2026,
       },
       {
         name: 'DID - Dichiarazione Immediata Disponibilità',
@@ -474,6 +483,7 @@ const SERVICES_DATA = [
           '02. Codice fiscale richiedente',
         ],
         faqs: [],
+        formSchema: FORM_SCHEMAS.DID_2026,
       },
       {
         name: 'PAD NASPI/DIS-COLL',
@@ -1657,6 +1667,7 @@ export async function seedAllServices() {
             basePrice: serviceData.basePrice,
             serviceTypeId: serviceType.id,
             requiredDocuments: serviceData.requiredDocuments as any,
+            formSchema: serviceData.formSchema as any,
           });
           await serviceRepo.save(service);
           console.log(`   ✅ Servizio: ${serviceData.name}`);
@@ -1668,6 +1679,7 @@ export async function seedAllServices() {
           service.basePrice = serviceData.basePrice;
           service.requiredDocuments = serviceData.requiredDocuments as any;
           service.serviceTypeId = serviceType.id;
+          service.formSchema = serviceData.formSchema as any;
           await serviceRepo.save(service);
         }
 
