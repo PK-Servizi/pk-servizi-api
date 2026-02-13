@@ -32,6 +32,9 @@ export class ServicesService {
         'service.description',
         'service.category',
         'service.basePrice',
+        'service.requiredDocuments',
+        'service.documentRequirements',
+        'service.formSchema',
         'service.isActive',
       ])
       .leftJoin('service.serviceType', 'serviceType')
@@ -69,6 +72,9 @@ export class ServicesService {
         'service.description',
         'service.category',
         'service.basePrice',
+        'service.requiredDocuments',
+        'service.documentRequirements',
+        'service.formSchema',
         'service.isActive',
       ])
       .where('service.serviceTypeId = :serviceTypeId', { serviceTypeId })
@@ -206,13 +212,13 @@ export class ServicesService {
   async getRequiredDocuments(id: string): Promise<any> {
     const service = await this.serviceRepository
       .createQueryBuilder('service')
-      .select(['service.id', 'service.name', 'service.documentRequirements'])
+      .select(['service.id', 'service.name', 'service.requiredDocuments', 'service.documentRequirements'])
       .where('service.id = :id', { id })
       .getOne();
     if (!service) {
       throw new NotFoundException('Service not found');
     }
-    return { success: true, data: service.documentRequirements };
+    return { success: true, data: service.documentRequirements || service.requiredDocuments || [] };
   }
 
   async updateSchema(id: string, schema: any): Promise<any> {
