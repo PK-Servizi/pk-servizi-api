@@ -20,6 +20,7 @@ import { UserSubscriptionsService } from './user-subscriptions.service';
 // Modules
 import { UsersModule } from '../users/users.module';
 import { PaymentsModule } from '../payments/payments.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 /**
  * Subscriptions Module
@@ -53,6 +54,7 @@ import { PaymentsModule } from '../payments/payments.module';
     ]),
     UsersModule,
     forwardRef(() => PaymentsModule),
+    NotificationsModule,
   ],
   controllers: [
     SubscriptionsController, // Customer operations
