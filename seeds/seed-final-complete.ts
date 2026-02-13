@@ -21,10 +21,10 @@ const SERVICES_DATA = [
         category: 'TAX',
         basePrice: 0,
         requiredDocuments: [
-          '01. Identification Document: ID card (front and back), Driver\'s License (front and back), or Passport of the declarant',
+          "01. Identification Document: ID card (front and back), Driver's License (front and back), or Passport of the declarant",
           '02. Tax Code: Tax code (Codice Fiscale) of the declarant',
           '03. Family Tax Codes: Tax codes for all members of the household',
-          '04. Rent Agreement: Rental contract (Contratto d\'affitto)',
+          "04. Rent Agreement: Rental contract (Contratto d'affitto)",
           '05. Mortgage: Residual mortgage capital as of 31/12/2024',
           '06. Bank Accounts: Accounting balance and average balance (giacenza media) as of 31/12/2024 for current accounts of all household members',
           '07. Savings/Postal Books: Accounting balance and average balance as of 31/12/2024 for deposit accounts or postal books of all household members',
@@ -32,18 +32,18 @@ const SERVICES_DATA = [
           '09. Prepaid Cards: Accounting balance and average balance for current accounts and prepaid cards with an IBAN held by the household',
           '10. Deposit Accounts: Accounting balance and average balance for deposit accounts held by the household',
           '11. Vehicles: License plate numbers for cars owned by household members',
-          '12. Disability Certification: For disabled or invalid individuals, the latest certification stating the condition (medium disability, severe disability, or non-self-sufficiency)'
+          '12. Disability Certification: For disabled or invalid individuals, the latest certification stating the condition (medium disability, severe disability, or non-self-sufficiency)',
         ],
         faqs: [
           {
             question: 'Entro quanto viene elaborata la mia richiesta?',
             answer:
-              'Il nostro team elabora la DSU nello stesso giorno in cui viene effettuata la richiesta (dal lunedì al sabato, dalle 09:00 alle 20:00). La consegna dell\'attestazione avviene entro 4 giorni lavorativi.',
+              "Il nostro team elabora la DSU nello stesso giorno in cui viene effettuata la richiesta (dal lunedì al sabato, dalle 09:00 alle 20:00). La consegna dell'attestazione avviene entro 4 giorni lavorativi.",
             order: 1,
             category: 'Tempi',
           },
           {
-            question: 'Quando scade l\'attestazione ISEE?',
+            question: "Quando scade l'attestazione ISEE?",
             answer:
               "L'attestazione ISEE ha validità fino al 31 dicembre di ogni anno. Ad esempio, l'attestazione ISEE effettuata nell'anno 2025 scadrà il 31 dicembre 2025.",
             order: 2,
@@ -71,22 +71,25 @@ const SERVICES_DATA = [
             category: 'Residenza',
           },
           {
-            question: 'Nel 2025 ho venduto la casa e ora ne ho acquistata un\'altra',
+            question:
+              "Nel 2025 ho venduto la casa e ora ne ho acquistata un'altra",
             answer:
               "Devi inserire i dati catastali della casa precedente, insieme all'importo residuo del mutuo al 31 dicembre 2025 relativo a quell'alloggio.",
             order: 6,
             category: 'Immobili',
           },
           {
-            question: 'Nel periodo ho cambiato auto. Quale targa devo inserire?',
+            question:
+              'Nel periodo ho cambiato auto. Quale targa devo inserire?',
             answer: "Devi inserire la targa dell'auto attualmente in uso.",
             order: 7,
             category: 'Veicoli',
           },
           {
-            question: 'Nel 2025 vivevo a un indirizzo diverso da quello attuale',
+            question:
+              'Nel 2025 vivevo a un indirizzo diverso da quello attuale',
             answer:
-              'Devi indicare l\'indirizzo attuale in cui risiedi al momento della compilazione.',
+              "Devi indicare l'indirizzo attuale in cui risiedi al momento della compilazione.",
             order: 8,
             category: 'Residenza',
           },
@@ -96,7 +99,7 @@ const SERVICES_DATA = [
         name: 'ISEE Universitario 2026',
         code: 'ISEE_UNI_2026',
         description:
-          'L\'ISEE Universitario è un indicatore determinato da uno specifico tipo di DSU richiesto dello studente per il diritto allo studio',
+          "L'ISEE Universitario è un indicatore determinato da uno specifico tipo di DSU richiesto dello studente per il diritto allo studio",
         category: 'TAX',
         basePrice: 0,
         requiredDocuments: [
@@ -112,18 +115,19 @@ const SERVICES_DATA = [
           '10. Nominal value of government bonds (e.g. BOT, CCT), bonds, certificates of deposit, savings bonds and similar',
           '11. University Student Tax Code',
           '12. Name of the University',
-          '13. In case of the presence of an unmarried and non-cohabiting parent: Tax Code of the Unmarried and Non-Cohabiting Parent'
+          '13. In case of the presence of an unmarried and non-cohabiting parent: Tax Code of the Unmarried and Non-Cohabiting Parent',
         ],
         faqs: [
           {
-            question: 'Chi deve dichiarare l\'ISEE universitario?',
+            question: "Chi deve dichiarare l'ISEE universitario?",
             answer:
               'Potrebbe essere chiunque del nucleo familiare, non necessariamente il capofamiglia',
             order: 1,
             category: 'Dichiarazione',
           },
           {
-            question: 'Quali sono le condizioni per essere considerato studente indipendente?',
+            question:
+              'Quali sono le condizioni per essere considerato studente indipendente?',
             answer:
               'Ha risieduto fuori dal domicilio familiare per almeno due anni prima di presentare la domanda di immatricolazione per la prima volta',
             order: 2,
@@ -136,14 +140,16 @@ const SERVICES_DATA = [
             category: 'Tempi',
           },
           {
-            question: 'Per quanto tempo è valido il certificato ISEE Universitario?',
+            question:
+              'Per quanto tempo è valido il certificato ISEE Universitario?',
             answer:
               "Il certificato ISEE Universitario è valido per l'anno accademico in corso perché scade il 31 dicembre di quell'anno.",
             order: 4,
             category: 'Validità',
           },
           {
-            question: 'Posso utilizzare il certificato ISEE Universitario per richiedere altri benefici?',
+            question:
+              'Posso utilizzare il certificato ISEE Universitario per richiedere altri benefici?',
             answer:
               'Sì, il certificato può essere utilizzato per richiedere benefici o agevolazioni secondo le istruzioni della tua università.',
             order: 5,
@@ -168,11 +174,11 @@ const SERVICES_DATA = [
           '07. Statement issued by the bank certifying the remaining capital of the mortgage',
           '08. Account balance and average balance of current accounts and prepaid cards with IBAN, opened by the entire household',
           '09. Account balance and average balance of open deposit accounts for the entire household',
-          '10. Nominal value of government bonds (e.g. BOT, CCT), bonds, certificates of deposit, savings bonds and similar'
+          '10. Nominal value of government bonds (e.g. BOT, CCT), bonds, certificates of deposit, savings bonds and similar',
         ],
         faqs: [
           {
-            question: 'Chi può richiedere l\'ISEE Socio-Sanitario?',
+            question: "Chi può richiedere l'ISEE Socio-Sanitario?",
             answer:
               'Beneficiario adulto con disabilità o non autosufficiente. Il dichiarante può essere un altro membro della famiglia',
             order: 1,
@@ -212,7 +218,7 @@ const SERVICES_DATA = [
           '08. Account balance and average balance of current accounts and prepaid cards with IBAN, opened by the entire household',
           '09. Account balance and average balance of open deposit accounts for the entire household',
           '10. Nominal value of government bonds (e.g. BOT, CCT), bonds, certificates of deposit, savings bonds and similar',
-          '11. Valid identity document of the unmarried and non-cohabiting parent'
+          '11. Valid identity document of the unmarried and non-cohabiting parent',
         ],
         faqs: [
           {
@@ -223,28 +229,30 @@ const SERVICES_DATA = [
             category: 'Differenze',
           },
           {
-            question: 'Quale genitore deve richiedere l\'ISEE?',
+            question: "Quale genitore deve richiedere l'ISEE?",
             answer:
               "Nel caso di genitori non coniugati e non conviventi, l'ISEE per Minorenni deve essere richiesto dal genitore con cui convivono abitualmente i figli",
             order: 2,
             category: 'Procedura',
           },
           {
-            question: 'Come si può abbassare l\'ISEE?',
+            question: "Come si può abbassare l'ISEE?",
             answer:
               'Cambiare residenza, rivedere i valori della proprietà, evitare conti congiunti, o richiedere un ISEE corrente',
             order: 3,
             category: 'Riduzione',
           },
           {
-            question: 'Sono una madre con due figli da marito divorziato e non convivente. Devo includere il padre?',
+            question:
+              'Sono una madre con due figli da marito divorziato e non convivente. Devo includere il padre?',
             answer:
               'No, devi includere solo la madre e due figli. Il padre va incluso in Sezione D fornendo nome e codice fiscale.',
             order: 4,
             category: 'Procedura',
           },
           {
-            question: 'Posso preparare ISEE Minorenni se il figlio non è riconosciuto dal padre?',
+            question:
+              'Posso preparare ISEE Minorenni se il figlio non è riconosciuto dal padre?',
             answer:
               'Solo se il figlio è stato riconosciuto dal padre. Se non riconosciuto, devi usare ISEE standard.',
             order: 5,
@@ -262,7 +270,7 @@ const SERVICES_DATA = [
         requiredDocuments: [
           '01. Documentation certifying the change in employment/income situation due to job loss or suspension: Letter of dismissal, copy of resignation, unrenewed fixed-term contract, wage supplementation documentation, mobility allowance receipts',
           '02. Documentation certifying the change in employment/income situation due to a reduction in work activity: Recent pay stubs demonstrating the reduction in hours or salary, Tax returns or accounting documentation certifying a decrease in income greater than 25%',
-          '03. Documentation certifying the change in financial position: Bank and postal account statements updated as of December 31 of the year preceding the year in which the current ISEE was submitted'
+          '03. Documentation certifying the change in financial position: Bank and postal account statements updated as of December 31 of the year preceding the year in which the current ISEE was submitted',
         ],
         faqs: [
           {
@@ -273,7 +281,7 @@ const SERVICES_DATA = [
             category: 'Definizione',
           },
           {
-            question: 'Quando posso richiedere l\'ISEE Corrente?',
+            question: "Quando posso richiedere l'ISEE Corrente?",
             answer:
               'Quando si verificano eventi specifici come riduzione del reddito familiare superiore al 25%, perdita del lavoro, o cambiamenti significativi nel nucleo familiare',
             order: 2,
@@ -287,14 +295,14 @@ const SERVICES_DATA = [
             category: 'Documenti',
           },
           {
-            question: 'L\'ISEE Corrente è obbligatorio?',
+            question: "L'ISEE Corrente è obbligatorio?",
             answer:
               "È opzionale ma altamente consigliato se la situazione finanziaria è peggiorata rispetto all'ISEE ordinario",
             order: 4,
             category: 'Obbligatorietà',
           },
           {
-            question: 'Per quanto tempo è valido l\'ISEE Corrente?',
+            question: "Per quanto tempo è valido l'ISEE Corrente?",
             answer:
               'Generalmente è valido per sei mesi dalla data di presentazione della DSU, salvo cambiamenti significativi che richiedano aggiornamenti',
             order: 5,
@@ -309,7 +317,8 @@ const SERVICES_DATA = [
   {
     serviceType: {
       name: 'Disoccupazione',
-      description: 'Servizi per la disoccupazione e prestazioni economiche per lavoratori disoccupati',
+      description:
+        'Servizi per la disoccupazione e prestazioni economiche per lavoratori disoccupati',
     },
     services: [
       {
@@ -320,69 +329,76 @@ const SERVICES_DATA = [
         category: 'EMPLOYMENT',
         basePrice: 0,
         requiredDocuments: [
-          '01. Documento di riconoscimento (Carta d\'identità italiana, carta d\'identità di un paese comunitario, patente, passaporto)',
+          "01. Documento di riconoscimento (Carta d'identità italiana, carta d'identità di un paese comunitario, patente, passaporto)",
           '02. Codice Fiscale o Tessera Sanitaria',
           '03. Permesso di soggiorno del richiedente (se extracomunitario)',
           '04. Ultima Busta Paga in possesso',
-          '05. Lettera di licenziamento - Contratto scaduto'
+          '05. Lettera di licenziamento - Contratto scaduto',
         ],
         faqs: [
           {
             question: 'Entro quanto viene elaborata la mia richiesta?',
-            answer: 'La tua richiesta di NASpI viene elaborata entro 6 ore dalla presentazione.',
+            answer:
+              'La tua richiesta di NASpI viene elaborata entro 6 ore dalla presentazione.',
             order: 1,
             category: 'Tempi',
           },
           {
-            question: 'Dopo la cessazione del rapporto di lavoro, entro quanto tempo posso richiedere la NASPI?',
-            answer: 'Puoi richiedere la NASpI entro 68 giorni dalla data di cessazione del rapporto di lavoro.',
+            question:
+              'Dopo la cessazione del rapporto di lavoro, entro quanto tempo posso richiedere la NASPI?',
+            answer:
+              'Puoi richiedere la NASpI entro 68 giorni dalla data di cessazione del rapporto di lavoro.',
             order: 2,
             category: 'Scadenze',
           },
           {
-            question: 'Qual è l\'importo dell\'indennità NASpI?',
+            question: "Qual è l'importo dell'indennità NASpI?",
             answer:
-              'L\'importo corrisponde al 75% della retribuzione media mensile soggetta a contribuzione degli ultimi quattro anni, fino a un massimo di €1.470,99 lordi. A partire dal primo giorno del sesto mese di fruizione, la NASpI si riduce del 3% ogni mese.',
+              "L'importo corrisponde al 75% della retribuzione media mensile soggetta a contribuzione degli ultimi quattro anni, fino a un massimo di €1.470,99 lordi. A partire dal primo giorno del sesto mese di fruizione, la NASpI si riduce del 3% ogni mese.",
             order: 3,
             category: 'Importo',
           },
           {
-            question: 'Percepisco la disoccupazione e ho trovato un nuovo lavoro, cosa devo fare?',
+            question:
+              'Percepisco la disoccupazione e ho trovato un nuovo lavoro, cosa devo fare?',
             answer:
-              'Devi richiedere una NASpI-Com per comunicare all\'INPS i termini del nuovo contratto, affinché l\'indennità venga sospesa.',
+              "Devi richiedere una NASpI-Com per comunicare all'INPS i termini del nuovo contratto, affinché l'indennità venga sospesa.",
             order: 4,
             category: 'Variazioni',
           },
           {
-            question: 'Percepisco la disoccupazione e sono incinta, cosa devo fare?',
+            question:
+              'Percepisco la disoccupazione e sono incinta, cosa devo fare?',
             answer:
-              'Devi richiedere una NASpI-Com per sospendere l\'indennità nel periodo previsto di maternità obbligatoria.',
+              "Devi richiedere una NASpI-Com per sospendere l'indennità nel periodo previsto di maternità obbligatoria.",
             order: 5,
             category: 'Variazioni',
           },
           {
-            question: 'Percepisco la pensione d\'invalidità, posso percepire anche la disoccupazione?',
+            question:
+              "Percepisco la pensione d'invalidità, posso percepire anche la disoccupazione?",
             answer: 'No, le due indennità non sono cumulabili.',
             order: 6,
             category: 'Cumulabilità',
           },
           {
-            question: 'L\'indennità di disoccupazione tiene conto solo dell\'ultimo lavoro?',
-            answer: 'L\'INPS considera i periodi di lavoro degli ultimi 4 anni.',
+            question:
+              "L'indennità di disoccupazione tiene conto solo dell'ultimo lavoro?",
+            answer: "L'INPS considera i periodi di lavoro degli ultimi 4 anni.",
             order: 7,
             category: 'Calcolo',
           },
           {
-            question: 'Cos\'è la NASpI e a chi spetta?',
+            question: "Cos'è la NASpI e a chi spetta?",
             answer:
-              'La NASpI è un\'indennità di disoccupazione erogata dall\'INPS ai lavoratori dipendenti che hanno perso involontariamente il lavoro. È necessario aver maturato almeno 13 settimane di contributi negli ultimi 4 anni e aver lavorato almeno 30 giorni negli ultimi 12 mesi.',
+              "La NASpI è un'indennità di disoccupazione erogata dall'INPS ai lavoratori dipendenti che hanno perso involontariamente il lavoro. È necessario aver maturato almeno 13 settimane di contributi negli ultimi 4 anni e aver lavorato almeno 30 giorni negli ultimi 12 mesi.",
             order: 8,
             category: 'Definizione',
           },
           {
-            question: 'Come si calcola l\'importo della NASpI?',
+            question: "Come si calcola l'importo della NASpI?",
             answer:
-              'L\'importo della NASpI si calcola in base alla retribuzione imponibile ai fini previdenziali degli ultimi 4 anni. Esiste una formula specifica e delle fasce di retribuzione che determinano l\'importo.',
+              "L'importo della NASpI si calcola in base alla retribuzione imponibile ai fini previdenziali degli ultimi 4 anni. Esiste una formula specifica e delle fasce di retribuzione che determinano l'importo.",
             order: 9,
             category: 'Calcolo',
           },
@@ -396,21 +412,21 @@ const SERVICES_DATA = [
           {
             question: 'Quando si perde il diritto alla NASpI?',
             answer:
-              'Il diritto alla NASpI si perde trovando un nuovo lavoro a tempo indeterminato, raggiungendo i requisiti per la pensione, superando i limiti di reddito da lavoro autonomo, rifiutando un\'offerta di lavoro congrua, o non partecipando alle iniziative di politica attiva del lavoro.',
+              "Il diritto alla NASpI si perde trovando un nuovo lavoro a tempo indeterminato, raggiungendo i requisiti per la pensione, superando i limiti di reddito da lavoro autonomo, rifiutando un'offerta di lavoro congrua, o non partecipando alle iniziative di politica attiva del lavoro.",
             order: 11,
             category: 'Perdita Diritto',
           },
           {
             question: 'Come e quando presentare la domanda di NASpI?',
             answer:
-              'La domanda di NASpI va presentata all\'INPS esclusivamente online, entro 68 giorni dalla data di cessazione del rapporto di lavoro.',
+              "La domanda di NASpI va presentata all'INPS esclusivamente online, entro 68 giorni dalla data di cessazione del rapporto di lavoro.",
             order: 12,
             category: 'Procedura',
           },
           {
             question: 'Posso lavorare part-time mentre percepisco la NASpI?',
             answer:
-              'Sì, è possibile lavorare part-time con un contratto di lavoro subordinato mentre si percepisce la NASpI. Bisogna però comunicare all\'INPS il reddito previsto dal nuovo lavoro, che comporterà una riduzione dell\'importo della NASpI.',
+              "Sì, è possibile lavorare part-time con un contratto di lavoro subordinato mentre si percepisce la NASpI. Bisogna però comunicare all'INPS il reddito previsto dal nuovo lavoro, che comporterà una riduzione dell'importo della NASpI.",
             order: 13,
             category: 'Occupazione',
           },
@@ -420,13 +436,13 @@ const SERVICES_DATA = [
         name: 'Disoccupazione Agricola',
         code: 'DAGRN_2026',
         description:
-          'L\'indennità di disoccupazione agricola è una prestazione economica per i lavoratori agricoli dipendenti',
+          "L'indennità di disoccupazione agricola è una prestazione economica per i lavoratori agricoli dipendenti",
         category: 'EMPLOYMENT',
         basePrice: 0,
         requiredDocuments: [
-          '01. Carta d\'identità richiedente',
+          "01. Carta d'identità richiedente",
           '02. Codice fiscale/Tessera Sanitaria del richiedente',
-          '03. Iban richiedente'
+          '03. Iban richiedente',
         ],
         faqs: [],
       },
@@ -434,15 +450,15 @@ const SERVICES_DATA = [
         name: 'Anticipo NASPI',
         code: 'ANTNAS_2026',
         description:
-          'La NASpI anticipata consiste nella liquidazione anticipata in un\'unica soluzione dell\'importo complessivo della NASpI',
+          "La NASpI anticipata consiste nella liquidazione anticipata in un'unica soluzione dell'importo complessivo della NASpI",
         category: 'EMPLOYMENT',
         basePrice: 0,
         requiredDocuments: [
-          '01. Documento di riconoscimento (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
           '02. Codice Fiscale',
           '03. Eventuale permesso di soggiorno del richiedente (se extracomunitario)',
           '04. Certificato di attribuzione P.IVA',
-          '05. Certificato che attesta l\'inizio attività (Visura camerale attiva, iscrizione gestione separata inps ecc)'
+          "05. Certificato che attesta l'inizio attività (Visura camerale attiva, iscrizione gestione separata inps ecc)",
         ],
         faqs: [],
       },
@@ -450,12 +466,12 @@ const SERVICES_DATA = [
         name: 'DID - Dichiarazione Immediata Disponibilità',
         code: 'DID_2026',
         description:
-          'La Did online - Dichiarazione di immediata disponibilità al lavoro, è la dichiarazione che determina formalmente l\'inizio dello stato di disoccupazione di una persona',
+          "La Did online - Dichiarazione di immediata disponibilità al lavoro, è la dichiarazione che determina formalmente l'inizio dello stato di disoccupazione di una persona",
         category: 'EMPLOYMENT',
         basePrice: 24.99,
         requiredDocuments: [
-          '01. Documento di riconoscimento (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
-          '02. Codice fiscale richiedente'
+          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
+          '02. Codice fiscale richiedente',
         ],
         faqs: [],
       },
@@ -467,13 +483,13 @@ const SERVICES_DATA = [
         category: 'EMPLOYMENT',
         basePrice: 24.99,
         requiredDocuments: [
-          '01. Carta d\'identità',
+          "01. Carta d'identità",
           '02. Codice fiscale',
-          '03. CV (Curriculum Vitae)'
+          '03. CV (Curriculum Vitae)',
         ],
         faqs: [
           {
-            question: 'Patto di Attivazione Digitale (PAD): cos\'è?',
+            question: "Patto di Attivazione Digitale (PAD): cos'è?",
             answer:
               'Il Patto di Attivazione Digitale (PAD) è un accordo che i beneficiari di NASpI e DIS-COLL devono sottoscrivere sulla piattaforma SIISL. Ci si impegna a partecipare attivamente a percorsi di ricerca di lavoro, formazione e reinserimento professionale',
             order: 1,
@@ -496,10 +512,10 @@ const SERVICES_DATA = [
         category: 'EMPLOYMENT',
         basePrice: 24.99,
         requiredDocuments: [
-          '01. Documento di riconoscimento (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
           '02. Codice fiscale richiedente',
           '03. Eventuale permesso di soggiorno del richiedente (se extracomunitario)',
-          '04. Documento che attesta l\'inizio di attività lavorativa (contratto di lavoro - certificato di attività autonoma)'
+          "04. Documento che attesta l'inizio di attività lavorativa (contratto di lavoro - certificato di attività autonoma)",
         ],
         faqs: [],
       },
@@ -525,7 +541,8 @@ const SERVICES_DATA = [
       {
         name: 'Integrazione 730',
         code: '730INT_2026',
-        description: 'Integrazione della dichiarazione dei redditi mediante modello 730',
+        description:
+          'Integrazione della dichiarazione dei redditi mediante modello 730',
         category: 'TAX',
         basePrice: 12.2,
         requiredDocuments: [],
@@ -549,22 +566,22 @@ const SERVICES_DATA = [
         category: 'HR',
         basePrice: 24.99,
         requiredDocuments: [
-          '01. Carta d\'identità',
+          "01. Carta d'identità",
           '02. Codice fiscale/Tessera Sanitaria',
-          '03. Ultima Busta Paga/Modello Unilav/Contratto di lavoro (serve: il codice fiscale e la pec dell\'azienda)',
-          '04. Ultimo giorno lavorativo, compresi i giorni di preavviso'
+          "03. Ultima Busta Paga/Modello Unilav/Contratto di lavoro (serve: il codice fiscale e la pec dell'azienda)",
+          '04. Ultimo giorno lavorativo, compresi i giorni di preavviso',
         ],
         faqs: [
           {
             question: 'Cosa succede se non rispetto il periodo di preavviso?',
             answer:
-              'Nel caso in cui il periodo di preavviso non venga rispettato, il lavoratore sarà considerato inadempiente e l\'azienda potrà detrarre dalla sua ultima busta paga l\'importo corrispondente ai giorni di preavviso mancanti.',
+              "Nel caso in cui il periodo di preavviso non venga rispettato, il lavoratore sarà considerato inadempiente e l'azienda potrà detrarre dalla sua ultima busta paga l'importo corrispondente ai giorni di preavviso mancanti.",
             order: 1,
             category: 'Preavviso',
           },
           {
             question: 'Entro quanto viene elaborata la mia richiesta?',
-            answer: 'Entro 2 ore dall\'invio.',
+            answer: "Entro 2 ore dall'invio.",
             order: 2,
             category: 'Tempi',
           },
@@ -576,7 +593,8 @@ const SERVICES_DATA = [
             category: 'NASpI',
           },
           {
-            question: 'Come dare le dimissioni senza perdere il diritto alla NASpI?',
+            question:
+              'Come dare le dimissioni senza perdere il diritto alla NASpI?',
             answer:
               'Comunica all\'INPS che le dimissioni sono motivate da una "giusta causa".',
             order: 4,
@@ -599,10 +617,10 @@ const SERVICES_DATA = [
         category: 'HR',
         basePrice: 24.99,
         requiredDocuments: [
-          '01. Carta d\'identità richiedente',
+          "01. Carta d'identità richiedente",
           '02. Codice Fiscale del richiedente',
-          '03. Ultima Busta Paga/Modello Unilav/Contratto di lavoro (serve: il codice fiscale e la pec dell\'azienda)',
-          '04. Ultimo giorno lavorativo, compresi i giorni di preavviso'
+          "03. Ultima Busta Paga/Modello Unilav/Contratto di lavoro (serve: il codice fiscale e la pec dell'azienda)",
+          '04. Ultimo giorno lavorativo, compresi i giorni di preavviso',
         ],
         faqs: [],
       },
@@ -614,9 +632,9 @@ const SERVICES_DATA = [
         category: 'HR',
         basePrice: 19.99,
         requiredDocuments: [
-          '01. Documento di riconoscimento (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
           '02. Codice fiscale lavoratore',
-          '03. Ricevuta delle dimissioni effettuate'
+          '03. Ricevuta delle dimissioni effettuate',
         ],
         faqs: [
           {
@@ -634,9 +652,10 @@ const SERVICES_DATA = [
             category: 'Limitazioni',
           },
           {
-            question: 'Cosa succede se il lavoratore non convalida le dimissioni?',
+            question:
+              'Cosa succede se il lavoratore non convalida le dimissioni?',
             answer:
-              'Le dimissioni rassegnate senza rispettare la procedura telematica sono inefficaci e non potranno comportare l\'interruzione del rapporto di lavoro.',
+              "Le dimissioni rassegnate senza rispettare la procedura telematica sono inefficaci e non potranno comportare l'interruzione del rapporto di lavoro.",
             order: 3,
             category: 'Validità',
           },
@@ -649,20 +668,20 @@ const SERVICES_DATA = [
   {
     serviceType: {
       name: 'Rateizzazione Cartelle Agenzia Entrate',
-      description: 'Rateizzazione dei debiti presso l\'Agenzia delle Entrate',
+      description: "Rateizzazione dei debiti presso l'Agenzia delle Entrate",
     },
     services: [
       {
         name: 'Rateizzazione Cartelle Agenzia delle Entrate',
         code: 'RATE_GEN_2026',
         description:
-          'Il servizio di rateizzazione dei debiti dell\'Agenzia delle Entrate offre ai contribuenti la possibilità di diluire il pagamento dei loro debiti fiscali in comode rate mensili',
+          "Il servizio di rateizzazione dei debiti dell'Agenzia delle Entrate offre ai contribuenti la possibilità di diluire il pagamento dei loro debiti fiscali in comode rate mensili",
         category: 'TAX',
         basePrice: 59.99,
         requiredDocuments: [
-          '01. Documento di riconoscimento (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
           '02. Codice fiscale richiedente',
-          '03. Cartelle da rateizzare'
+          '03. Cartelle da rateizzare',
         ],
         faqs: [],
       },
@@ -693,19 +712,19 @@ const SERVICES_DATA = [
   {
     serviceType: {
       name: 'Estratto Conto Previdenziale',
-      description: 'Estratto conto previdenziale dall\'INPS',
+      description: "Estratto conto previdenziale dall'INPS",
     },
     services: [
       {
         name: 'Estratto Conto Previdenziale',
         code: 'ESTCONT_PREV_2026',
         description:
-          'L\'Estratto conto contributivo è un documento che elenca tutti i contributi effettuati all\'INPS in favore del lavoratore',
+          "L'Estratto conto contributivo è un documento che elenca tutti i contributi effettuati all'INPS in favore del lavoratore",
         category: 'PENSION',
         basePrice: 24.99,
         requiredDocuments: [
-          '01. Documento di riconoscimento (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
-          '02. Codice fiscale richiedente'
+          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
+          '02. Codice fiscale richiedente',
         ],
         faqs: [],
       },
@@ -716,19 +735,19 @@ const SERVICES_DATA = [
   {
     serviceType: {
       name: 'Comunicazione INPS',
-      description: 'Comunicazione con l\'INPS',
+      description: "Comunicazione con l'INPS",
     },
     services: [
       {
         name: 'Comunicazione INPS',
         code: 'COMM_INPS_2026',
         description:
-          'Il servizio Comunicazione INPS consente di entrare in contatto con l\'INPS per sollecitare la risoluzione di problematiche riguardanti richieste che risultano ferme o in sospeso',
+          "Il servizio Comunicazione INPS consente di entrare in contatto con l'INPS per sollecitare la risoluzione di problematiche riguardanti richieste che risultano ferme o in sospeso",
         category: 'ADMINISTRATIVE',
         basePrice: 29.99,
         requiredDocuments: [
-          '01. Documento di riconoscimento (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
-          '02. Codice fiscale richiedente'
+          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
+          '02. Codice fiscale richiedente',
         ],
         faqs: [],
       },
@@ -824,18 +843,18 @@ const SERVICES_DATA = [
         category: 'IMMIGRATION',
         basePrice: 119.99,
         requiredDocuments: [
-          '01. Carta d\'identità italiana del richiedente',
+          "01. Carta d'identità italiana del richiedente",
           '02. Codice fiscale del richiedente',
           '03. Passaporto del richiedente',
           '04. Permesso di soggiorno del richiedente',
           '05. Certificato di lingua italiana livello B1 se non in possesso di titolo di studio italiano o di permesso di soggiorno per soggiornanti di lungo periodo',
-          '06. Atto di nascita tradotto e legalizzato dall\'ambasciata italiana nel paese di origine/apostillato',
-          '07. Certificato penale tradotto e legalizzato dall\'ambasciata italiana nel paese di origine/apostillato',
+          "06. Atto di nascita tradotto e legalizzato dall'ambasciata italiana nel paese di origine/apostillato",
+          "07. Certificato penale tradotto e legalizzato dall'ambasciata italiana nel paese di origine/apostillato",
           '08. CU, modello redditi o modello 730 degli ultimi 3 anni',
           '09. Stato di famiglia rilasciato dal comune di residenza',
           '10. Certificato di residenza storico/Autodichiarazione di residenza storica',
           '11. Copia del versamento del contributo di € 250,00',
-          '12. Marca da bollo da € 16,00'
+          '12. Marca da bollo da € 16,00',
         ],
         faqs: [],
       },
@@ -846,7 +865,7 @@ const SERVICES_DATA = [
         category: 'IMMIGRATION',
         basePrice: 119.99,
         requiredDocuments: [
-          '01. Carta d\'identità fronte e retro del richiedente',
+          "01. Carta d'identità fronte e retro del richiedente",
           '02. Codice fiscale/tessera sanitaria fronte e retro del richiedente',
           '03. Passaporto richiedente',
           '04. Atto di nascita tradotto e legalizzato/apostillato',
@@ -858,7 +877,7 @@ const SERVICES_DATA = [
           '10. Certificato di lingua italiana livello B1',
           '11. Marca da bollo da € 16,00',
           '12. Documento di riconoscimento del coniuge',
-          '13. Codice fiscale/tessera sanitaria del coniuge'
+          '13. Codice fiscale/tessera sanitaria del coniuge',
         ],
         faqs: [],
       },
@@ -891,11 +910,11 @@ const SERVICES_DATA = [
           '09. Bollettino di versamento dei contributi INPS relativi al trimestre precedente (ultimi 3 mesi) se lavoratore domestico',
           '10. Certificato di Iscrizione alla Camera di Commercio se lavoratore autonomo',
           '11. Certificato di attribuzione P.IVA se lavoratore autonomo',
-          '12. Contratto di locazione o contratto di comodato gratuito o atto di proprietà dell\'alloggio',
+          "12. Contratto di locazione o contratto di comodato gratuito o atto di proprietà dell'alloggio",
           '13. Idoneità abitativa e certificazione igienico-sanitaria',
-          '14. Nel caso il richiedente sia ospitato: dichiarazione autenticata del titolare dell\'alloggio con consenso al ricongiungimento',
+          "14. Nel caso il richiedente sia ospitato: dichiarazione autenticata del titolare dell'alloggio con consenso al ricongiungimento",
           '15. Modello S2 - Dichiarazione di consenso alloggio per i familiari ricongiunti',
-          '16. Modello S1 - Dichiarazione di assenso del proprietario dell\'alloggio all\'ospitalità di un minore di 14 anni'
+          "16. Modello S1 - Dichiarazione di assenso del proprietario dell'alloggio all'ospitalità di un minore di 14 anni",
         ],
         faqs: [],
       },
@@ -916,10 +935,10 @@ const SERVICES_DATA = [
         category: 'IMMIGRATION',
         basePrice: 19.99,
         requiredDocuments: [
-          '01. Carta d\'identità del richiedente',
+          "01. Carta d'identità del richiedente",
           '02. Codice Fiscale del richiedente',
           '03. Permesso di soggiorno del richiedente',
-          '04. Passaporto del richiedente'
+          '04. Passaporto del richiedente',
         ],
         faqs: [],
       },
@@ -942,7 +961,7 @@ const SERVICES_DATA = [
         requiredDocuments: [
           '01. Contratto di lavoro (mansioni, orario, retribuzione)',
           '02. Registro presenze con ore lavorate, straordinari e assenze',
-          '03. Dati personali di colf/badante (nome, cognome, codice fiscale, dati anagrafici)'
+          '03. Dati personali di colf/badante (nome, cognome, codice fiscale, dati anagrafici)',
         ],
         faqs: [],
       },
@@ -955,23 +974,23 @@ const SERVICES_DATA = [
         requiredDocuments: [
           '01. Dati personali datore di lavoro (nome, cognome, codice fiscale o P.IVA, indirizzo)',
           '02. Dati personali lavoratore (nome, cognome, codice fiscale, data di nascita, residenza)',
-          '03. Registro presenze o giornaliero con ore lavorate nel trimestre'
+          '03. Registro presenze o giornaliero con ore lavorate nel trimestre',
         ],
         faqs: [],
       },
       {
         name: 'Assunzione Colf e Badanti',
         code: 'ASSU_COLF_2026',
-        description: 'Comunicazione di assunzione all\'INPS',
+        description: "Comunicazione di assunzione all'INPS",
         category: 'HR',
         basePrice: 49.99,
         requiredDocuments: [
-          '01. Documento di riconoscimento datore di lavoro (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          "01. Documento di riconoscimento datore di lavoro (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
           '02. Codice fiscale datore di lavoro',
           '03. Eventuale permesso di soggiorno del datore di lavoro',
-          '04. Documento di riconoscimento lavoratore (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          "04. Documento di riconoscimento lavoratore (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
           '05. Codice fiscale lavoratore',
-          '06. Eventuale permesso di soggiorno del lavoratore'
+          '06. Eventuale permesso di soggiorno del lavoratore',
         ],
         faqs: [],
       },
@@ -982,8 +1001,8 @@ const SERVICES_DATA = [
         category: 'HR',
         basePrice: 36.6,
         requiredDocuments: [
-          '01. Documento di riconoscimento (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
-          '02. Codice fiscale richiedente'
+          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
+          '02. Codice fiscale richiedente',
         ],
         faqs: [],
       },
@@ -998,8 +1017,8 @@ const SERVICES_DATA = [
           '02. Dati personali del lavoratore (nome, cognome, codice fiscale, data di nascita, residenza, qualifiche)',
           '03. Mansioni e compiti da svolgere',
           '04. Orario di lavoro, giorni di riposo ed eventuali turni',
-          '05. Retribuzione e modalita\' di pagamento',
-          '06. Durata del contratto (determinato o indeterminato)'
+          "05. Retribuzione e modalita' di pagamento",
+          '06. Durata del contratto (determinato o indeterminato)',
         ],
         faqs: [],
       },
@@ -1010,11 +1029,11 @@ const SERVICES_DATA = [
         category: 'HR',
         basePrice: 36.6,
         requiredDocuments: [
-          '01. Documento di riconoscimento del datore di lavoro (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          "01. Documento di riconoscimento del datore di lavoro (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
           '02. Codice fiscale del datore di lavoro',
           '03. Eventuale permesso di soggiorno del datore di lavoro',
           '04. Codice fiscale del lavoratore',
-          '05. Comunicazione di assunzione INPS'
+          '05. Comunicazione di assunzione INPS',
         ],
         faqs: [],
       },
@@ -1025,13 +1044,13 @@ const SERVICES_DATA = [
         category: 'HR',
         basePrice: 36.6,
         requiredDocuments: [
-          '01. Documento di riconoscimento datore di lavoro (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          "01. Documento di riconoscimento datore di lavoro (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
           '02. Codice fiscale datore di lavoro',
           '03. Eventuale permesso di soggiorno del datore di lavoro',
-          '04. Documento di riconoscimento lavoratore (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          "04. Documento di riconoscimento lavoratore (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
           '05. Codice fiscale lavoratore',
           '06. Eventuale permesso di soggiorno del lavoratore',
-          '07. Comunicazione di assunzione INPS'
+          '07. Comunicazione di assunzione INPS',
         ],
         faqs: [],
       },
@@ -1052,11 +1071,11 @@ const SERVICES_DATA = [
         category: 'SOCIAL',
         basePrice: 29.99,
         requiredDocuments: [
-          '01. Carta d\'identità dichiarante',
+          "01. Carta d'identità dichiarante",
           '02. Codice Fiscale dichiarante',
           '03. Permesso/Carta di soggiorno dichiarante',
           '04. Codice fiscale neonato',
-          '05. Attestazione ISEE non superiore a euro 17.416,66'
+          '05. Attestazione ISEE non superiore a euro 17.416,66',
         ],
         faqs: [],
       },
@@ -1067,11 +1086,11 @@ const SERVICES_DATA = [
         category: 'SOCIAL',
         basePrice: 29.99,
         requiredDocuments: [
-          '01. Documento d\'identita\' valido del genitore richiedente',
+          "01. Documento d'identita' valido del genitore richiedente",
           '02. Codice fiscale del genitore richiedente e del bambino/i',
-          '03. Attestazione ISEE minorenni in corso di validita\' (non superiore a 40.000 euro)',
+          "03. Attestazione ISEE minorenni in corso di validita' (non superiore a 40.000 euro)",
           '04. Permesso di soggiorno valido (per cittadini non UE)',
-          '05. IBAN del genitore richiedente'
+          '05. IBAN del genitore richiedente',
         ],
         faqs: [],
       },
@@ -1082,11 +1101,11 @@ const SERVICES_DATA = [
         category: 'HR',
         basePrice: 29.99,
         requiredDocuments: [
-          '01. Documento di riconoscimento (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
           '02. Codice fiscale richiedente',
           '03. Codice fiscale altro genitore se presente',
           '04. Codice fiscale del minore',
-          '05. Buste paga'
+          '05. Buste paga',
         ],
         faqs: [],
       },
@@ -1106,11 +1125,11 @@ const SERVICES_DATA = [
         category: 'HR',
         basePrice: 29.99,
         requiredDocuments: [
-          '01. Documento di riconoscimento (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
           '02. Codice fiscale richiedente',
           '03. Eventuale permesso di soggiorno',
           '04. Certificato di gravidanza telematico con data presunta del parto',
-          '05. Eventuale certificato medico o autodichiarazione del datore di lavoro per lavorare fino all\'inizio maternita\''
+          "05. Eventuale certificato medico o autodichiarazione del datore di lavoro per lavorare fino all'inizio maternita'",
         ],
         faqs: [],
       },
@@ -1121,12 +1140,12 @@ const SERVICES_DATA = [
         category: 'HR',
         basePrice: 29.99,
         requiredDocuments: [
-          '01. Documento di riconoscimento (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
           '02. Codice fiscale richiedente',
           '03. Eventuale permesso di soggiorno',
           '04. Certificato di gravidanza telematico con data presunta del parto',
           '05. Certificato medico ASL o direzione territoriale competente con gravi complicanze',
-          '06. Certificato di interdizione anticipata per condizioni di lavoro pesante o pericoloso'
+          '06. Certificato di interdizione anticipata per condizioni di lavoro pesante o pericoloso',
         ],
         faqs: [],
       },
@@ -1137,10 +1156,10 @@ const SERVICES_DATA = [
         category: 'HR',
         basePrice: 29.99,
         requiredDocuments: [
-          '01. Documento di riconoscimento (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
           '02. Codice fiscale richiedente',
           '03. Codice fiscale altro genitore se presente',
-          '04. Codice fiscale del minore'
+          '04. Codice fiscale del minore',
         ],
         faqs: [],
       },
@@ -1151,10 +1170,10 @@ const SERVICES_DATA = [
         category: 'HR',
         basePrice: 29.99,
         requiredDocuments: [
-          '01. Documento di riconoscimento (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
           '02. Codice fiscale richiedente',
           '03. Codice fiscale altro genitore se presente',
-          '04. Codice fiscale del minore'
+          '04. Codice fiscale del minore',
         ],
         faqs: [],
       },
@@ -1184,10 +1203,10 @@ const SERVICES_DATA = [
         category: 'HR',
         basePrice: 29.99,
         requiredDocuments: [
-          '01. Documento di riconoscimento del familiare disabile (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          "01. Documento di riconoscimento del familiare disabile (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
           '02. Codice fiscale del familiare disabile',
           '03. Verbale riconoscimento Handicap',
-          '04. Busta paga dell\'attuale datore di lavoro'
+          "04. Busta paga dell'attuale datore di lavoro",
         ],
         faqs: [],
       },
@@ -1208,8 +1227,8 @@ const SERVICES_DATA = [
         category: 'PENSION',
         basePrice: 62,
         requiredDocuments: [
-          '01. Documento di riconoscimento (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
-          '02. Codice fiscale richiedente'
+          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
+          '02. Codice fiscale richiedente',
         ],
         faqs: [],
       },
@@ -1229,12 +1248,12 @@ const SERVICES_DATA = [
         category: 'PENSION',
         basePrice: 0,
         requiredDocuments: [
-          '01. Carta d\'identità richiedente',
+          "01. Carta d'identità richiedente",
           '02. Codice fiscale/Tessera Sanitaria del richiedente',
-          '03. Carta d\'identità della persona deceduta',
+          "03. Carta d'identità della persona deceduta",
           '04. Codice fiscale/Tessera Sanitaria della persona deceduta',
           '05. Codice IBAN del titolare (dichiarante) della pensione',
-          '06. Codice fiscale/Tessera Sanitaria dei familiari che hanno diritto alla pensione'
+          '06. Codice fiscale/Tessera Sanitaria dei familiari che hanno diritto alla pensione',
         ],
         faqs: [],
       },
@@ -1245,10 +1264,10 @@ const SERVICES_DATA = [
         category: 'PENSION',
         basePrice: 29.99,
         requiredDocuments: [
-          '01. Documento d\'identità valido del richiedente (fronte e retro)',
+          "01. Documento d'identità valido del richiedente (fronte e retro)",
           '02. Codice fiscale del richiedente',
           '03. Codice fiscale del coniuge e dei familiari a carico (se rilevante)',
-          '04. Eventuale lettera ricevuta da INPS'
+          '04. Eventuale lettera ricevuta da INPS',
         ],
         faqs: [],
       },
@@ -1269,7 +1288,7 @@ const SERVICES_DATA = [
         category: 'TAX',
         basePrice: 129.99,
         requiredDocuments: [
-          '01. Documento di riconoscimento (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
           '02. Codice fiscale richiedente',
           '03. CU 2023 redditi 2022',
           '04. Codice fiscale dei familiari a carico',
@@ -1277,9 +1296,9 @@ const SERVICES_DATA = [
           '06. Contratto di locazione',
           '07. Interessi passivi su mutui (contratto compravendita, contratto mutuo, oneri accessori, quietanze interessi, fatture ristrutturazione/costruzione)',
           '08. Spese funebri',
-          '09. Spese frequenza di scuole dell\'infanzia, del primo ciclo di istruzione e della scuola secondaria di secondo grado',
+          "09. Spese frequenza di scuole dell'infanzia, del primo ciclo di istruzione e della scuola secondaria di secondo grado",
           '10. Spese frequenza corsi istruzione universitaria presso università statali e non statali',
-          '11. Spese per addetti all\'assistenza personale',
+          "11. Spese per addetti all'assistenza personale",
           '12. Spese per attività sportive dei ragazzi',
           '13. Spese veterinarie',
           '14. Spese asili nido',
@@ -1290,7 +1309,7 @@ const SERVICES_DATA = [
           '19. Spese mediche e di assistenza di persone con disabilità',
           '20. Spese 36% - 50% - 65% per interventi di recupero del patrimonio edilizio',
           '21. Spese 50% per la pace contributiva e le colonne per la ricarica',
-          '22. Spese 50% per l\'arredo immobili (comprese giovani coppie) e IVA per acquisto abitazione A o B; spese 55% - 65% per risparmio energetico'
+          "22. Spese 50% per l'arredo immobili (comprese giovani coppie) e IVA per acquisto abitazione A o B; spese 55% - 65% per risparmio energetico",
         ],
         faqs: [],
       },
@@ -1301,19 +1320,19 @@ const SERVICES_DATA = [
         category: 'TAX',
         basePrice: 50,
         requiredDocuments: [
-          '01. Documento di riconoscimento (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
           '02. Codice fiscale richiedente',
           '03. CU 2023 redditi 2022',
           '04. Eventuale certificato di attribuzione P.IVA',
-          '05. Eventuali fatture emesse nell\'anno 2022',
+          "05. Eventuali fatture emesse nell'anno 2022",
           '06. Codice fiscale dei familiari a carico',
           '07. Spese sanitarie',
           '08. Contratto di locazione',
           '09. Interessi passivi su mutui (contratto compravendita, contratto mutuo, oneri accessori, quietanze interessi, fatture ristrutturazione/costruzione)',
           '10. Spese funebri',
-          '11. Spese frequenza di scuole dell\'infanzia, del primo ciclo di istruzione e della scuola secondaria di secondo grado',
+          "11. Spese frequenza di scuole dell'infanzia, del primo ciclo di istruzione e della scuola secondaria di secondo grado",
           '12. Spese frequenza corsi istruzione universitaria presso università statali e non statali',
-          '13. Spese per addetti all\'assistenza personale',
+          "13. Spese per addetti all'assistenza personale",
           '14. Spese per attività sportive dei ragazzi',
           '15. Spese veterinarie',
           '16. Spese asili nido',
@@ -1324,7 +1343,7 @@ const SERVICES_DATA = [
           '21. Spese mediche e di assistenza di persone con disabilità',
           '22. Spese 36% - 50% - 65% per interventi di recupero del patrimonio edilizio',
           '23. Spese 50% per la pace contributiva e le colonne per la ricarica',
-          '24. Spese 50% per l\'arredo immobili (comprese giovani coppie) e IVA per acquisto abitazione A o B; spese 55% - 65% per risparmio energetico'
+          "24. Spese 50% per l'arredo immobili (comprese giovani coppie) e IVA per acquisto abitazione A o B; spese 55% - 65% per risparmio energetico",
         ],
         faqs: [],
       },
@@ -1335,7 +1354,7 @@ const SERVICES_DATA = [
         category: 'TAX',
         basePrice: 29.99,
         requiredDocuments: [
-          '01. Documento di riconoscimento (Carta d\'identità fronte e retro - Patente fronte e retro - Passaporto)',
+          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
           '02. Codice fiscale richiedente',
           '03. CU 2023 redditi 2022',
           '04. Codice fiscale dei familiari a carico',
@@ -1343,9 +1362,9 @@ const SERVICES_DATA = [
           '06. Contratto di locazione',
           '07. Interessi passivi su mutui (contratto compravendita, contratto mutuo, oneri accessori, quietanze interessi, fatture ristrutturazione/costruzione)',
           '08. Spese funebri',
-          '09. Spese frequenza di scuole dell\'infanzia, del primo ciclo di istruzione e della scuola secondaria di secondo grado',
+          "09. Spese frequenza di scuole dell'infanzia, del primo ciclo di istruzione e della scuola secondaria di secondo grado",
           '10. Spese frequenza corsi istruzione universitaria presso università statali e non statali',
-          '11. Spese per addetti all\'assistenza personale',
+          "11. Spese per addetti all'assistenza personale",
           '12. Spese per attività sportive dei ragazzi',
           '13. Spese veterinarie',
           '14. Spese asili nido',
@@ -1356,7 +1375,7 @@ const SERVICES_DATA = [
           '19. Spese mediche e di assistenza di persone con disabilità',
           '20. Spese 36% - 50% - 65% per interventi di recupero del patrimonio edilizio',
           '21. Spese 50% per la pace contributiva e le colonne per la ricarica',
-          '22. Spese 50% per l\'arredo immobili (comprese giovani coppie) e IVA per acquisto abitazione A o B; spese 55% - 65% per risparmio energetico'
+          "22. Spese 50% per l'arredo immobili (comprese giovani coppie) e IVA per acquisto abitazione A o B; spese 55% - 65% per risparmio energetico",
         ],
         faqs: [],
       },
@@ -1367,10 +1386,10 @@ const SERVICES_DATA = [
         category: 'TAX',
         basePrice: 29.99,
         requiredDocuments: [
-          '01. Carta d\'identità',
+          "01. Carta d'identità",
           '02. Codice fiscale',
           '03. Contratto di locazione',
-          '04. Registrazione del contratto di locazione'
+          '04. Registrazione del contratto di locazione',
         ],
         faqs: [],
       },
@@ -1381,10 +1400,10 @@ const SERVICES_DATA = [
         category: 'TAX',
         basePrice: 0,
         requiredDocuments: [
-          '01. Carta d\'identità',
+          "01. Carta d'identità",
           '02. Codice Fiscale',
           '03. Visura Catastale Aggiornata',
-          '04. Dati dei Pagamenti Precedenti'
+          '04. Dati dei Pagamenti Precedenti',
         ],
         faqs: [],
       },
@@ -1597,7 +1616,7 @@ const SERVICES_DATA = [
 export async function seedAllServices() {
   try {
     console.log(
-      '\n✨ Inizio Seeding - Tutti i Tipi di Servizio, Servizi e FAQs...\n'
+      '\n✨ Inizio Seeding - Tutti i Tipi di Servizio, Servizi e FAQs...\n',
     );
 
     if (!AppDataSource.isInitialized) {
@@ -1679,7 +1698,7 @@ export async function seedAllServices() {
     }
 
     console.log(
-      '\n✨ Seeding completato con successo! Tutti i dati sono stati caricati.\n'
+      '\n✨ Seeding completato con successo! Tutti i dati sono stati caricati.\n',
     );
     console.log('📊 Riepilogo Finale:');
     console.log(`   🔹 Tipi di Servizio creati: ${serviceTypesCount}`);

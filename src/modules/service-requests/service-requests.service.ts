@@ -1336,7 +1336,7 @@ export class ServiceRequestsService {
     try {
       const request = await this.serviceRequestRepository.findOne({
         where: { id },
-        relations: ['service'],
+        relations: ['service', 'payment'],
       });
 
       if (!request) {
@@ -1351,15 +1351,39 @@ export class ServiceRequestsService {
         throw new ForbiddenException('Not authorized to submit this request');
       }
 
-      // CRITICAL: Verify subscription before allowing submission (MILSTON M6)
-      const serviceCode = request.service?.code || 'ISEE';
-      const subscriptionCheck = await this.verifySubscriptionAccess(
-        userId,
-        serviceCode,
-      );
+      // CRITICAL: Verify access based on service pricing
+      // For FREE services (basePrice = 0): allow without payment or subscription
+      // For PAID services: require either direct payment OR active subscription
+      const service = request.service;
+      const basePriceNum = parseFloat(String(service?.basePrice || 0));
+      const isFreeService = basePriceNum === 0;
+      
+      // Check if user has a direct payment for this request
+      let hasValidPayment = false;
+      if (request.paymentId) {
+        const payment = await this.paymentRepository.findOne({
+          where: { id: request.paymentId },
+        });
+        // Payment must exist and be in 'completed' status
+        hasValidPayment = payment && payment.status === 'completed';
+        this.logger.debug(`Payment check - ID: ${request.paymentId}, Found: ${!!payment}, Status: ${payment?.status}, Valid: ${hasValidPayment}`);
+      }
+      
+      this.logger.debug(`Access check - Service: ${service?.name} (${service?.code}), BasePrice: ${service?.basePrice} (parsed: ${basePriceNum}), Free: ${isFreeService}, HasPayment: ${hasValidPayment}`);
+      
+      // If service is FREE, allow to submit
+      if (!isFreeService && !hasValidPayment) {
+        this.logger.warn(`Subscription check required for paid service without direct payment: ${service?.code}`);
+        // Only check subscription if: service is PAID AND user hasn't paid directly
+        const serviceCode = service?.code || 'ISEE';
+        const subscriptionCheck = await this.verifySubscriptionAccess(
+          userId,
+          serviceCode,
+        );
 
-      if (!subscriptionCheck.isValid) {
-        throw new ForbiddenException(subscriptionCheck.message);
+        if (!subscriptionCheck.isValid) {
+          throw new ForbiddenException(subscriptionCheck.message);
+        }
       }
 
       // Update status

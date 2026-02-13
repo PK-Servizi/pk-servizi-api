@@ -1127,3 +1127,989 @@ Requaird documents:
 Price: 0,00
 
 Description:L'assegno sociale è una prestazione economica a sostegno dei cittadini italiani e stranieri residenti in Italia che si trovano in condizioni economiche disagiate. A differenza della pensione di vecchiaia, l'assegno sociale non richiede il versamento di contributi previdenziali 
+
+Questionnaires 
+Questionnaire-1: Informazioni personali 
+{
+  "personal_information": {
+    "name": "ramzan",
+    "surname": null,
+    "email": "ramzanhusnain7194@gmail.com",
+    "mobile_phone_number": {
+      "country_code": "+39",
+      "number": null
+    },
+    "gender": "Male",
+    "nationality": "Italy",
+    "date_of_birth": null,
+    "place_of_birth": {
+      "country_selection": "Italy"
+    },
+    "current_residence": {
+      "country": "Italy",
+      "province": null,
+      "city": null,
+      "address": null,
+      "house_number": null,
+      "postal_code": null
+    }
+  }
+}
+Same as SmartCaf.it for all the services 
+Add following in all the services in Questionnaire-1 
+1- Permesso di soggiorno (se extracomunitario)          
+Attach Permesso di soggiorno                                   
+Add Expiry date 
+If the Permesso di soggiorno is expired then add also Ricevuta 
+Attach Ricevuta 
+2- Stato civile 
+o 
+o 
+o 
+o 
+o 
+Celibe / Nubile 
+Coniugato/a 
+Separato/a 
+Divorziato/a 
+Vedovo/a 
+Add the following questionnaire at the end of all the services (Must) 
+Questionnaire: Declarations & Authorization (Dichiarazioni e autorizzazioni) 
+Mandatory checkboxes: 
+☐ Dichiaro che i dati forniti sono veritieri 
+☐ Autorizzo il trattamento dei dati personali (GDPR) 
+☐ Delega CAF per invio DSU 
+Optional: 
+☐ Desidero essere ricontattato per altri servizi CAF / Patronato 
+Digital signature field. 
+Full name 
+12,20 
+12,20 
+12,20 
+60,00 
+60,00 
+ISEE 
+Service-1: ISEE Ordinario 2026 
+Questionnaire-1: Informazioni personali (dichiarante) 
+Same as SmartCaf.it for all the services 
+Questionnaire-2: Household (Nucleo Familiare) 
+Sei solo?     
+si         
+or                 
+If no then add the following: 
+No 
+Repeat this block for each household member 
+For ogni componente del nucleo: 
+1. Nome e Cognome 
+2. Codice Fiscale 
+3. Data di nascita 
+4. Rapporto di parentela col dichiarante 
+o Coniuge 
+o Figlio/a 
+o Genitore 
+o Altro 
+Add these documents here: 
+1- ISEE L’anno sccorso  (Not Compulsary) 
+2- Codice Fiscale / Tessera Sanitaria (Compulsary) 
+5.   Presenza di persone con disabilità? 
+o Nessuna 
+o Media 
+o Grave 
+o Non autosufficiente 
+Add the following document if the answer is not ‘Nessuna’ : 
+2- Certificato medico d’INPS (Compulsary) 
+6. Attivita’ lavorativa  
+o Lavoro dipendente 
+o Autonomo 
+o Pensione 
+o Disoccupato 
+o Studente 
+o Casalinga 
+o Altro 
+Other Income 
+4. Redditi esteri?    si         
+If yes attach file 
+or           
+No 
+5. Assegni di mantenimento percepiti?      Yes         
+If yes attach file 
+6. Redditi da affitti?           
+If yes attach file 
+7. Altri redditi imponibili?        
+If yes attach file 
+si         
+or           
+si        
+No 
+or           
+No 
+or           
+No  
+Questionnaire-3: Financial Assets (Patrimonio Mobiliare – al 31/12/2024) 
+For every household member             
+si           
+or         
+no 
+If yes attach the following and enable to attach more than one file or photo 
+Giacenza media 2024  
+Other Assets 
+If yes attach the following and enable to attach more than one file or photo 
+STEP 5 — Real Estate (Patrimonio Immobiliare) 
+si           
+or         
+no 
+If yes attach the following and enable to attach more than one file or photo 
+For each property: 
+1. Tipo immobile:         
+o Abitazione principale 
+o Seconda casa 
+o Terreno 
+If yes attach file 
+2. Percentuale di proprietà           
+If yes attach file 
+si           
+or        
+3. Mutuo residuo al 31/12/2024 (se presente)              
+If yes attach file 
+no 
+si        
+or        
+Questionnaire-4: Primary Residence Details (Residenza Principale) 
+Only if applicable: 
+1. Casa di proprietà o affitto? 
+o Proprietà 
+o Affitto 
+o Altro 
+If affitto attach:  
+no 
+Estremi contratto con Registrazione Agenzia delle Entrate (must upload) 
+Questionnaire-5: Vehicles (Veicoli)       
+For all family members: 
+1. Auto? 
+o Sì 
+o No 
+If yes: 
+Write Targa…………. 
+1. Moto? 
+o Sì 
+o No 
+If yes: 
+Write Targa…………. 
+1. Barche? 
+o Sì 
+o No 
+If yes: 
+Write Targa…………. 
+Questionnaire-6: Special Situations (Situazioni particolari) 
+Checkboxes: 
+• Genitori non conviventi      si             
+• Coniuge residente all’estero          
+• Separazione legale           
+• Figli con affidamento           
+or              
+si             
+si             
+or              
+si             
+or              
+no 
+or              
+no 
+no 
+no 
+Questionnaire-7: Declarations & Authorization (Dichiarazioni e autorizzazioni) 
+Mandatory checkboxes: 
+☐ Dichiaro che i dati forniti sono veritieri 
+☐ Autorizzo il trattamento dei dati personali (GDPR) 
+☐ Delega CAF per invio DSU 
+Optional: 
+☐ Desidero essere ricontattato per altri servizi CAF / Patronato 
+Digital signature field. 
+Full name 
+Service-2: ISEE Universitario 2026 
+Questionnaire-1: Informazioni personali (dichiarante) 
+Same as SmartCaf.it for all the services 
+Questionnaire-2: Household (Nucleo Familiare) 
+Sei solo?     
+si         
+or                 
+No 
+If no then add the following: 
+Repeat this block for each household member 
+For ogni componente del nucleo: 
+5. Nome e Cognome 
+6. Codice Fiscale 
+7. Data di nascita 
+8. Rapporto di parentela col dichiarante 
+o Coniuge 
+o Figlio/a 
+o Genitore 
+o Altro 
+Add these documents here: 
+3- ISEE L’anno sccorso  (Not Compulsary) 
+2- Codice Fiscale / Tessera Sanitaria (Compulsary) 
+5.   Presenza di persone con disabilità? 
+o Nessuna 
+o Media 
+o Grave 
+o Non autosufficiente 
+Add the following document if the answer is not ‘Nessuna’ : 
+4- Certificato medico d’INPS (Compulsary) 
+7. Attivita’ lavorativa  
+o Lavoro dipendente 
+o Autonomo 
+o Pensione 
+o Disoccupato 
+o Studente 
+o Casalinga 
+o Altro 
+Other Income 
+8. Redditi esteri?    si         
+If yes attach file 
+or           
+No 
+9. Assegni di mantenimento percepiti?      Yes         
+If yes attach file 
+10. Redditi da affitti?           
+If yes attach file 
+11. Altri redditi imponibili?        
+If yes attach file 
+si         
+or           
+si        
+No 
+or           
+No 
+or           
+No  
+Questionnaire-3: Financial Assets (Patrimonio Mobiliare – al 31/12/2024) 
+For every household member             
+si           
+or         
+no 
+If yes attach the following and enable to attach more than one file or photo 
+Giacenza media 2024  
+Other Assets 
+If yes attach the following and enable to attach more than one file or photo 
+STEP 5 — Real Estate (Patrimonio Immobiliare) 
+si           
+or         
+no 
+If yes attach the following and enable to attach more than one file or photo 
+For each property: 
+4. Tipo immobile:         
+o Abitazione principale 
+o Seconda casa 
+o Terreno 
+If yes attach file 
+5. Percentuale di proprietà           
+If yes attach file 
+si           
+or        
+6. Mutuo residuo al 31/12/2024 (se presente)              
+If yes attach file 
+no 
+si        
+or        
+no 
+Questionnaire-4: Primary Residence Details (Residenza Principale) 
+Only if applicable: 
+2. Casa di proprietà o affitto? 
+o Proprietà 
+o Affitto 
+o Altro 
+If affitto attach:  
+Estremi contratto con Registrazione Agenzia delle Entrate (must upload) 
+Questionnaire-5: Vehicles (Veicoli)       
+For all family members: 
+2. Auto? 
+o Sì 
+o No 
+If yes: 
+Write Targa…………. 
+2. Moto? 
+o Sì 
+o No 
+If yes: 
+Write Targa…………. 
+2. Barche? 
+o Sì 
+o No 
+If yes: 
+Write Targa…………. 
+Questionnaire-6: University (Universita) 
+1. Codice Fiscale dello studente Universitari 
+2. Nome dell'Università 
+3. In caso di presenza di genitore non coniugato e non convivente: Codice Fiscale 
+Genitore non Coniugato e non Convivente 
+Questionnaire-7: Special Situations (Situazioni particolari) 
+Checkboxes: 
+• Genitori non conviventi      si             
+• Coniuge residente all’estero          
+• Separazione legale           
+• Figli con affidamento           
+si             
+si             
+or              
+si             
+or              
+or              
+no 
+or              
+no 
+no 
+no 
+Questionnaire-8: Declarations & Authorization (Dichiarazioni e autorizzazioni) 
+Mandatory checkboxes: 
+☐ Dichiaro che i dati forniti sono veritieri 
+☐ Autorizzo il trattamento dei dati personali (GDPR) 
+☐ Delega CAF per invio DSU 
+Optional: 
+☐ Desidero essere ricontattato per altri servizi CAF / Patronato 
+Digital signature field. 
+Full name 
+Service-3: ISEE Socio Sanitario 2026 
+Questionnaire-1: Informazioni personali (dichiarante) 
+Same as SmartCaf.it for all the services 
+Questionnaire-2: Household (Nucleo Familiare) 
+Sei solo?     
+si         
+or                 
+If no then add the following: 
+No 
+Repeat this block for each household member 
+For ogni componente del nucleo: 
+9. Nome e Cognome 
+10. Codice Fiscale 
+11. Data di nascita 
+12. Rapporto di parentela col dichiarante 
+o Coniuge 
+o Figlio/a 
+o Genitore 
+o Altro 
+Add these documents here: 
+5- ISEE L’anno sccorso  (Not Compulsary) 
+2- Codice Fiscale / Tessera Sanitaria (Compulsary) 
+5.   Presenza di persone con disabilità? 
+o Nessuna 
+o Media 
+o Grave 
+o Non autosufficiente 
+Add the following document if the answer is not ‘Nessuna’ : 
+6- Certificato medico d’INPS (Compulsary) 
+8. Attivita’ lavorativa  
+o Lavoro dipendente 
+o Autonomo 
+o Pensione 
+o Disoccupato 
+o Studente 
+o Casalinga 
+o Altro 
+Other Income 
+12. Redditi esteri?    si         
+or           
+No 
+If yes attach file 
+13. Assegni di mantenimento percepiti?      Yes         
+or           
+No  
+If yes attach file 
+14. Redditi da affitti?           
+If yes attach file 
+15. Altri redditi imponibili?        
+If yes attach file 
+si         
+or           
+si        
+No 
+or           
+No 
+Questionnaire-3: Financial Assets (Patrimonio Mobiliare – al 31/12/2024) 
+For every household member             
+si           
+or         
+no 
+If yes attach the following and enable to attach more than one file or photo 
+Giacenza media 2024  
+Other Assets 
+If yes attach the following and enable to attach more than one file or photo 
+STEP 5 — Real Estate (Patrimonio Immobiliare) 
+si           
+or         
+no 
+If yes attach the following and enable to attach more than one file or photo 
+For each property: 
+7. Tipo immobile:         
+o Abitazione principale 
+o Seconda casa 
+o Terreno 
+If yes attach file 
+8. Percentuale di proprietà           
+If yes attach file 
+si           
+or        
+9. Mutuo residuo al 31/12/2024 (se presente)              
+If yes attach file 
+no 
+si        
+or        
+Questionnaire-4: Primary Residence Details (Residenza Principale) 
+Only if applicable: 
+no 
+3. Casa di proprietà o affitto? 
+o Proprietà 
+o Affitto 
+o Altro 
+If affitto attach:  
+Estremi contratto con Registrazione Agenzia delle Entrate (must upload) 
+Questionnaire-5: Vehicles (Veicoli)       
+For all family members: 
+3. Auto? 
+o Sì 
+o No 
+If yes: 
+Write Targa…………. 
+3. Moto? 
+o Sì 
+o No 
+If yes: 
+Write Targa…………. 
+3. Barche? 
+o Sì 
+o No 
+If yes: 
+Write Targa…………. 
+Questionnaire-6: Special Situations (Situazioni particolari) 
+Checkboxes: 
+• Genitori non conviventi      si             
+• Coniuge residente all’estero          
+or              
+si             
+no 
+or              
+no 
+• Separazione legale           
+si             
+or              
+no 
+• Figli con affidamento           
+si             
+or              
+no 
+Questionnaire-7: Declarations & Authorization (Dichiarazioni e autorizzazioni) 
+Mandatory checkboxes: 
+☐ Dichiaro che i dati forniti sono veritieri 
+☐ Autorizzo il trattamento dei dati personali (GDPR) 
+☐ Delega CAF per invio DSU 
+Optional: 
+☐ Desidero essere ricontattato per altri servizi CAF / Patronato 
+Digital signature field. 
+Full name 
+Service-4: ISEE Minorenni 2026 
+Questionnaire-1: Informazioni personali (dichiarante) 
+Same as SmartCaf.it for all the services 
+Questionnaire-2: Household (Nucleo Familiare) 
+Sei solo?     
+si         
+or                 
+If no then add the following: 
+No 
+Repeat this block for each household member 
+For ogni componente del nucleo: 
+13. Nome e Cognome 
+14. Codice Fiscale 
+15. Data di nascita 
+16. Rapporto di parentela col dichiarante 
+o Coniuge 
+o Figlio/a 
+o Genitore 
+o Altro 
+Add these documents here: 
+7- ISEE L’anno sccorso  (Not Compulsary) 
+2- Codice Fiscale / Tessera Sanitaria (Compulsary) 
+5.   Presenza di persone con disabilità? 
+o Nessuna 
+o Media 
+o Grave 
+o Non autosufficiente 
+Add the following document if the answer is not ‘Nessuna’ : 
+8- Certificato medico d’INPS (Compulsary) 
+9. Attivita’ lavorativa  
+o Lavoro dipendente 
+o Autonomo 
+o Pensione 
+o Disoccupato 
+o Studente 
+o Casalinga 
+o Altro 
+Other Income 
+16. Redditi esteri?    si         
+If yes attach file 
+or           
+No 
+17. Assegni di mantenimento percepiti?      Yes         
+If yes attach file 
+18. Redditi da affitti?           
+If yes attach file 
+19. Altri redditi imponibili?        
+If yes attach file 
+si         
+or           
+si        
+or           
+or           
+No 
+No 
+No  
+Questionnaire-3: Financial Assets (Patrimonio Mobiliare – al 31/12/2024) 
+For every household member             
+si           
+or         
+no 
+If yes attach the following and enable to attach more than one file or photo 
+Giacenza media 2024  
+Other Assets 
+If yes attach the following and enable to attach more than one file or photo 
+STEP 5 — Real Estate (Patrimonio Immobiliare) 
+si           
+or         
+no 
+If yes attach the following and enable to attach more than one file or photo 
+For each property: 
+10. Tipo immobile:         
+o Abitazione principale 
+o Seconda casa 
+o Terreno 
+If yes attach file 
+11. Percentuale di proprietà           
+If yes attach file 
+si           
+or        
+12. Mutuo residuo al 31/12/2024 (se presente)              
+If yes attach file 
+no 
+si        
+or        
+Questionnaire-4: Primary Residence Details (Residenza Principale) 
+Only if applicable: 
+4. Casa di proprietà o affitto? 
+o Proprietà 
+o Affitto 
+o Altro 
+If affitto attach:  
+no 
+Estremi contratto con Registrazione Agenzia delle Entrate (must upload) 
+Questionnaire-5: Vehicles (Veicoli)       
+For all family members: 
+4. Auto? 
+o Sì 
+o No 
+If yes: 
+Write Targa…………. 
+4. Moto? 
+o Sì 
+o No 
+If yes: 
+Write Targa…………. 
+4. Barche? 
+o Sì 
+o No 
+If yes: 
+Write Targa…………. 
+Questionnaire-6: Special Situations (Situazioni particolari) 
+Checkboxes: 
+• Genitori non conviventi      si             
+• Coniuge residente all’estero          
+• Separazione legale           
+• Figli con affidamento           
+or              
+si             
+si             
+or              
+si             
+or              
+no 
+or              
+no 
+no 
+no 
+Questionnaire-7: Declarations & Authorization (Dichiarazioni e autorizzazioni) 
+Mandatory checkboxes: 
+☐ Dichiaro che i dati forniti sono veritieri 
+☐ Autorizzo il trattamento dei dati personali (GDPR) 
+☐ Delega CAF per invio DSU 
+Optional: 
+☐ Desidero essere ricontattato per altri servizi CAF / Patronato 
+Digital signature field. 
+Full name 
+Service-1: ISEE Corrente 
+Questionnaire-1: Informazioni personali (dichiarante) 
+Same as SmartCaf.it for all the services 
+Questionnaire-2: Variation (Variazione della Situazione Lavorativa/Reddituale/ 
+Patrimoniale) 
+Perdita o sospensione del lavoro?             
+If yes attach file 
+Si            
+Riduzione dell'attività lavorativa o del reddito?            
+If yes attach file 
+or             
+no 
+Si            
+or             
+Diminuzione di oltre il 20% del patrimonio mobiliare o immobiliare          
+If yes attach file 
+Questionnaire-3: Household (Nucleo Familiare) 
+Sei solo?     
+si         
+or                 
+If no then add the following: 
+No 
+Repeat this block for each household member 
+For ogni componente del nucleo: 
+17. Nome e Cognome 
+18. Codice Fiscale 
+19. Data di nascita 
+20. Rapporto di parentela col dichiarante 
+no 
+Si            
+or             
+no 
+o Coniuge 
+o Figlio/a 
+o Genitore 
+o Altro 
+Add these documents here: 
+9- ISEE L’anno sccorso  (Not Compulsary) 
+2- Codice Fiscale / Tessera Sanitaria (Compulsary) 
+5.   Presenza di persone con disabilità? 
+o Nessuna 
+o Media 
+o Grave 
+o Non autosufficiente 
+Add the following document if the answer is not ‘Nessuna’ : 
+10- Certificato medico d’INPS (Compulsary) 
+10. Attivita’ lavorativa  
+o Lavoro dipendente 
+o Autonomo 
+o Pensione 
+o Disoccupato 
+o Studente 
+o Casalinga 
+o Altro 
+Other Income 
+20. Redditi esteri?    si         
+If yes attach file 
+or           
+No 
+21. Assegni di mantenimento percepiti?      Yes         
+If yes attach file 
+22. Redditi da affitti?           
+si         
+or           
+No 
+or           
+No  
+If yes attach file 
+23. Altri redditi imponibili?        
+si        
+or           
+No 
+If yes attach file 
+Questionnaire-4: Financial Assets (Patrimonio Mobiliare – al 31/12/2024) 
+For every household member             
+si           
+or         
+no 
+If yes attach the following and enable to attach more than one file or photo 
+Giacenza media 2024  
+Other Assets 
+If yes attach the following and enable to attach more than one file or photo 
+STEP 5 — Real Estate (Patrimonio Immobiliare) 
+si           
+or         
+no 
+If yes attach the following and enable to attach more than one file or photo 
+For each property: 
+13. Tipo immobile:         
+o Abitazione principale 
+o Seconda casa 
+o Terreno 
+If yes attach file 
+14. Percentuale di proprietà           
+If yes attach file 
+si           
+or        
+15. Mutuo residuo al 31/12/2024 (se presente)              
+If yes attach file 
+no 
+si        
+or        
+Questionnaire-5: Primary Residence Details (Residenza Principale) 
+Only if applicable: 
+5. Casa di proprietà o affitto? 
+o Proprietà 
+o Affitto 
+o Altro 
+no 
+If affitto attach:  
+Estremi contratto con Registrazione Agenzia delle Entrate (must upload) 
+Questionnaire-6: Vehicles (Veicoli)       
+For all family members: 
+5. Auto? 
+o Sì 
+o No 
+If yes: 
+Write Targa…………. 
+5. Moto? 
+o Sì 
+o No 
+If yes: 
+Write Targa…………. 
+5. Barche? 
+o Sì 
+o No 
+If yes: 
+Write Targa…………. 
+Questionnaire-7: Special Situations (Situazioni particolari) 
+Checkboxes: 
+• Genitori non conviventi      si             
+• Coniuge residente all’estero          
+• Separazione legale           
+• Figli con affidamento           
+si             
+si             
+or              
+si             
+or              
+or              
+no 
+or              
+no 
+no 
+no 
+Questionnaire-8: Declarations & Authorization (Dichiarazioni e autorizzazioni) 
+Mandatory checkboxes: 
+☐ Dichiaro che i dati forniti sono veritieri 
+☐ Autorizzo il trattamento dei dati personali (GDPR) 
+☐ Delega CAF per invio DSU 
+Optional: 
+☐ Desidero essere ricontattato per altri servizi CAF / Patronato 
+Digital signature field. 
+Full name 
+Disoccupazione/ NASPI 
+Service-1- Disoccupazione NASPI 
+Same as SmartCaf.it  
+Service-2- Disoccupazione Agricola 
+Same as SmartCaf.it  
+Service-3- Anticipo NASPI 
+Same as SmartCaf.it  
+Service-4- DID - Dichiarazione di Immediata Disponibilità 
+Questionnaire: Informazioni personali (dichiarante) 
+Same as SmartCaf.it 
+Service-5- PAD NASPI/DIS-COLL 
+Questionnaire-1: Informazioni personali (dichiarante) 
+Same as SmartCaf.it 
+Questionnaire-2: Curriculum  
+Allega CV aggiornato  
+Service-6- Naspi-Com 
+Questionnaire-1: Informazioni personali (dichiarante) 
+Same as SmartCaf.it 
+Questionnaire-2: Variation (Variazione) 
+UNILAV/Contratto di lavoro/Certificato di attività autonoma 
+Allega file   
+Service-7- Ricorso NASPI 
+Questionnaire-1: Informazioni personali (dichiarante) 
+Same as SmartCaf.it 
+Questionnaire-2: Le prove per Ricorso 
+Attach the following 
+1- Lettera di Rigetto 
+2- Ultima Lettera di Licenziamento 
+Modello 730   
+Service-1: 730 
+Questionnaire-1: Informazioni personali (dichiarante) 
+Same as SmartCaf.it for all the services 
+Questionnaire-2: Tipo di Dichiarazione  
+1. È la tua prima dichiarazione dei redditi? 
+o Sì 
+o No 
+2. Hai già presentato il 730 l’anno scorso?  
+o Sì 
+o No 
+If si attach 730 l’anno scorso 
+Questionnaire-3: Sostituto d’Imposta 
+1. Hai un sostituto d’imposta? 
+o Sì 
+o No 
+If Sì: 
+• Denominazione datore di lavoro / ente pensionistico 
+• Codice fiscale sostituto 
+If No: 
+• Rimborso tramite Agenzia delle Entrate 
+Questionnaire-4: Familiari a Carico 
+Repeatable section 
+Per ogni familiare: 
+1. Nome e Cognome 
+2. Codice Fiscale 
+3. Rapporto di parentela 
+4. Mesi a carico (1–12) 
+5. Percentuale a carico (50% / 100%) 
+Questionnaire-5: Redditi di lavoro / pensione (Anno d’Imposta di riferimento) 
+1. Numero di CU ricevute 
+Select  from 1 to 10            
+Enable file attach option according to the above selection  
+Altri redditi               
+si                   
+or              
+If si select the option and attach file 
+• Redditi da fabbricati  
+• Redditi da terreni 
+• Affitti 
+• Redditi esteri 
+no 
+• Assegni di mantenimento percepiti 
+• Altri redditi imponibili 
+Questionnaire-6: Abitazione Principale e Immobili 
+1. Abitazione principale: 
+o Proprietà 
+o Affitto 
+If Affitto attach: 
+Estremi contratto con Registrazione Agenzia delle Entrate (must upload) 
+2. Possiedi altri immobili? 
+o Sì 
+o No 
+If Sì, for each attach file: 
+• Comune 
+• Percentuale di possesso 
+• Rendita catastale 
+• Utilizzo (affitto / a disposizione) 
+Questionnaire-7: Spese Detraibili e Deducibili 
+1. Hai sostenuto spese sanitarie? 
+o Sì 
+o No 
+Altre spese (checkbox) and attach file for each selection 
+• Spese veterinarie 
+• Spese universitarie 
+• Spese scolastiche 
+• Attività sportive figli 
+• Spese funebri 
+• Spese assicurative 
+• Contributi previdenziali 
+• Donazioni ONLUS / ETS 
+• Spese assistenza disabili 
+(Each → upload) 
+Questionnaire-8: Mutui, Ristrutturazioni e Bonus 
+1. Mutuo prima casa? 
+o Sì 
+o No 
+If Sì then attach for each: 
+• Interessi passivi pagati 
+• Anno stipula mutuo 
+2. Lavori edilizi / bonus fiscali? 
+o Ristrutturazione 
+o Ecobonus 
+o Bonus mobili 
+o Superbonus 
+(Upload documentazione for each selection) 
+Questionnaire-9: Dichiarazioni e Autorizzazioni 
+Mandatory checkboxes: 
+☐ Dichiaro che i dati inseriti sono completi e veritieri 
+☐ Autorizzo il CAF alla trasmissione del Modello 730 
+☐ Accetto l’informativa privacy (GDPR) 
+Optional: 
+☐ Desidero assistenza per altri servizi fiscali 
+Firma digitale. 
+Full name 
+Service-2: Integrazione 730 (Se Modello 730 fatto da noi) 
+Questionnaire-1: Informazioni personali (dichiarante) 
+Same as SmartCaf.it for all the services 
+Questionnaire-2: Documenti relativi 
+Attach documenti relativi alle nuove informazioni/correzioni 
+Dimissioni   
+Service-1: Dimissioni Volontarie 
+Questionnaire-1: Informazioni personali (dichiarante) 
+Same as SmartCaf.it for all the services 
+Questionnaire-2: Datore di Lavoro 
+1. Attach UNILAV/Busta Paga/Contratto di lavoro 
+2. PEC o email aziendale (se disponibile) 
+Questionnaire-3: Dimissioni Volontarie 
+1. Data ultimo giorno di lavoro  
+Show the calendar 
+Questionnaire-4: Dichiarazioni e Autorizzazioni 
+Mandatory checkboxes: 
+☐ Dichiaro che i dati forniti sono veritieri 
+☐ Autorizzo il Patronato all’invio delle dimissioni volontarie 
+☐ Accetto l’informativa privacy (GDPR) 
+Optional: 
+☐ Desidero assistenza per NASpI o altri servizi Patronato 
+Firma digitale. 
+Full Name 
+Service-2: Dimissioni per giusta causa 
+Questionnaire-1: Informazioni personali (dichiarante) 
+Same as SmartCaf.it for all the services 
+Questionnaire-2: Datore di Lavoro 
+1. Attach UNILAV/Busta Paga/Contratto di lavoro 
+2. PEC o email aziendale (se disponibile) 
+Questionnaire-3: Dimissioni per giusta causa 
+1. Data ultimo giorno di lavoro  
+Show the calendar 
+2. Motivo 
+Show a box to write upto 500 words 
+Questionnaire-4: Dichiarazioni e Autorizzazioni 
+Mandatory checkboxes: 
+☐ Dichiaro che i dati forniti sono veritieri 
+☐ Autorizzo il Patronato all’invio delle dimissioni volontarie 
+☐ Accetto l’informativa privacy (GDPR) 
+Optional: 
+☐ Desidero assistenza per NASpI o altri servizi Patronato 
+Firma digitale. 
+Full Name 
+Service-3: Risoluzione Consensuale 
+Questionnaire-1: Informazioni personali (dichiarante) 
+Same as SmartCaf.it for all the services 
+Questionnaire-2: Datore di Lavoro 
+1. Attach UNILAV/Busta Paga/Contratto di lavoro 
+2. PEC o email aziendale (se disponibile) 
+Questionnaire-3: Dimissioni - Risoluzione Consensuale 
+1. Data ultimo giorno di lavoro  
+Show the calendar 
+Questionnaire-4: Dichiarazioni e Autorizzazioni 
+Mandatory checkboxes: 
+☐ Dichiaro che i dati forniti sono veritieri 
+☐ Autorizzo il Patronato all’invio delle dimissioni volontarie 
+☐ Accetto l’informativa privacy (GDPR) 
+Optional: 
+☐ Desidero assistenza per NASpI o altri servizi Patronato 
+Firma digitale. 
+Full Name 
+Service-4: Revoca Dimissioni Volontarie 
+Questionnaire-1: Informazioni personali (dichiarante) 
+Same as SmartCaf.it for all the services 
+Questionnaire-2: Revoca Dimissioni 
+Attach ricevuta dimissioni gia effetuate 
+Questionnaire-4: Dichiarazioni e Autorizzazioni 
+Mandatory checkboxes: 
+☐ Dichiaro che i dati forniti sono veritieri 
+☐ Autorizzo il Patronato all’invio delle dimissioni volontarie 
+☐ Accetto l’informativa privacy (GDPR) 
+Optional: 
+☐ Desidero assistenza per NASpI o altri servizi Patronato 
+Firma digitale. 
+Full Name 
+Service: Rateizzazione Cartelle Agenzia delle Entrate 
+Questionnaire-1: Informazioni personali (dichiarante) 
+Same as SmartCaf.it for all the services 
+Questionnaire-1: SPID 
+Nome Utente                                                                   
+Password 
+Quando procederemo con l'invio telematico della sua pratica tramite SPID, riceverà una 
+chiamata dal nostro call center e una notifica push istantanea sul suo smartphone (tramite 
+l'app del suo fornitore, es. PosteID, InfoCert, Lepida, Aruba, Sielte, ecc.) 
+Service: Test di conoscenza della lingua Italiana A2 
+Questionnaire-1: Informazioni personali (dichiarante) 
+Same as SmartCaf.it for all the services 
+Questionnaire-1: SPID 
+Nome Utente                                                                   
+Password 
+Quando procederemo con l'invio telematico della sua pratica tramite SPID, riceverà una 
+chiamata dal nostro call center e una notifica push istantanea sul suo smartphone (tramite 
+l'app del suo fornitore, es. PosteID, InfoCert, Lepida, Aruba, Sielte, ecc.)

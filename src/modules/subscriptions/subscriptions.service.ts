@@ -1,4 +1,4 @@
-import { Injectable, Logger, BadRequestException } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
@@ -173,14 +173,51 @@ export class SubscriptionsService {
   async cancelSubscription(userId: string): Promise<any> {
     const subscription = await this.userSubscriptionRepository.findOne({
       where: { userId },
+      relations: ['plan'],
     });
-    if (subscription) {
-      await this.userSubscriptionRepository.update(userId, {
-        status: 'cancelled',
-        endDate: new Date(),
-      });
+
+    if (!subscription) {
+      throw new NotFoundException('Subscription not found');
     }
-    return { success: true, message: 'Subscription cancelled' };
+
+    // If already cancelled, return early
+    if (subscription.status === 'cancelled') {
+      return {
+        success: true,
+        message: 'Subscription already cancelled',
+        data: subscription,
+      };
+    }
+
+    // Cancel Stripe subscription if it exists
+    if (subscription.stripeSubscriptionId) {
+      try {
+        await this.stripeService.cancelSubscription(
+          subscription.stripeSubscriptionId,
+          false, // Cancel immediately, not at period end
+        );
+      } catch (error) {
+        this.logger.warn(
+          `Failed to cancel Stripe subscription: ${error.message}`,
+        );
+        // Continue with DB update even if Stripe fails
+      }
+    }
+
+    // Update database subscription record
+    subscription.status = 'cancelled';
+    subscription.endDate = new Date();
+    subscription.autoRenew = false;
+
+    const updated = await this.userSubscriptionRepository.save(subscription);
+
+    this.logger.log(`Subscription cancelled for user ${userId}`);
+
+    return {
+      success: true,
+      message: 'Subscription cancelled successfully',
+      data: updated,
+    };
   }
 
   async upgradeSubscription(
