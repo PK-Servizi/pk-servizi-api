@@ -25,6 +25,8 @@
     "seed:isee": "ts-node seeds/isee-ordinario-2026-seed.ts",
     "seed:isee-all": "ts-node seeds/isee-all-types-seed.ts",
     "seed:final": "ts-node seeds/seed-final-complete.ts",
+    "seed:faqs": "ts-node -r tsconfig-paths/register ./seeds/seed-faqs-from-data.ts",
+    "seed:descriptions": "ts-node -r tsconfig-paths/register ./seeds/seed-service-descriptions.ts",
     "seed:all": "npm run seed && npm run seed:permissions",
     "seed:verify": "ts-node -r tsconfig-paths/register ./seeds/verify-form-schemas.ts",
     "seed:verify-all": "ts-node -r tsconfig-paths/register ./seeds/verify-all-services.ts",
