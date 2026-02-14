@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import { AppDataSource } from '../src/config/data-source';
 import { Service } from '../src/modules/services/entities/service.entity';
 import { ServiceType } from '../src/modules/service-types/entities/service-type.entity';
+import { PERSONAL_INFORMATION_SECTION, DECLARATIONS_AUTHORIZATION_SECTION } from './form-schemas';
 
 // First, define service type categories
 const SERVICE_TYPE_CATEGORIES = [
@@ -37,6 +38,7 @@ const SERVICES_BY_TYPE = {
       formSchema: {
         title: 'ISEE Standard Data',
         sections: [
+          PERSONAL_INFORMATION_SECTION,
           {
             title: 'Nucleo Familiare',
             fields: [
@@ -72,6 +74,7 @@ const SERVICES_BY_TYPE = {
               { name: 'vehicles', label: 'Vehicles owned', type: 'array', required: false },
             ],
           },
+          DECLARATIONS_AUTHORIZATION_SECTION,
         ],
       },
     },
@@ -89,6 +92,7 @@ const SERVICES_BY_TYPE = {
       formSchema: {
         title: 'ISEE Università Data',
         sections: [
+          PERSONAL_INFORMATION_SECTION,
           {
             title: 'Student Information',
             fields: [
@@ -111,6 +115,7 @@ const SERVICES_BY_TYPE = {
               { name: 'familyIncome', label: 'Family income', type: 'number', required: true },
             ],
           },
+          DECLARATIONS_AUTHORIZATION_SECTION,
         ],
       },
     },
@@ -128,6 +133,7 @@ const SERVICES_BY_TYPE = {
       formSchema: {
         title: 'ISEE Sociosanitario Data',
         sections: [
+          PERSONAL_INFORMATION_SECTION,
           {
             title: 'Beneficiary Information',
             fields: [
@@ -150,6 +156,7 @@ const SERVICES_BY_TYPE = {
               { name: 'familyMembers', label: 'Family members details', type: 'array', required: true },
             ],
           },
+          DECLARATIONS_AUTHORIZATION_SECTION,
         ],
       },
     },
@@ -169,6 +176,7 @@ const SERVICES_BY_TYPE = {
       formSchema: {
         title: '730 Standard Data',
         sections: [
+          PERSONAL_INFORMATION_SECTION,
           {
             title: 'Dati Anagrafici',
             fields: [
@@ -200,6 +208,7 @@ const SERVICES_BY_TYPE = {
               { name: 'dependents', label: 'Number of dependents', type: 'number', required: false },
             ],
           },
+          DECLARATIONS_AUTHORIZATION_SECTION,
         ],
       },
     },
@@ -217,6 +226,7 @@ const SERVICES_BY_TYPE = {
       formSchema: {
         title: '730 with Property Data',
         sections: [
+          PERSONAL_INFORMATION_SECTION,
           {
             title: 'Dati Anagrafici',
             fields: [
@@ -244,6 +254,7 @@ const SERVICES_BY_TYPE = {
               { name: 'homeBonus', label: 'Home renovation bonus', type: 'number', required: false },
             ],
           },
+          DECLARATIONS_AUTHORIZATION_SECTION,
         ],
       },
     },
@@ -261,6 +272,7 @@ const SERVICES_BY_TYPE = {
       formSchema: {
         title: 'PF Unico Data',
         sections: [
+          PERSONAL_INFORMATION_SECTION,
           {
             title: 'Dati Anagrafici',
             fields: [
@@ -298,6 +310,7 @@ const SERVICES_BY_TYPE = {
               { name: 'pensionContributions', label: 'Pension contributions', type: 'number', required: false },
             ],
           },
+          DECLARATIONS_AUTHORIZATION_SECTION,
         ],
       },
     },
@@ -316,6 +329,7 @@ const SERVICES_BY_TYPE = {
       formSchema: {
         title: 'IMU Single Property',
         sections: [
+          PERSONAL_INFORMATION_SECTION,
           {
             title: 'Dati Contribuente',
             fields: [
@@ -344,6 +358,7 @@ const SERVICES_BY_TYPE = {
               { name: 'mainResidenceDeduction', label: 'Main residence deduction', type: 'radio', options: ['YES', 'NO'], required: true },
             ],
           },
+          DECLARATIONS_AUTHORIZATION_SECTION,
         ],
       },
     },
@@ -360,6 +375,7 @@ const SERVICES_BY_TYPE = {
       formSchema: {
         title: 'IMU Multiple Properties',
         sections: [
+          PERSONAL_INFORMATION_SECTION,
           {
             title: 'Dati Contribuente',
             fields: [
@@ -381,6 +397,7 @@ const SERVICES_BY_TYPE = {
               { name: 'changes', label: 'Changes details', type: 'array', required: false },
             ],
           },
+          DECLARATIONS_AUTHORIZATION_SECTION,
         ],
       },
     },
@@ -398,6 +415,7 @@ const SERVICES_BY_TYPE = {
       formSchema: {
         title: 'IMU with Succession',
         sections: [
+          PERSONAL_INFORMATION_SECTION,
           {
             title: 'Dati Contribuente',
             fields: [
@@ -426,6 +444,7 @@ const SERVICES_BY_TYPE = {
               { name: 'previousPayments', label: 'Previous IMU payments', type: 'array', required: false },
             ],
           },
+          DECLARATIONS_AUTHORIZATION_SECTION,
         ],
       },
     },
