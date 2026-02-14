@@ -6,11 +6,13 @@ import {
   PERSONAL_INFORMATION_SECTION,
   DECLARATIONS_AUTHORIZATION_SECTION,
 } from './form-schemas';
+import { getServiceQuestionnaires } from './questionnaires-from-data';
 
 const ensureFormSchema = (
   schema: any,
   serviceName: string,
   description?: string,
+  serviceCode?: string,
 ) => {
   const baseSchema = schema || {};
   const sections = Array.isArray(baseSchema.sections)
@@ -19,6 +21,21 @@ const ensureFormSchema = (
 
   if (sections[0]?.id !== 'personal_information') {
     sections.unshift(PERSONAL_INFORMATION_SECTION);
+  }
+
+  // Add service-specific questionnaires if not already present
+  if (serviceCode) {
+    const questionnaires = getServiceQuestionnaires(serviceCode);
+    for (const questionnaire of questionnaires) {
+      if (!sections.some(s => s.id === questionnaire.id)) {
+        // Insert before declarations (before the last section if it's declarations)
+        if (sections[sections.length - 1]?.id === 'declarations_authorization') {
+          sections.splice(sections.length - 1, 0, questionnaire);
+        } else {
+          sections.push(questionnaire);
+        }
+      }
+    }
   }
 
   if (sections[sections.length - 1]?.id !== 'declarations_authorization') {
@@ -520,6 +537,7 @@ export async function seedServiceTypes() {
             serviceData.formSchema,
             serviceData.name,
             serviceData.description,
+            serviceData.code,
           ) as any;
           await serviceRepo.save(existing);
         } else {
@@ -532,6 +550,7 @@ export async function seedServiceTypes() {
               serviceData.formSchema,
               serviceData.name,
               serviceData.description,
+              serviceData.code,
             ) as any,
           });
           await serviceRepo.save(newService);

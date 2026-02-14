@@ -138,6 +138,38 @@ const PERSONAL_INFORMATION_SECTION = {
         },
       ],
     },
+    {
+      name: 'permesso_soggiorno',
+      label: 'Permesso di soggiorno (se extracomunitario)',
+      type: 'file',
+      required: false,
+      order: 10,
+      description: 'Allega permesso di soggiorno',
+    },
+    {
+      name: 'permesso_expiry_date',
+      label: 'Data di scadenza permesso',
+      type: 'date',
+      required: false,
+      order: 11,
+      description: 'If expired, you must also upload ricevuta',
+    },
+    {
+      name: 'permesso_ricevuta',
+      label: 'Ricevuta (se permesso scaduto)',
+      type: 'file',
+      required: false,
+      order: 12,
+      description: 'Allega ricevuta se il permesso è scaduto',
+    },
+    {
+      name: 'stato_civile',
+      label: 'Stato civile',
+      type: 'select',
+      options: ['Celibe / Nubile', 'Coniugato/a', 'Separato/a', 'Divorziato/a', 'Vedovo/a'],
+      required: true,
+      order: 13,
+    },
   ],
 };
 

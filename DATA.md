@@ -1130,31 +1130,6 @@ Description:L'assegno sociale è una prestazione economica a sostegno dei cittad
 
 Questionnaires 
 Questionnaire-1: Informazioni personali 
-{
-  "personal_information": {
-    "name": "ramzan",
-    "surname": null,
-    "email": "ramzanhusnain7194@gmail.com",
-    "mobile_phone_number": {
-      "country_code": "+39",
-      "number": null
-    },
-    "gender": "Male",
-    "nationality": "Italy",
-    "date_of_birth": null,
-    "place_of_birth": {
-      "country_selection": "Italy"
-    },
-    "current_residence": {
-      "country": "Italy",
-      "province": null,
-      "city": null,
-      "address": null,
-      "house_number": null,
-      "postal_code": null
-    }
-  }
-}
 Same as SmartCaf.it for all the services 
 Add following in all the services in Questionnaire-1 
 1- Permesso di soggiorno (se extracomunitario)          

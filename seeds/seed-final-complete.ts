@@ -8,13 +8,18 @@ import {
   PERSONAL_INFORMATION_SECTION,
   DECLARATIONS_AUTHORIZATION_SECTION,
 } from './form-schemas';
+import { getServiceQuestionnaires } from './questionnaires-from-data';
 
-const buildGenericFormSchema = (serviceName: string, description?: string) => ({
-  title: serviceName,
-  description: description || `Form for ${serviceName}`,
-  sections: [
-    PERSONAL_INFORMATION_SECTION,
-    {
+const buildGenericFormSchema = (serviceName: string, description?: string, serviceCode?: string) => {
+  const sections = [PERSONAL_INFORMATION_SECTION];
+  
+  // Add service-specific questionnaires if defined
+  const questionnaires = serviceCode ? getServiceQuestionnaires(serviceCode) : [];
+  if (questionnaires.length > 0) {
+    sections.push(...questionnaires);
+  } else {
+    // Fallback to generic service information section
+    sections.push({
       id: 'service_information',
       title: 'Informazioni Servizio',
       description: 'Service specific information',
@@ -27,10 +32,17 @@ const buildGenericFormSchema = (serviceName: string, description?: string) => ({
           order: 1,
         },
       ],
-    },
-    DECLARATIONS_AUTHORIZATION_SECTION,
-  ],
-});
+    });
+  }
+  
+  sections.push(DECLARATIONS_AUTHORIZATION_SECTION);
+  
+  return {
+    title: serviceName,
+    description: description || `Form for ${serviceName}`,
+    sections,
+  };
+};
 
 const SERVICES_DATA = [
   // 1. ISEE
@@ -1688,7 +1700,11 @@ export async function seedAllServices() {
         if (!service) {
           const formSchema =
             serviceData.formSchema ??
-            buildGenericFormSchema(serviceData.name, serviceData.description);
+            buildGenericFormSchema(
+              serviceData.name,
+              serviceData.description,
+              serviceData.code,
+            );
 
           service = serviceRepo.create({
             name: serviceData.name,
@@ -1706,7 +1722,11 @@ export async function seedAllServices() {
         } else {
           const formSchema =
             serviceData.formSchema ??
-            buildGenericFormSchema(serviceData.name, serviceData.description);
+            buildGenericFormSchema(
+              serviceData.name,
+              serviceData.description,
+              serviceData.code,
+            );
 
           service.name = serviceData.name;
           service.description = serviceData.description;
