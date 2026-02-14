@@ -3,7 +3,34 @@ import { AppDataSource } from '../src/config/data-source';
 import { Service } from '../src/modules/services/entities/service.entity';
 import { ServiceType } from '../src/modules/service-types/entities/service-type.entity';
 import { Faq } from '../src/modules/faqs/entities/faq.entity';
-import { FORM_SCHEMAS } from './form-schemas';
+import {
+  FORM_SCHEMAS,
+  PERSONAL_INFORMATION_SECTION,
+  DECLARATIONS_AUTHORIZATION_SECTION,
+} from './form-schemas';
+
+const buildGenericFormSchema = (serviceName: string, description?: string) => ({
+  title: serviceName,
+  description: description || `Form for ${serviceName}`,
+  sections: [
+    PERSONAL_INFORMATION_SECTION,
+    {
+      id: 'service_information',
+      title: 'Informazioni Servizio',
+      description: 'Service specific information',
+      fields: [
+        {
+          name: 'notes',
+          label: 'Note',
+          type: 'textarea',
+          required: false,
+          order: 1,
+        },
+      ],
+    },
+    DECLARATIONS_AUTHORIZATION_SECTION,
+  ],
+});
 
 const SERVICES_DATA = [
   // 1. ISEE
@@ -1659,6 +1686,10 @@ export async function seedAllServices() {
         });
 
         if (!service) {
+          const formSchema =
+            serviceData.formSchema ??
+            buildGenericFormSchema(serviceData.name, serviceData.description);
+
           service = serviceRepo.create({
             name: serviceData.name,
             code: serviceData.code,
@@ -1667,19 +1698,23 @@ export async function seedAllServices() {
             basePrice: serviceData.basePrice,
             serviceTypeId: serviceType.id,
             requiredDocuments: serviceData.requiredDocuments as any,
-            formSchema: serviceData.formSchema as any,
+            formSchema: formSchema as any,
           });
           await serviceRepo.save(service);
           console.log(`   ✅ Servizio: ${serviceData.name}`);
           servicesCount++;
         } else {
+          const formSchema =
+            serviceData.formSchema ??
+            buildGenericFormSchema(serviceData.name, serviceData.description);
+
           service.name = serviceData.name;
           service.description = serviceData.description;
           service.category = serviceData.category;
           service.basePrice = serviceData.basePrice;
           service.requiredDocuments = serviceData.requiredDocuments as any;
           service.serviceTypeId = serviceType.id;
-          service.formSchema = serviceData.formSchema as any;
+          service.formSchema = formSchema as any;
           await serviceRepo.save(service);
         }
 

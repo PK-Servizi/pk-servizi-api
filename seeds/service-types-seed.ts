@@ -2,7 +2,35 @@ import 'reflect-metadata';
 import { AppDataSource } from '../src/config/data-source';
 import { Service } from '../src/modules/services/entities/service.entity';
 import { ServiceType } from '../src/modules/service-types/entities/service-type.entity';
-import { PERSONAL_INFORMATION_SECTION, DECLARATIONS_AUTHORIZATION_SECTION } from './form-schemas';
+import {
+  PERSONAL_INFORMATION_SECTION,
+  DECLARATIONS_AUTHORIZATION_SECTION,
+} from './form-schemas';
+
+const ensureFormSchema = (
+  schema: any,
+  serviceName: string,
+  description?: string,
+) => {
+  const baseSchema = schema || {};
+  const sections = Array.isArray(baseSchema.sections)
+    ? [...baseSchema.sections]
+    : [];
+
+  if (sections[0]?.id !== 'personal_information') {
+    sections.unshift(PERSONAL_INFORMATION_SECTION);
+  }
+
+  if (sections[sections.length - 1]?.id !== 'declarations_authorization') {
+    sections.push(DECLARATIONS_AUTHORIZATION_SECTION);
+  }
+
+  return {
+    title: baseSchema.title || serviceName,
+    description: baseSchema.description || description || `Form for ${serviceName}`,
+    sections,
+  };
+};
 
 // First, define service type categories
 const SERVICE_TYPE_CATEGORIES = [
@@ -38,7 +66,6 @@ const SERVICES_BY_TYPE = {
       formSchema: {
         title: 'ISEE Standard Data',
         sections: [
-          PERSONAL_INFORMATION_SECTION,
           {
             title: 'Nucleo Familiare',
             fields: [
@@ -74,7 +101,6 @@ const SERVICES_BY_TYPE = {
               { name: 'vehicles', label: 'Vehicles owned', type: 'array', required: false },
             ],
           },
-          DECLARATIONS_AUTHORIZATION_SECTION,
         ],
       },
     },
@@ -92,7 +118,6 @@ const SERVICES_BY_TYPE = {
       formSchema: {
         title: 'ISEE Università Data',
         sections: [
-          PERSONAL_INFORMATION_SECTION,
           {
             title: 'Student Information',
             fields: [
@@ -115,7 +140,6 @@ const SERVICES_BY_TYPE = {
               { name: 'familyIncome', label: 'Family income', type: 'number', required: true },
             ],
           },
-          DECLARATIONS_AUTHORIZATION_SECTION,
         ],
       },
     },
@@ -133,7 +157,6 @@ const SERVICES_BY_TYPE = {
       formSchema: {
         title: 'ISEE Sociosanitario Data',
         sections: [
-          PERSONAL_INFORMATION_SECTION,
           {
             title: 'Beneficiary Information',
             fields: [
@@ -156,7 +179,6 @@ const SERVICES_BY_TYPE = {
               { name: 'familyMembers', label: 'Family members details', type: 'array', required: true },
             ],
           },
-          DECLARATIONS_AUTHORIZATION_SECTION,
         ],
       },
     },
@@ -176,7 +198,6 @@ const SERVICES_BY_TYPE = {
       formSchema: {
         title: '730 Standard Data',
         sections: [
-          PERSONAL_INFORMATION_SECTION,
           {
             title: 'Dati Anagrafici',
             fields: [
@@ -208,7 +229,6 @@ const SERVICES_BY_TYPE = {
               { name: 'dependents', label: 'Number of dependents', type: 'number', required: false },
             ],
           },
-          DECLARATIONS_AUTHORIZATION_SECTION,
         ],
       },
     },
@@ -226,7 +246,6 @@ const SERVICES_BY_TYPE = {
       formSchema: {
         title: '730 with Property Data',
         sections: [
-          PERSONAL_INFORMATION_SECTION,
           {
             title: 'Dati Anagrafici',
             fields: [
@@ -254,7 +273,6 @@ const SERVICES_BY_TYPE = {
               { name: 'homeBonus', label: 'Home renovation bonus', type: 'number', required: false },
             ],
           },
-          DECLARATIONS_AUTHORIZATION_SECTION,
         ],
       },
     },
@@ -272,7 +290,6 @@ const SERVICES_BY_TYPE = {
       formSchema: {
         title: 'PF Unico Data',
         sections: [
-          PERSONAL_INFORMATION_SECTION,
           {
             title: 'Dati Anagrafici',
             fields: [
@@ -310,7 +327,6 @@ const SERVICES_BY_TYPE = {
               { name: 'pensionContributions', label: 'Pension contributions', type: 'number', required: false },
             ],
           },
-          DECLARATIONS_AUTHORIZATION_SECTION,
         ],
       },
     },
@@ -329,7 +345,6 @@ const SERVICES_BY_TYPE = {
       formSchema: {
         title: 'IMU Single Property',
         sections: [
-          PERSONAL_INFORMATION_SECTION,
           {
             title: 'Dati Contribuente',
             fields: [
@@ -358,7 +373,6 @@ const SERVICES_BY_TYPE = {
               { name: 'mainResidenceDeduction', label: 'Main residence deduction', type: 'radio', options: ['YES', 'NO'], required: true },
             ],
           },
-          DECLARATIONS_AUTHORIZATION_SECTION,
         ],
       },
     },
@@ -375,7 +389,6 @@ const SERVICES_BY_TYPE = {
       formSchema: {
         title: 'IMU Multiple Properties',
         sections: [
-          PERSONAL_INFORMATION_SECTION,
           {
             title: 'Dati Contribuente',
             fields: [
@@ -397,7 +410,6 @@ const SERVICES_BY_TYPE = {
               { name: 'changes', label: 'Changes details', type: 'array', required: false },
             ],
           },
-          DECLARATIONS_AUTHORIZATION_SECTION,
         ],
       },
     },
@@ -415,7 +427,6 @@ const SERVICES_BY_TYPE = {
       formSchema: {
         title: 'IMU with Succession',
         sections: [
-          PERSONAL_INFORMATION_SECTION,
           {
             title: 'Dati Contribuente',
             fields: [
@@ -444,7 +455,6 @@ const SERVICES_BY_TYPE = {
               { name: 'previousPayments', label: 'Previous IMU payments', type: 'array', required: false },
             ],
           },
-          DECLARATIONS_AUTHORIZATION_SECTION,
         ],
       },
     },
@@ -506,7 +516,11 @@ export async function seedServiceTypes() {
           existing.category = serviceData.category;
           existing.basePrice = serviceData.basePrice;
           existing.requiredDocuments = serviceData.requiredDocuments as any;
-          existing.formSchema = serviceData.formSchema as any;
+          existing.formSchema = ensureFormSchema(
+            serviceData.formSchema,
+            serviceData.name,
+            serviceData.description,
+          ) as any;
           await serviceRepo.save(existing);
         } else {
           console.log(`      ✅ Creating: ${serviceData.name}`);
@@ -514,7 +528,11 @@ export async function seedServiceTypes() {
             ...serviceData,
             serviceTypeId: serviceType.id,
             requiredDocuments: serviceData.requiredDocuments as any,
-            formSchema: serviceData.formSchema as any,
+            formSchema: ensureFormSchema(
+              serviceData.formSchema,
+              serviceData.name,
+              serviceData.description,
+            ) as any,
           });
           await serviceRepo.save(newService);
         }

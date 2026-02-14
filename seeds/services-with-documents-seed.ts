@@ -3,6 +3,33 @@ import { AppDataSource } from '../src/config/data-source';
 import { Service } from '../src/modules/services/entities/service.entity';
 import { ServiceType } from '../src/modules/service-types/entities/service-type.entity';
 import { Faq } from '../src/modules/faqs/entities/faq.entity';
+import {
+  PERSONAL_INFORMATION_SECTION,
+  DECLARATIONS_AUTHORIZATION_SECTION,
+} from './form-schemas';
+
+const buildGenericFormSchema = (serviceName: string, description?: string) => ({
+  title: serviceName,
+  description: description || `Form for ${serviceName}`,
+  sections: [
+    PERSONAL_INFORMATION_SECTION,
+    {
+      id: 'service_information',
+      title: 'Informazioni Servizio',
+      description: 'Service specific information',
+      fields: [
+        {
+          name: 'notes',
+          label: 'Note',
+          type: 'textarea',
+          required: false,
+          order: 1,
+        },
+      ],
+    },
+    DECLARATIONS_AUTHORIZATION_SECTION,
+  ],
+});
 
 const SERVICES_DATA = {
   'ISEE': [
@@ -239,6 +266,11 @@ export async function seedServicesWithDocuments() {
         });
 
         if (!service) {
+          const formSchema = buildGenericFormSchema(
+            serviceData.name,
+            serviceData.description,
+          );
+
           service = serviceRepo.create({
             name: serviceData.name,
             code: serviceData.code,
@@ -247,10 +279,17 @@ export async function seedServicesWithDocuments() {
             basePrice: serviceData.basePrice,
             requiredDocuments: serviceData.requiredDocuments as any,
             serviceTypeId: serviceType.id,
+            formSchema: formSchema as any,
           });
           await serviceRepo.save(service);
           console.log(`      ✅ Created service: ${serviceData.name}`);
         } else {
+          if (!service.formSchema || !service.formSchema.sections?.length) {
+            service.formSchema = buildGenericFormSchema(
+              serviceData.name,
+              serviceData.description,
+            ) as any;
+          }
           service.requiredDocuments = serviceData.requiredDocuments as any;
           await serviceRepo.save(service);
           console.log(`      ✅ Updated documents for: ${serviceData.name}`);
