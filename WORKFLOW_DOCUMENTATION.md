@@ -34,7 +34,7 @@ The service request workflow now dynamically adjusts based on service pricing:
          │  STEP 2: QUESTIONNAIRE                    │
          │  Status: awaiting_form                    │
          │  (PATCH /:id/questionnaire)               │
-         │  ↓                                         │
+         │  ↓                                        │
          │  [Form Submission with formData]          │
          └────────────────────────────────────────┬──┘
                     │                             │
@@ -43,10 +43,10 @@ The service request workflow now dynamically adjusts based on service pricing:
          │  Status: awaiting_documents               │
          │  (POST /:id/documents)                    │
          │  ↓                                        │
-         │  [Upload Required Files]                 │
+         │  [Upload Required Files]                  │
          │  ↓                                        │
-         │  Status: submitted                       │
-         └──────────────────────────────────────────┘
+         │  Status: submitted                        │
+         └────────────────────────────────────────── ┘
                     │
          ┌──────────▼──────────────────┐
          │  Operator Review            │

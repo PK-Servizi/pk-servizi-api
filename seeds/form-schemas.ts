@@ -141,6 +141,63 @@ const PERSONAL_INFORMATION_SECTION = {
   ],
 };
 
+// Declarations and Authorization Section - MUST be last section in all services
+const DECLARATIONS_AUTHORIZATION_SECTION = {
+  id: 'declarations_authorization',
+  title: 'Dichiarazioni e Autorizzazioni',
+  description: 'Declarations & Authorization - Required consents and digital signature',
+  fields: [
+    {
+      name: 'declare_data_truthful',
+      label: 'Dichiaro che i dati forniti sono veritieri',
+      type: 'checkbox',
+      required: true,
+      order: 1,
+    },
+    {
+      name: 'authorize_gdpr',
+      label: 'Autorizzo il trattamento dei dati personali (GDPR)',
+      type: 'checkbox',
+      required: true,
+      order: 2,
+    },
+    {
+      name: 'delegate_caf_dsu',
+      label: 'Delega CAF per invio DSU',
+      type: 'checkbox',
+      required: true,
+      order: 3,
+    },
+    {
+      name: 'recontact_other_services',
+      label: 'Desidero essere ricontattato per altri servizi CAF / Patronato',
+      type: 'checkbox',
+      required: false,
+      order: 4,
+    },
+    {
+      name: 'digital_signature',
+      label: 'Firma Digitale',
+      type: 'signature',
+      required: true,
+      order: 5,
+      description: 'Please provide your digital signature',
+    },
+    {
+      name: 'full_name_signature',
+      label: 'Nome Completo',
+      type: 'text',
+      required: true,
+      order: 6,
+      description: 'Full name for signature verification',
+    },
+  ],
+};
+
+// Export reusable sections
+export { PERSONAL_INFORMATION_SECTION };
+export { DECLARATIONS_AUTHORIZATION_SECTION };
+
 export const FORM_SCHEMAS = {
   // 1. ISEE Services
   ISEE_ORD_2026: {
@@ -377,6 +434,7 @@ export const FORM_SCHEMAS = {
           },
         ],
       },
+      DECLARATIONS_AUTHORIZATION_SECTION,
     ],
   },
 
@@ -494,6 +552,7 @@ export const FORM_SCHEMAS = {
           },
         ],
       },
+      DECLARATIONS_AUTHORIZATION_SECTION,
     ],
   },
 
@@ -597,6 +656,7 @@ export const FORM_SCHEMAS = {
           },
         ],
       },
+      DECLARATIONS_AUTHORIZATION_SECTION,
     ],
   },
 
@@ -700,6 +760,7 @@ export const FORM_SCHEMAS = {
           },
         ],
       },
+      DECLARATIONS_AUTHORIZATION_SECTION,
     ],
   },
 
@@ -816,6 +877,7 @@ export const FORM_SCHEMAS = {
           },
         ],
       },
+      DECLARATIONS_AUTHORIZATION_SECTION,
     ],
   },
 
@@ -964,6 +1026,7 @@ export const FORM_SCHEMAS = {
           },
         ],
       },
+      DECLARATIONS_AUTHORIZATION_SECTION,
     ],
   },
 
@@ -1090,6 +1153,7 @@ export const FORM_SCHEMAS = {
           },
         ],
       },
+      DECLARATIONS_AUTHORIZATION_SECTION,
     ],
   },
 
@@ -1181,6 +1245,7 @@ export const FORM_SCHEMAS = {
           },
         ],
       },
+      DECLARATIONS_AUTHORIZATION_SECTION,
     ],
   },
 
@@ -1281,6 +1346,7 @@ export const FORM_SCHEMAS = {
           },
         ],
       },
+      DECLARATIONS_AUTHORIZATION_SECTION,
     ],
   },
 };
