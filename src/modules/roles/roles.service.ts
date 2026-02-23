@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import { BaseService } from '../../common/services/base.service';
 import { Role } from './entities/role.entity';
 import { User } from '../users/entities/user.entity';
+import { Permission } from './entities/permission.entity';
+import { RolePermission } from './entities/role-permission.entity';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 
@@ -22,6 +24,10 @@ export class RolesService extends BaseService<
     protected readonly roleRepository: Repository<Role>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Permission)
+    private readonly permissionRepository: Repository<Permission>,
+    @InjectRepository(RolePermission)
+    private readonly rolePermissionRepository: Repository<RolePermission>,
   ) {
     super(roleRepository);
   }
@@ -49,10 +55,31 @@ export class RolesService extends BaseService<
   }
 
   /**
-   * Find role by ID (wrapper for BaseService)
+   * Find role by ID with permissions
    */
-  async findOne(id: string) {
-    return super.findById(id);
+  async findRoleWithPermissions(id: string) {
+    const role = await this.roleRepository.findOne({
+      where: { id },
+      relations: ['rolePermissions', 'rolePermissions.permission'],
+    });
+
+    if (!role) {
+      throw new NotFoundException(`Role with ID ${id} not found`);
+    }
+
+    // Transform the response to include flat permissions array
+    const permissions = role.rolePermissions?.map((rp) => rp.permission) || [];
+    
+    // Create a plain object response
+    return {
+      id: role.id,
+      name: role.name,
+      description: role.description,
+      permissions: JSON.parse(role.permissions || '[]'),
+      permissionsDetailed: permissions,
+      createdAt: role.createdAt,
+      updatedAt: role.updatedAt,
+    };
   }
 
   /**
@@ -89,11 +116,13 @@ export class RolesService extends BaseService<
   }
 
   /**
-   * Get all permissions (stub - extends when permission system is fully integrated)
+   * Get all permissions
    */
   async findAllPermissions() {
-    // TODO: Implement when Permission entity relations are set up
-    return [];
+    const permissions = await this.permissionRepository.find({
+      order: { name: 'ASC' },
+    });
+    return permissions;
   }
 
   /**
@@ -101,9 +130,39 @@ export class RolesService extends BaseService<
    */
   async assignPermissions(id: string, dto: any) {
     // Verify role exists
-    await this.findById(id);
-    // TODO: Implement permission assignment logic
-    return null;
+    const role = await this.findById(id);
+    
+    // Verify permissions exist
+    const permissions = await this.permissionRepository.findByIds(dto.permissionIds);
+    if (permissions.length !== dto.permissionIds.length) {
+      throw new NotFoundException('One or more permissions not found');
+    }
+
+    // Assign permissions
+    const rolePermissions = [];
+    for (const permission of permissions) {
+      // Check if already assigned
+      const existing = await this.rolePermissionRepository.findOne({
+        where: {
+          roleId: id,
+          permissionId: permission.id,
+        },
+      });
+
+      if (!existing) {
+        const rolePermission = this.rolePermissionRepository.create({
+          roleId: id,
+          permissionId: permission.id,
+        });
+        rolePermissions.push(await this.rolePermissionRepository.save(rolePermission));
+      }
+    }
+
+    return {
+      success: true,
+      message: 'Permissions assigned successfully',
+      data: rolePermissions,
+    };
   }
 
   /**
@@ -112,8 +171,31 @@ export class RolesService extends BaseService<
   async removePermission(roleId: string, permissionId: string) {
     // Verify role exists
     await this.findById(roleId);
-    // TODO: Implement permission removal logic
-    return null;
+    
+    // Verify permission exists
+    const permission = await this.permissionRepository.findOne({
+      where: { id: permissionId },
+    });
+    if (!permission) {
+      throw new NotFoundException('Permission not found');
+    }
+
+    // Remove permission
+    const rolePermission = await this.rolePermissionRepository.findOne({
+      where: {
+        roleId,
+        permissionId,
+      },
+    });
+
+    if (rolePermission) {
+      await this.rolePermissionRepository.remove(rolePermission);
+    }
+
+    return {
+      success: true,
+      message: 'Permission removed successfully',
+    };
   }
 
   /**

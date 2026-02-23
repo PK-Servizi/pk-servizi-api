@@ -4,11 +4,17 @@ import { RolesService } from './roles.service';
 import { RolesController } from './roles.controller';
 import { Role } from './entities/role.entity';
 import { User } from '../users/entities/user.entity';
+import { Permission } from './entities/permission.entity';
+import { RolePermission } from './entities/role-permission.entity';
 import { SharedModule } from '../shared/shared.module';
 import { GuardsModule } from '../../common/modules/guards.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Role, User]), SharedModule, GuardsModule],
+  imports: [
+    TypeOrmModule.forFeature([Role, User, Permission, RolePermission]),
+    SharedModule,
+    GuardsModule,
+  ],
   controllers: [RolesController],
   providers: [RolesService],
   exports: [RolesService, TypeOrmModule],

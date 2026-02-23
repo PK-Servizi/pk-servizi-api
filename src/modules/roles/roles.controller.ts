@@ -52,7 +52,7 @@ export class RolesController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Get role details' })
   findOneRole(@Param('id') id: string) {
-    return this.rolesService.findOne(id);
+    return this.rolesService.findRoleWithPermissions(id);
   }
 
   @Put('roles/:id')
