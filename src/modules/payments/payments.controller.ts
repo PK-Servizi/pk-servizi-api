@@ -105,7 +105,7 @@ export class PaymentsController {
   }
 
   @Post(':id/refund')
-  @Permissions('payments:refund', 'payments:read_own')
+  @Permissions('payments:refund', 'payments:refund_own')
   @ApiOperation({
     summary: '[Admin/Customer] Process payment refund',
     description:

@@ -155,6 +155,7 @@ export class PermissionsGuard implements CanActivate {
           'payments:read_own',
           'payments:create',
           'payments:create_own',
+          'payments:refund_own',
           'invoices:read',
           'invoices:read_own',
           'invoices:download',
