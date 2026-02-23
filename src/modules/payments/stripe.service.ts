@@ -491,22 +491,21 @@ export class StripeService {
       if (error instanceof BadRequestException) {
         throw error;
       }
-      // Provide more specific error messages
+      // Provide more specific error messages for Stripe errors
       if (error.type === 'StripeInvalidRequestError') {
         if (error.message.includes('already been refunded')) {
           throw new BadRequestException(
-            'This payment has already been refunded',
+            'This payment has already been refunded in Stripe.',
           );
-        } else if (error.message.includes('not found')) {
-          throw new BadRequestException('Payment not found in Stripe');
-        } else if (error.message.includes('charge')) {
+        } else if (error.message.includes('No such payment_intent')) {
           throw new BadRequestException(
-            'Payment cannot be refunded. It may not have been captured yet.',
+            'Payment intent not found in Stripe. It may have expired or been deleted.',
           );
         }
       }
+      // Show the actual Stripe error for debugging
       throw new BadRequestException(
-        `Failed to process refund: ${error.message}`,
+        `Stripe refund error: ${error.message}`,
       );
     }
   }

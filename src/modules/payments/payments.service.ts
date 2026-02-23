@@ -384,24 +384,15 @@ export class PaymentsService {
           stripeError.stack,
         );
         
-        // Provide clearer error messages based on Stripe error
-        if (stripeError.message?.includes('has already been refunded')) {
-          throw new BadRequestException(
-            'This payment has already been refunded.',
-          );
-        } else if (stripeError.message?.includes('not found')) {
-          throw new BadRequestException(
-            'Payment not found in Stripe. It may have been cancelled or expired.',
-          );
-        } else if (stripeError.message?.includes('charge') || stripeError.message?.includes('captured')) {
-          throw new BadRequestException(
-            'Payment cannot be refunded because it was not successfully captured in Stripe. This can happen if the customer abandoned the checkout or the payment failed. Please check the payment status in your Stripe dashboard.',
-          );
-        } else {
-          throw new BadRequestException(
-            `Failed to process refund with Stripe: ${stripeError.message}`,
-          );
+        // Re-throw BadRequestException as-is (already has a proper message)
+        if (stripeError instanceof BadRequestException) {
+          throw stripeError;
         }
+        
+        // For other errors, show the actual Stripe error message for debugging
+        throw new BadRequestException(
+          `Stripe refund failed: ${stripeError.message}`,
+        );
       }
 
       // Update payment status
