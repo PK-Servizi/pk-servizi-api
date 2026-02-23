@@ -194,6 +194,100 @@ export class PaymentsService {
   }
 
   /**
+   * Check payment status in Stripe for diagnosis
+   */
+  async checkStripeStatus(paymentId: string): Promise<any> {
+    const payment = await this.paymentRepository.findOne({
+      where: { id: paymentId },
+    });
+
+    if (!payment) {
+      throw new NotFoundException('Payment not found');
+    }
+
+    if (!payment.stripePaymentIntentId) {
+      return {
+        success: true,
+        message: 'Payment has no Stripe payment intent ID',
+        data: {
+          paymentId: payment.id,
+          databaseStatus: payment.status,
+          stripePaymentIntentId: null,
+          stripeStatus: null,
+          issue: 'No Stripe payment intent stored for this payment',
+        },
+      };
+    }
+
+    try {
+      let paymentIntentId = payment.stripePaymentIntentId;
+      let checkoutSession = null;
+
+      // If this is a checkout session ID, get the payment intent
+      if (paymentIntentId.startsWith('cs_')) {
+        checkoutSession = await this.stripeService.getCheckoutSession(paymentIntentId);
+        if (checkoutSession?.payment_intent) {
+          paymentIntentId = checkoutSession.payment_intent as string;
+        } else {
+          return {
+            success: true,
+            message: 'Checkout session found but no payment intent',
+            data: {
+              paymentId: payment.id,
+              databaseStatus: payment.status,
+              storedId: payment.stripePaymentIntentId,
+              checkoutSessionStatus: checkoutSession?.status,
+              paymentStatus: checkoutSession?.payment_status,
+              issue: 'Customer may not have completed checkout',
+            },
+          };
+        }
+      }
+
+      // Get the payment intent from Stripe
+      const paymentIntent = await this.stripeService.getPaymentIntent(paymentIntentId);
+
+      const diagnosis = {
+        paymentId: payment.id,
+        databaseStatus: payment.status,
+        stripePaymentIntentId: paymentIntentId,
+        stripeStatus: paymentIntent.status,
+        stripeAmount: paymentIntent.amount / 100,
+        stripeCurrency: paymentIntent.currency,
+        latestCharge: paymentIntent.latest_charge,
+        canRefund: paymentIntent.status === 'succeeded' && !!paymentIntent.latest_charge,
+        issue: null as string | null,
+      };
+
+      // Diagnose the issue
+      if (paymentIntent.status !== 'succeeded') {
+        diagnosis.issue = `Stripe status is '${paymentIntent.status}', not 'succeeded'. Payment was not successfully captured.`;
+      } else if (!paymentIntent.latest_charge) {
+        diagnosis.issue = 'Payment has no associated charge. This is unexpected for a succeeded payment.';
+      } else {
+        diagnosis.issue = null;
+      }
+
+      return {
+        success: true,
+        message: diagnosis.canRefund ? 'Payment is refundable' : 'Payment cannot be refunded',
+        data: diagnosis,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Failed to check Stripe status: ${error.message}`,
+        data: {
+          paymentId: payment.id,
+          databaseStatus: payment.status,
+          stripePaymentIntentId: payment.stripePaymentIntentId,
+          error: error.message,
+        },
+      };
+    }
+  }
+
+  /**
    * Process refund for completed payment
    */
   async processRefund(
