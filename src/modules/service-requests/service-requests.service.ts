@@ -1914,8 +1914,22 @@ export class ServiceRequestsService {
     userId: string,
     reason: string,
   ): Promise<any> {
+    // Get the requesting user to check if they're admin
+    const requestingUser = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['role'],
+    });
+
+    if (!requestingUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    const isAdmin = requestingUser.role?.name === 'admin';
+
+    // Find service request - admins can refund any request, customers only their own
+    const whereCondition = isAdmin ? { id } : { id, userId };
     const request = await this.serviceRequestRepository.findOne({
-      where: { id, userId },
+      where: whereCondition,
       relations: ['payment', 'user', 'service'],
     });
 
@@ -1996,31 +2010,33 @@ export class ServiceRequestsService {
       request.userNotes += `\n[REFUND REQUESTED] ${new Date().toISOString()}: ${reason}`;
       await this.serviceRequestRepository.save(request);
 
-      // Notify customer
+      // Notify customer (the actual owner of the service request)
       await this.notificationsService.send({
-        userId,
+        userId: request.userId,
         title: '💰 Refund Approved',
         message: `Your refund of €${request.payment.amount} has been processed.`,
         type: 'success',
         actionUrl: `/payments/${request.payment.id}`,
       });
 
-      // Notify admin
-      const adminUsers = await this.userRepository.find({
-        where: { role: 'admin' as any },
-      });
-      for (const admin of adminUsers) {
-        await this.notificationsService.send({
-          userId: admin.id,
-          title: '💰 Refund Processed',
-          message: `Refund of €${request.payment.amount} processed for ${request.user.email} - ${request.service?.name}`,
-          type: 'info',
-          actionUrl: `/admin/service-requests/${request.id}`,
+      // Notify admin (if refund was processed by customer, notify admins)
+      if (!isAdmin) {
+        const adminUsers = await this.userRepository.find({
+          where: { role: 'admin' as any },
         });
+        for (const admin of adminUsers) {
+          await this.notificationsService.send({
+            userId: admin.id,
+            title: '💰 Refund Processed',
+            message: `Refund of €${request.payment.amount} processed for ${request.user.email} - ${request.service?.name}`,
+            type: 'info',
+            actionUrl: `/admin/service-requests/${request.id}`,
+          });
+        }
       }
 
       this.logger.log(
-        `Refund processed successfully for service request ${id}, payment ${request.payment.id}. Reason: ${reason}`,
+        `Refund processed successfully for service request ${id}, payment ${request.payment.id}. Processed by: ${isAdmin ? 'Admin' : 'Customer'}. Reason: ${reason}`,
       );
 
       return {

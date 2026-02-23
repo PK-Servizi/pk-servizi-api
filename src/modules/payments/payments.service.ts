@@ -1,9 +1,17 @@
-import { BadRequestException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  Logger,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Payment } from './entities/payment.entity';
 import { CreatePaymentDto } from './dto/create-payment.dto';
-import { UpdatePaymentDto } from './dto/update-payment.dto';
+import { StripeService } from './stripe.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { User } from '../users/entities/user.entity';
 import * as PDFDocument from 'pdfkit';
 
 /**
@@ -11,10 +19,17 @@ import * as PDFDocument from 'pdfkit';
  * Handles payment management, Stripe integration, and payment processing
  * Extends BaseService for CRUD operations
  */
+@Injectable()
 export class PaymentsService {
+  private readonly logger = new Logger(PaymentsService.name);
+
   constructor(
     @InjectRepository(Payment)
     protected readonly paymentRepository: Repository<Payment>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    private readonly stripeService: StripeService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   /**
@@ -181,26 +196,165 @@ export class PaymentsService {
   /**
    * Process refund for completed payment
    */
-  async processRefund(id: string, refundAmount?: number): Promise<Payment> {
-    const payment = await this.paymentRepository.findOne({ where: { id } });
+  async processRefund(
+    paymentId: string,
+    userId: string,
+    reason: string,
+    partialAmount?: number,
+  ): Promise<any> {
+    // Check if user is admin
+    const requestingUser = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['role'],
+    });
+
+    if (!requestingUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    const isAdmin = requestingUser.role?.name === 'admin';
+
+    // Find payment - admins can refund any payment, customers only their own
+    const whereCondition = isAdmin
+      ? { id: paymentId }
+      : { id: paymentId, userId };
+    const payment = await this.paymentRepository.findOne({
+      where: whereCondition,
+      relations: ['user', 'serviceRequest', 'serviceRequest.service'],
+    });
+
     if (!payment) {
-      throw new Error(`Payment ${id} not found`);
+      throw new NotFoundException('Payment not found');
     }
 
+    // Validate payment status
     if (payment.status !== 'completed') {
-      throw new BadRequestException('Can only refund completed payments');
+      throw new BadRequestException(
+        `Can only refund completed payments. Current status: ${payment.status}`,
+      );
     }
 
-    const refundAmountFinal = refundAmount || payment.amount;
-
-    if (refundAmountFinal > payment.amount) {
+    // Validate refund amount
+    const refundAmount = partialAmount || payment.amount;
+    if (refundAmount > payment.amount) {
       throw new BadRequestException(
         'Refund amount cannot exceed payment amount',
       );
     }
 
-    payment.status = 'refunded';
-    return this.paymentRepository.save(payment);
+    // Process refund with Stripe
+    try {
+      if (!payment.stripePaymentIntentId) {
+        throw new BadRequestException(
+          'No Stripe payment intent found for this payment',
+        );
+      }
+
+      this.logger.log(
+        `Processing refund for payment ${paymentId}, stripePaymentIntentId: ${payment.stripePaymentIntentId}`,
+      );
+
+      // Get the actual payment intent ID (in case we stored a checkout session ID)
+      let paymentIntentId = payment.stripePaymentIntentId;
+
+      // Check if this is a checkout session ID instead of payment intent
+      if (paymentIntentId.startsWith('cs_')) {
+        this.logger.log(
+          `Detected checkout session ID, retrieving payment intent...`,
+        );
+        const checkoutSession =
+          await this.stripeService.getCheckoutSession(paymentIntentId);
+        if (checkoutSession && checkoutSession.payment_intent) {
+          paymentIntentId = checkoutSession.payment_intent as string;
+          // Update the stored payment intent ID
+          payment.stripePaymentIntentId = paymentIntentId;
+          await this.paymentRepository.save(payment);
+          this.logger.log(`Updated payment intent ID to: ${paymentIntentId}`);
+        } else {
+          throw new BadRequestException(
+            'Payment intent not found in checkout session. Payment may not have been completed.',
+          );
+        }
+      }
+
+      // Process Stripe refund
+      const stripeRefund = await this.stripeService.createRefund(
+        paymentIntentId,
+        partialAmount ? Math.round(partialAmount * 100) : undefined, // Convert to cents
+      );
+
+      // Update payment status
+      payment.status = 'refunded';
+      if (payment.metadata) {
+        payment.metadata.refundReason = reason;
+        payment.metadata.refundedAt = new Date().toISOString();
+        payment.metadata.refundedBy = isAdmin ? 'admin' : 'customer';
+        payment.metadata.stripeRefundId = stripeRefund.id;
+        if (partialAmount) {
+          payment.metadata.refundAmount = partialAmount;
+        }
+      }
+      await this.paymentRepository.save(payment);
+
+      // Notify customer (the actual owner of the payment)
+      await this.notificationsService.send({
+        userId: payment.userId,
+        title: '💰 Refund Processed',
+        message: `Your refund of €${refundAmount.toFixed(2)} has been processed successfully.`,
+        type: 'success',
+        actionUrl: `/payments/${payment.id}`,
+      });
+
+      // Notify admins if refund was requested by customer
+      if (!isAdmin) {
+        const adminUsers = await this.userRepository.find({
+          where: { role: { name: 'admin' } as any },
+        });
+        for (const admin of adminUsers) {
+          await this.notificationsService.send({
+            userId: admin.id,
+            title: '💰 Refund Processed',
+            message: `Refund of €${refundAmount.toFixed(2)} processed for ${payment.user?.email || 'customer'}${payment.serviceRequest?.service?.name ? ` - ${payment.serviceRequest.service.name}` : ''}`,
+            type: 'info',
+            actionUrl: `/admin/payments/${payment.id}`,
+          });
+        }
+      }
+
+      this.logger.log(
+        `Refund processed successfully for payment ${paymentId}. Amount: €${refundAmount}. Processed by: ${isAdmin ? 'Admin' : 'Customer'}`,
+      );
+
+      return {
+        success: true,
+        message: 'Refund processed successfully',
+        data: {
+          paymentId: payment.id,
+          refundAmount,
+          stripeRefundId: stripeRefund.id,
+          reason,
+          processedAt: new Date(),
+          processedBy: isAdmin ? 'admin' : 'customer',
+        },
+      };
+    } catch (error) {
+      this.logger.error(
+        `Failed to process refund for payment ${paymentId}: ${error.message}`,
+        error.stack,
+      );
+      // Re-throw the error if it's already a BadRequestException with a specific message
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException ||
+        error instanceof ConflictException
+      ) {
+        throw error;
+      }
+      // Otherwise throw a generic error
+      throw new BadRequestException(
+        `Failed to process refund: ${error.message || 'Unknown error'}`,
+      );
+    }
   }
 
   /**

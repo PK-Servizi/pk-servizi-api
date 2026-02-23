@@ -105,23 +105,37 @@ export class PaymentsController {
   }
 
   @Post(':id/refund')
-  @Permissions('payments:refund')
-  @ApiOperation({ summary: '[Admin] Process payment refund' })
+  @Permissions('payments:refund', 'payments:read_own')
+  @ApiOperation({
+    summary: '[Admin/Customer] Process payment refund',
+    description:
+      'Process a refund for a payment. Admins can refund any payment. Customers can only refund their own payments.',
+  })
   @AuditLog({ action: 'PAYMENT_REFUNDED', resourceType: 'payment' })
   @ApiBody({
     schema: {
       type: 'object',
       properties: {
-        reason: { type: 'string' },
+        reason: {
+          type: 'string',
+          description: 'Reason for the refund',
+          example: 'Customer requested refund',
+        },
         amount: {
           type: 'number',
-          description: 'Amount to refund (optional for partial)',
+          description: 'Amount to refund (optional, defaults to full amount)',
+          example: 50.0,
         },
       },
       required: ['reason'],
     },
   })
-  processRefund(@Param('id') id: string, @Body() dto: any) {
-    return { success: true, message: 'Refund processed' };
+  processRefund(
+    @Param('id') id: string,
+    @Body('reason') reason: string,
+    @Body('amount') amount: number,
+    @CurrentUser() user: any,
+  ) {
+    return this.paymentsService.processRefund(id, user.id, reason, amount);
   }
 }
