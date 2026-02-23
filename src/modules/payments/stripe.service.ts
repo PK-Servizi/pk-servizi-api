@@ -454,6 +454,30 @@ export class StripeService {
 
     try {
       this.logger.log(`Creating refund for payment intent: ${paymentIntentId}`);
+      
+      // First, verify the payment intent exists and is in a refundable state
+      const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentIntentId);
+      
+      // Check if payment intent has been successfully captured
+      if (paymentIntent.status !== 'succeeded') {
+        this.logger.warn(
+          `Payment intent ${paymentIntentId} status is '${paymentIntent.status}', not 'succeeded'`,
+        );
+        throw new BadRequestException(
+          `Payment cannot be refunded. Current Stripe status: '${paymentIntent.status}'. Only successfully captured payments can be refunded.`,
+        );
+      }
+      
+      // Check if there's a charge associated with the payment intent
+      if (!paymentIntent.latest_charge) {
+        this.logger.warn(
+          `Payment intent ${paymentIntentId} has no associated charge`,
+        );
+        throw new BadRequestException(
+          'Payment has no associated charge. It may not have been captured yet or the checkout was abandoned.',
+        );
+      }
+      
       return await this.stripe.refunds.create({
         payment_intent: paymentIntentId,
         amount,
@@ -463,6 +487,10 @@ export class StripeService {
         `Failed to create refund for ${paymentIntentId}: ${error.message}`,
         error.stack,
       );
+      // If it's already a BadRequestException, re-throw it
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
       // Provide more specific error messages
       if (error.type === 'StripeInvalidRequestError') {
         if (error.message.includes('already been refunded')) {

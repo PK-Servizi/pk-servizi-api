@@ -1951,9 +1951,17 @@ export class ServiceRequestsService {
       );
     }
 
-    if (!request.payment || request.payment.status !== 'completed') {
+    // Check if payment exists
+    if (!request.payment) {
       throw new BadRequestException(
-        'No completed payment found for this request',
+        'No payment found for this service request. Nothing to refund.',
+      );
+    }
+
+    // Check payment status
+    if (request.payment.status !== 'completed') {
+      throw new BadRequestException(
+        `Cannot refund payment with status '${request.payment.status}'. Only completed payments can be refunded.`,
       );
     }
 
@@ -1997,7 +2005,33 @@ export class ServiceRequestsService {
       }
 
       // Process Stripe refund
-      await this.stripeService.createRefund(paymentIntentId);
+      try {
+        await this.stripeService.createRefund(paymentIntentId);
+      } catch (stripeError) {
+        this.logger.error(
+          `Stripe refund failed for payment intent ${paymentIntentId}: ${stripeError.message}`,
+          stripeError.stack,
+        );
+        
+        // Provide clearer error messages based on Stripe error
+        if (stripeError.message?.includes('has already been refunded')) {
+          throw new BadRequestException(
+            'This payment has already been refunded.',
+          );
+        } else if (stripeError.message?.includes('not found')) {
+          throw new BadRequestException(
+            'Payment not found in Stripe. It may have been cancelled or expired.',
+          );
+        } else if (stripeError.message?.includes('charge') || stripeError.message?.includes('captured')) {
+          throw new BadRequestException(
+            'Payment cannot be refunded because it was not successfully captured in Stripe. This can happen if the customer abandoned the checkout or the payment failed. Please check the payment status in your Stripe dashboard.',
+          );
+        } else {
+          throw new BadRequestException(
+            `Failed to process refund with Stripe: ${stripeError.message}`,
+          );
+        }
+      }
 
       // Update payment status
       request.payment.status = 'refunded';

@@ -278,10 +278,37 @@ export class PaymentsService {
       }
 
       // Process Stripe refund
-      const stripeRefund = await this.stripeService.createRefund(
-        paymentIntentId,
-        partialAmount ? Math.round(partialAmount * 100) : undefined, // Convert to cents
-      );
+      let stripeRefund;
+      try {
+        stripeRefund = await this.stripeService.createRefund(
+          paymentIntentId,
+          partialAmount ? Math.round(partialAmount * 100) : undefined, // Convert to cents
+        );
+      } catch (stripeError) {
+        this.logger.error(
+          `Stripe refund failed for payment intent ${paymentIntentId}: ${stripeError.message}`,
+          stripeError.stack,
+        );
+        
+        // Provide clearer error messages based on Stripe error
+        if (stripeError.message?.includes('has already been refunded')) {
+          throw new BadRequestException(
+            'This payment has already been refunded.',
+          );
+        } else if (stripeError.message?.includes('not found')) {
+          throw new BadRequestException(
+            'Payment not found in Stripe. It may have been cancelled or expired.',
+          );
+        } else if (stripeError.message?.includes('charge') || stripeError.message?.includes('captured')) {
+          throw new BadRequestException(
+            'Payment cannot be refunded because it was not successfully captured in Stripe. This can happen if the customer abandoned the checkout or the payment failed. Please check the payment status in your Stripe dashboard.',
+          );
+        } else {
+          throw new BadRequestException(
+            `Failed to process refund with Stripe: ${stripeError.message}`,
+          );
+        }
+      }
 
       // Update payment status
       payment.status = 'refunded';
