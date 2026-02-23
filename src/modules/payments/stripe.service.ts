@@ -418,6 +418,30 @@ export class StripeService {
   }
 
   /**
+   * Get checkout session details
+   */
+  async getCheckoutSession(
+    sessionId: string,
+  ): Promise<Stripe.Checkout.Session> {
+    if (!this.stripe) {
+      throw new Error('Stripe not configured');
+    }
+
+    try {
+      this.logger.log(`Retrieving checkout session: ${sessionId}`);
+      return await this.stripe.checkout.sessions.retrieve(sessionId);
+    } catch (error) {
+      this.logger.error(
+        `Failed to retrieve checkout session ${sessionId}: ${error.message}`,
+        error.stack,
+      );
+      throw new BadRequestException(
+        `Failed to retrieve checkout session: ${error.message}`,
+      );
+    }
+  }
+
+  /**
    * Create refund
    */
   async createRefund(

@@ -1956,10 +1956,34 @@ export class ServiceRequestsService {
         `Processing refund for service request ${id}, payment ${request.payment.id}, stripePaymentIntentId: ${request.payment.stripePaymentIntentId}`,
       );
 
+      // Get the actual payment intent ID (in case we stored a checkout session ID)
+      let paymentIntentId = request.payment.stripePaymentIntentId;
+      
+      // Check if this is a checkout session ID instead of payment intent
+      if (paymentIntentId.startsWith('cs_')) {
+        this.logger.log(
+          `Detected checkout session ID, retrieving payment intent...`,
+        );
+        const checkoutSession = await this.stripeService.getCheckoutSession(
+          paymentIntentId,
+        );
+        if (checkoutSession && checkoutSession.payment_intent) {
+          paymentIntentId = checkoutSession.payment_intent as string;
+          // Update the stored payment intent ID
+          request.payment.stripePaymentIntentId = paymentIntentId;
+          await this.paymentRepository.save(request.payment);
+          this.logger.log(
+            `Updated payment intent ID to: ${paymentIntentId}`,
+          );
+        } else {
+          throw new BadRequestException(
+            'Payment intent not found in checkout session. Payment may not have been completed.',
+          );
+        }
+      }
+
       // Process Stripe refund
-      await this.stripeService.createRefund(
-        request.payment.stripePaymentIntentId,
-      );
+      await this.stripeService.createRefund(paymentIntentId);
 
       // Update payment status
       request.payment.status = 'refunded';
