@@ -1945,12 +1945,21 @@ export class ServiceRequestsService {
 
     // Process refund immediately
     try {
-      // Process Stripe refund
-      if (request.payment.stripePaymentIntentId) {
-        await this.stripeService.createRefund(
-          request.payment.stripePaymentIntentId,
+      // Validate that we have a stripe payment intent
+      if (!request.payment.stripePaymentIntentId) {
+        throw new BadRequestException(
+          'No Stripe payment intent found for this payment',
         );
       }
+
+      this.logger.log(
+        `Processing refund for service request ${id}, payment ${request.payment.id}, stripePaymentIntentId: ${request.payment.stripePaymentIntentId}`,
+      );
+
+      // Process Stripe refund
+      await this.stripeService.createRefund(
+        request.payment.stripePaymentIntentId,
+      );
 
       // Update payment status
       request.payment.status = 'refunded';
@@ -1987,7 +1996,7 @@ export class ServiceRequestsService {
       }
 
       this.logger.log(
-        `Refund processed for service request ${id}, payment ${request.payment.id}. Reason: ${reason}`,
+        `Refund processed successfully for service request ${id}, payment ${request.payment.id}. Reason: ${reason}`,
       );
 
       return {
@@ -2003,11 +2012,16 @@ export class ServiceRequestsService {
       };
     } catch (error) {
       this.logger.error(
-        `Failed to process refund: ${error.message}`,
+        `Failed to process refund for service request ${id}: ${error.message}`,
         error.stack,
       );
+      // Re-throw the error if it's already a BadRequestException with a specific message
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      // Otherwise throw a generic error
       throw new BadRequestException(
-        'Failed to process refund. Please contact support.',
+        `Failed to process refund: ${error.message || 'Unknown error'}`,
       );
     }
   }

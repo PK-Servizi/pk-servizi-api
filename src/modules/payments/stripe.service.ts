@@ -429,13 +429,33 @@ export class StripeService {
     }
 
     try {
+      this.logger.log(`Creating refund for payment intent: ${paymentIntentId}`);
       return await this.stripe.refunds.create({
         payment_intent: paymentIntentId,
         amount,
       });
     } catch (error) {
-      this.logger.error(`Failed to create refund: ${error.message}`);
-      throw new BadRequestException('Failed to process refund');
+      this.logger.error(
+        `Failed to create refund for ${paymentIntentId}: ${error.message}`,
+        error.stack,
+      );
+      // Provide more specific error messages
+      if (error.type === 'StripeInvalidRequestError') {
+        if (error.message.includes('already been refunded')) {
+          throw new BadRequestException(
+            'This payment has already been refunded',
+          );
+        } else if (error.message.includes('not found')) {
+          throw new BadRequestException('Payment not found in Stripe');
+        } else if (error.message.includes('charge')) {
+          throw new BadRequestException(
+            'Payment cannot be refunded. It may not have been captured yet.',
+          );
+        }
+      }
+      throw new BadRequestException(
+        `Failed to process refund: ${error.message}`,
+      );
     }
   }
 
