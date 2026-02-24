@@ -3,7 +3,7 @@
 
 $ErrorActionPreference = "Stop"
 
-$SERVER = "ubuntu@ec2-13-60-205-66.eu-north-1.compute.amazonaws.com"
+$SERVER = "ubuntu@ec2-13-60-77-204.eu-north-1.compute.amazonaws.com"
 $KEY = "D:\work\pk-servizi-key.pem"
 $PROJECT_PATH = "d:\work\live_projects\pk-servizi-api"
 

@@ -581,7 +581,7 @@ export class PaymentsService {
         doc.fontSize(18).font('Helvetica-Bold');
         doc.text('Total Amount Paid:', leftMargin, yPosition + 10);
         doc.text(
-          `€${(payment.amount / 100).toFixed(2)}`,
+          `€${Number(payment.amount).toFixed(2)}`,
           rightMargin + 100,
           yPosition + 10,
           { align: 'right' },
@@ -762,13 +762,13 @@ export class PaymentsService {
           .fontSize(10)
           .font('Helvetica')
           .text('1', 330, yPos + 10, { width: 50, align: 'center' });
-        doc.text(`€${(payment.amount / 100).toFixed(2)}`, 390, yPos + 10, {
+        doc.text(`€${Number(payment.amount).toFixed(2)}`, 390, yPos + 10, {
           width: 70,
           align: 'right',
         });
         doc
           .font('Helvetica-Bold')
-          .text(`€${(payment.amount / 100).toFixed(2)}`, 470, yPos + 10, {
+          .text(`€${Number(payment.amount).toFixed(2)}`, 470, yPos + 10, {
             width: 70,
             align: 'right',
           });
@@ -785,7 +785,7 @@ export class PaymentsService {
         yPos += 20;
         doc.fontSize(12).font('Helvetica');
         doc.text('Subtotal:', 350, yPos);
-        doc.text(`€${(payment.amount / 100).toFixed(2)}`, 470, yPos, {
+        doc.text(`€${Number(payment.amount).toFixed(2)}`, 470, yPos, {
           width: 70,
           align: 'right',
         });
@@ -799,7 +799,7 @@ export class PaymentsService {
         doc.fillColor('#000000');
         doc.fontSize(16).font('Helvetica-Bold');
         doc.text('TOTAL PAID:', 360, yPos);
-        doc.text(`€${(payment.amount / 100).toFixed(2)}`, 470, yPos, {
+        doc.text(`€${Number(payment.amount).toFixed(2)}`, 470, yPos, {
           width: 70,
           align: 'right',
         });

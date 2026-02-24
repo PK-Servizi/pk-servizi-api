@@ -96,7 +96,8 @@ export class PaymentsController {
   @Permissions('payments:read')
   @ApiOperation({
     summary: '[Admin] Check payment status in Stripe',
-    description: 'Retrieves the actual payment status from Stripe for diagnosis',
+    description:
+      'Retrieves the actual payment status from Stripe for diagnosis',
   })
   checkStripeStatus(@Param('id') id: string) {
     return this.paymentsService.checkStripeStatus(id);
