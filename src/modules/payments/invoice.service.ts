@@ -159,6 +159,14 @@ export class InvoiceService {
   }
 
   /**
+   * Get PDF buffer for a specific invoice (for streaming download)
+   */
+  async getInvoicePdfBuffer(invoiceId: string): Promise<Buffer> {
+    const invoice = await this.findOne(invoiceId);
+    return this.createPdfBuffer(invoice);
+  }
+
+  /**
    * Create PDF buffer for invoice
    */
   private async createPdfBuffer(invoice: Invoice): Promise<Buffer> {

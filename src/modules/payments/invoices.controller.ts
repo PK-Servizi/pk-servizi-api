@@ -111,18 +111,17 @@ export class InvoicesController {
       throw new BadRequestException('Access denied to this invoice');
     }
 
-    const pdfUrl = await this.invoiceService.getInvoicePdfUrl(invoiceId);
+    // Generate PDF buffer and stream it
+    const pdfBuffer = await this.invoiceService.getInvoicePdfBuffer(invoiceId);
+    const fileName = `invoice-${invoice.invoiceNumber || invoice.id.slice(0, 8)}.pdf`;
 
-    // In real implementation, stream from S3
-    // For now, return URL
-    return res.json({
-      success: true,
-      data: {
-        invoiceId,
-        pdfUrl,
-        fileName: `invoice-${invoice.id.slice(0, 8)}.pdf`,
-      },
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="${fileName}"`,
+      'Content-Length': pdfBuffer.length,
     });
+
+    res.send(pdfBuffer);
   }
 
   /**

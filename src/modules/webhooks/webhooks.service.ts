@@ -253,6 +253,27 @@ export class WebhooksService {
           'Payment completed for service request: ' + serviceRequestId,
         );
 
+        // Generate and send invoice for service payment
+        try {
+          const invoice = await this.invoiceService.generateInvoiceFromPayment(
+            payment.id,
+          );
+          this.logger.log('Invoice generated for service payment: ' + invoice.id);
+
+          // Send invoice email to user
+          const user = await this.userRepository.findOne({
+            where: { id: userId },
+          });
+          if (user && user.email) {
+            await this.sendServicePaymentInvoiceEmail(user, invoice, payment, session);
+          }
+        } catch (invoiceError) {
+          this.logger.error(
+            `Failed to generate invoice for service payment: ${invoiceError.message}`,
+          );
+          // Don't fail the payment processing if invoice generation fails
+        }
+
         // Trigger service request workflow update
         await this.serviceRequestsService.handlePaymentSuccess(payment.id);
 
@@ -776,6 +797,107 @@ export class WebhooksService {
         totalCount: this.webhookLogs.length,
       },
     };
+  }
+
+  /**
+   * Send invoice email for service payment
+   */
+  private async sendServicePaymentInvoiceEmail(
+    user: any,
+    invoice: any,
+    payment: any,
+    session: any,
+  ): Promise<void> {
+    const serviceName = payment.description || 'Professional Service';
+    const amount = (session.amount_total / 100).toFixed(2);
+
+    const emailHtml = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .header h1 { margin: 0; font-size: 28px; }
+          .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+          .greeting { font-size: 18px; margin-bottom: 20px; }
+          .message { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
+          .details { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
+          .details-title { font-size: 20px; color: #667eea; margin-bottom: 15px; font-weight: bold; }
+          .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+          .detail-label { font-weight: 600; color: #666; }
+          .detail-value { color: #333; }
+          .button { display: inline-block; background: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+          .footer { text-align: center; color: #666; font-size: 14px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Payment Confirmation</h1>
+        </div>
+        <div class="content">
+          <div class="greeting">Hello ${user.fullName},</div>
+          <div class="message">
+            <p>Thank you for your purchase! Your payment has been successfully processed.</p>
+          </div>
+          <div class="details">
+            <div class="details-title">Invoice Details:</div>
+            <div class="detail-row">
+              <span class="detail-label">Invoice Number:</span>
+              <span class="detail-value"><strong>${invoice.invoiceNumber}</strong></span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Service:</span>
+              <span class="detail-value">${serviceName}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Date:</span>
+              <span class="detail-value">${new Date().toLocaleDateString()}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Amount:</span>
+              <span class="detail-value" style="color: #667eea; font-size: 20px; font-weight: bold;">${amount} EUR</span>
+            </div>
+          </div>
+          <p style="text-align: center;">You can download your invoice using the button below:</p>
+          <div style="text-align: center;">
+            <a href="${process.env.FRONTEND_URL || 'http://localhost:3001'}/dashboard/invoices/${invoice.id}" class="button">Download Invoice</a>
+          </div>
+          <div class="footer">
+            <p>Your service request is now being processed. We'll keep you updated on its progress.</p>
+            <p><strong>PK SERVIZI</strong><br>Your trusted partner for professional services</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const emailText =
+      'Payment Confirmation\n\n' +
+      'Dear ' + user.fullName + ',\n\n' +
+      'Thank you for your purchase! Your payment has been successfully processed.\n\n' +
+      'Service: ' + serviceName + '\n' +
+      'Amount: €' + amount + '\n' +
+      'Invoice: ' + invoice.invoiceNumber;
+
+    await this.notificationsService.send({
+      userId: user.id,
+      userEmail: user.email,
+      title: 'Payment Successful - Invoice Attached',
+      message: emailText,
+      htmlContent: emailHtml,
+      type: 'payment',
+      data: {
+        serviceRequestId: payment.serviceRequestId,
+        paymentId: payment.id,
+        invoiceId: invoice.id,
+        invoiceNumber: invoice.invoiceNumber,
+        amount: session.amount_total / 100,
+        serviceName,
+      },
+    });
+
+    this.logger.log('Service payment invoice email sent to: ' + user.email);
   }
 
   private logWebhookEvent(log: {
