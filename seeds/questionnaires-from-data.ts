@@ -5488,4 +5488,3 @@ export const SERVICE_QUESTIONNAIRES: Record<string, any[]> = {
 export function getServiceQuestionnaires(serviceCode: string) {
   return SERVICE_QUESTIONNAIRES[serviceCode] || [];
 }
-

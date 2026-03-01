@@ -9,11 +9,17 @@ import {
 } from './form-schemas';
 import { getServiceQuestionnaires } from './questionnaires-from-data';
 
-const buildGenericFormSchema = (serviceName: string, description?: string, serviceCode?: string) => {
+const buildGenericFormSchema = (
+  serviceName: string,
+  description?: string,
+  serviceCode?: string,
+) => {
   const sections: any[] = [PERSONAL_INFORMATION_SECTION];
 
   // Add service-specific questionnaires if defined
-  const questionnaires = serviceCode ? getServiceQuestionnaires(serviceCode) : [];
+  const questionnaires = serviceCode
+    ? getServiceQuestionnaires(serviceCode)
+    : [];
   if (questionnaires.length > 0) {
     sections.push(...questionnaires);
   }
@@ -148,39 +154,39 @@ const SERVICES_DATA = [
         ],
         faqs: [
           {
-            question: "Chi deve dichiarare l'ISEE universitario?",
+            question: "Chi deve essere il dichiarante dell'ISEE universitario?",
             answer:
-              'Potrebbe essere chiunque del nucleo familiare, non necessariamente il capofamiglia',
+              "Potrebbe essere chiunque del nucleo, non necessariamente il capo famiglia né per forza il richiedente del servizio che poi di fatto presenterà l'Isee elaborato.",
             order: 1,
             category: 'Dichiarazione',
           },
           {
             question:
-              'Quali sono le condizioni per essere considerato studente indipendente?',
+              'Quali sono le condizioni per essere considerato studente autonomo?',
             answer:
-              'Ha risieduto fuori dal domicilio familiare per almeno due anni prima di presentare la domanda di immatricolazione per la prima volta',
+              'Uno studente è considerato "autonomo" nel momento in cui: è residente fuori dall\'unità abitativa della famiglia di origine da almeno due anni rispetto alla data di presentazione della domanda di iscrizione per la prima volta a ciascun corso di studi, in alloggio non di proprietà di un suo membro.',
             order: 2,
             category: 'Studenti',
           },
           {
-            question: 'Quanto tempo ci vuole per elaborare la DSU?',
+            question: 'Entro quanto tempo viene elaborata la DSU?',
             answer: 'La DSU viene elaborata entro 6 ore dalla richiesta.',
             order: 3,
             category: 'Tempi',
           },
           {
             question:
-              'Per quanto tempo è valido il certificato ISEE Universitario?',
+              "Qual è la validità dell'attestazione ISEE Universitario?",
             answer:
-              "Il certificato ISEE Universitario è valido per l'anno accademico in corso perché scade il 31 dicembre di quell'anno.",
+              "L'attestazione ISEE Universitario ha validità per l'anno accademico in corso perché scade il 31 dicembre dello stesso anno.",
             order: 4,
             category: 'Validità',
           },
           {
             question:
-              'Posso utilizzare il certificato ISEE Universitario per richiedere altri benefici?',
+              "Posso utilizzare l'attestazione ISEE Universitario per richiedere altre agevolazioni o benefici?",
             answer:
-              'Sì, il certificato può essere utilizzato per richiedere benefici o agevolazioni secondo le istruzioni della tua università.',
+              "Sì, l'attestazione può essere utilizzata per richiedere agevolazioni o benefici, secondo le indicazioni della propria università.",
             order: 5,
             category: 'Utilizzo',
           },
@@ -209,21 +215,21 @@ const SERVICES_DATA = [
           {
             question: "Chi può richiedere l'ISEE Socio-Sanitario?",
             answer:
-              'Beneficiario adulto con disabilità o non autosufficiente. Il dichiarante può essere un altro membro della famiglia',
+              'Il modello ISEE Socio Sanitario può essere presentato solo se il beneficiario delle prestazioni è un maggiorenne disabile o non autosufficiente. Il dichiarante può essere anche un altro membro del nucleo familiare, purché maggiorenne, ma deve includere anche la persona disabile nel nucleo.',
             order: 1,
             category: 'Richiedenti',
           },
           {
-            question: 'Cosa significa nucleo familiare ristretto?',
+            question: 'Cosa significa "nucleo familiare ristretto"?',
             answer:
-              'Il beneficiario può dichiarare un nucleo familiare più piccolo, costituito dal beneficiario, dal coniuge, da figli minori e da figli adulti dependenti',
+              'Il beneficiario ha la possibilità di dichiarare un nucleo familiare ristretto rispetto a quello ordinario, composto esclusivamente dal beneficiario delle prestazioni, dal coniuge, dai figli minorenni e dai figli maggiorenni a carico ai fini IRPEF (a meno che non siano coniugati o abbiano figli).',
             order: 2,
             category: 'Famiglia',
           },
           {
-            question: 'Quali sono i tempi di elaborazione?',
+            question: 'Entro quanto viene elaborata la mia richiesta?',
             answer:
-              'La DSU viene elaborata entro 6 ore, il certificato ISEE è pronto entro 3 giorni',
+              "La Dichiarazione Sostitutiva Unica (DSU) viene elaborata entro 6 ore dalla richiesta, e l'attestazione ISEE è pronta entro 3 giorni.",
             order: 3,
             category: 'Tempi',
           },
@@ -251,39 +257,39 @@ const SERVICES_DATA = [
         ],
         faqs: [
           {
-            question: 'Qual è la differenza tra ISEE e ISEE per Minorenni?',
+            question: "Che differenza c'è tra ISEE e ISEE Minorenni?",
             answer:
-              "L'ISEE per Minorenni è specificamente progettato per famiglie con figli minori e fornisce metodi di calcolo diversi basati sulla situazione familiare",
+              "L'ISEE Minorenni è appositamente destinato ai nuclei familiari con figli minori e prevede diverse modalità di calcolo in base alla situazione familiare. Coincide con l'ISEE ordinario quando i genitori sono sposati, che convivano o meno.",
             order: 1,
             category: 'Differenze',
           },
           {
             question: "Quale genitore deve richiedere l'ISEE?",
             answer:
-              "Nel caso di genitori non coniugati e non conviventi, l'ISEE per Minorenni deve essere richiesto dal genitore con cui convivono abitualmente i figli",
+              "In caso di genitori non conviventi e non sposati, l'ISEE Minorenni deve essere richiesto dal genitore con cui i figli convivono abitualmente. In questo modo, il genitore non convivente rientra nel nucleo familiare del figlio come componente aggiuntiva o attratta.",
             order: 2,
             category: 'Procedura',
           },
           {
-            question: "Come si può abbassare l'ISEE?",
+            question: "Come si fa ad abbassare l'ISEE?",
             answer:
-              'Cambiare residenza, rivedere i valori della proprietà, evitare conti congiunti, o richiedere un ISEE corrente',
+              "Per ridurre l'ISEE è possibile: effettuare un cambio di residenza, rivedere i valori delle proprietà immobiliari, evitare i conti cointestati, richiedere l'ISEE corrente.",
             order: 3,
             category: 'Riduzione',
           },
           {
             question:
-              'Sono una madre con due figli da marito divorziato e non convivente. Devo includere il padre?',
+              "Sono una madre con due bambini avuti dal marito divorziato e non convivente. Devo includere il padre per richiedere l'agevolazione per la mensa scolastica?",
             answer:
-              'No, devi includere solo la madre e due figli. Il padre va incluso in Sezione D fornendo nome e codice fiscale.',
+              "No, essendo i genitori divorziati e non conviventi, è necessario compilare l'ISEE Minorenni includendo solo la madre e i due figli nel quadro A (nucleo familiare). Il padre dovrà essere inserito nel quadro D (genitore non coniugato e non convivente) fornendo il suo nome e codice fiscale.",
             order: 4,
             category: 'Procedura',
           },
           {
             question:
-              'Posso preparare ISEE Minorenni se il figlio non è riconosciuto dal padre?',
+              'Posso predisporre un ISEE Minorenni se il figlio non è stato riconosciuto dal padre?',
             answer:
-              'Solo se il figlio è stato riconosciuto dal padre. Se non riconosciuto, devi usare ISEE standard.',
+              "Solo se il figlio è stato riconosciuto dal padre, questo viene incluso nel calcolo ISEE. Se non è stato riconosciuto, non è possibile predisporre l'ISEE Minorenni e va presentato quello ordinario.",
             order: 5,
             category: 'Documenti',
           },
@@ -305,35 +311,36 @@ const SERVICES_DATA = [
           {
             question: "Cos'è l'ISEE Corrente e a cosa serve?",
             answer:
-              "È un aggiornamento dell'ISEE ordinario che tiene conto della situazione finanziaria più recente. Aiuta ad accedere a bonus e benefici che richiedono un indicatore più accurato",
+              "L'ISEE Corrente è un aggiornamento del tuo ISEE ordinario che tiene conto della tua situazione economica più recente. Serve per riflettere variazioni significative di reddito, patrimonio o nucleo familiare avvenute negli ultimi mesi. Ti è utile per accedere a bonus, agevolazioni e prestazioni sociali che richiedono un indicatore aggiornato e più fedele alla tua attuale capacità economica.",
             order: 1,
             category: 'Definizione',
           },
           {
             question: "Quando posso richiedere l'ISEE Corrente?",
             answer:
-              'Quando si verificano eventi specifici come riduzione del reddito familiare superiore al 25%, perdita del lavoro, o cambiamenti significativi nel nucleo familiare',
+              "Puoi richiedere l'ISEE Corrente quando si verificano eventi specifici che modificano la tua situazione. I casi più comuni includono una riduzione del reddito di oltre il 25% del nucleo familiare, la perdita del lavoro o la sospensione dell'attività lavorativa, o variazioni significative nel nucleo familiare come nascite, matrimoni o separazioni.",
             order: 2,
             category: 'Quando',
           },
           {
-            question: 'Quali documenti servono?',
+            question:
+              "Quali documenti sono necessari per richiedere l'ISEE Corrente?",
             answer:
-              "L'ISEE ordinario che già possiedi. Documenti che certificano il cambio: lettera di licenziamento, buste paga, estratti bancari aggiornati, certificati di cambio nel nucleo familiare",
+              "Per richiedere l'ISEE Corrente avrai bisogno dell'ISEE ordinario già in tuo possesso. Inoltre, dovrai fornire documenti che attestino la variazione della tua situazione, come la documentazione relativa alla perdita o riduzione del lavoro, estratti conto bancari aggiornati per il patrimonio, o certificati anagrafici per variazioni del nucleo familiare.",
             order: 3,
             category: 'Documenti',
           },
           {
-            question: "L'ISEE Corrente è obbligatorio?",
+            question: "L'ISEE Corrente è obbligatorio o facoltativo?",
             answer:
-              "È opzionale ma altamente consigliato se la situazione finanziaria è peggiorata rispetto all'ISEE ordinario",
+              "L'ISEE Corrente è facoltativo, ma fortemente consigliato se la tua situazione economica è peggiorata rispetto a quella rilevata dall'ISEE ordinario. Non richiederlo potrebbe farti perdere l'opportunità di accedere a prestazioni o ricevere importi inferiori a quelli che ti spetterebbero.",
             order: 4,
             category: 'Obbligatorietà',
           },
           {
-            question: "Per quanto tempo è valido l'ISEE Corrente?",
+            question: "Quanto dura la validità dell'ISEE Corrente?",
             answer:
-              'Generalmente è valido per sei mesi dalla data di presentazione della DSU, salvo cambiamenti significativi che richiedano aggiornamenti',
+              "L'ISEE Corrente ha generalmente una validità di sei mesi dalla data di presentazione della Dichiarazione Sostitutiva Unica (DSU), a meno che non intervengano nuove variazioni significative che richiedano un ulteriore aggiornamento.",
             order: 5,
             category: 'Validità',
           },
@@ -459,6 +466,21 @@ const SERVICES_DATA = [
             order: 13,
             category: 'Occupazione',
           },
+          {
+            question: 'Ho diritto alla NASpI se mi dimetto?',
+            answer:
+              'In generale, no. Le dimissioni volontarie non danno diritto alla NASpI. Tuttavia, ci sono eccezioni: dimissioni per giusta causa o durante il periodo tutelato di maternità.',
+            order: 14,
+            category: 'Dimissioni',
+          },
+          {
+            question:
+              "Cosa succede se mi trasferisco all'estero durante la NASpI?",
+            answer:
+              "La NASpI può essere erogata anche all'estero, ma solo in determinati casi e per un periodo massimo di 3 mesi. È necessario informare l'INPS del trasferimento.",
+            order: 15,
+            category: 'Estero',
+          },
         ],
       },
       {
@@ -518,16 +540,18 @@ const SERVICES_DATA = [
         ],
         faqs: [
           {
-            question: "Patto di Attivazione Digitale (PAD): cos'è?",
+            question:
+              "Patto di Attivazione Digitale (PAD): cos'è e come influisce su NASpI e DIS-COLL?",
             answer:
-              'Il Patto di Attivazione Digitale (PAD) è un accordo che i beneficiari di NASpI e DIS-COLL devono sottoscrivere sulla piattaforma SIISL. Ci si impegna a partecipare attivamente a percorsi di ricerca di lavoro, formazione e reinserimento professionale',
+              'Il Patto di Attivazione Digitale (PAD) è un accordo che i beneficiari di NASpI e DIS-COLL devono sottoscrivere sulla piattaforma SIISL a partire da novembre 2024. Attraverso il PAD, ci si impegna a partecipare attivamente a percorsi di ricerca di lavoro, formazione e reinserimento professionale. In pratica, è un modo per confermare la propria disponibilità al lavoro e accedere ai servizi di supporto offerti.',
             order: 1,
             category: 'Definizione',
           },
           {
-            question: 'Il PAD è obbligatorio?',
+            question:
+              'PAD obbligatorio per NASpI e DIS-COLL? Scadenze e conseguenze della mancata sottoscrizione',
             answer:
-              'Sì, il PAD è obbligatorio per chi percepisce NASpI e DIS-COLL. La mancata sottoscrizione può comportare sospensione o decadenza del beneficio',
+              "Sì, il PAD è obbligatorio per chi percepisce NASpI e DIS-COLL. Non ci sono scadenze rigide per la sottoscrizione, ma è fondamentale farlo il prima possibile per evitare potenziali ritardi nell'erogazione delle indennità. La mancata sottoscrizione può comportare la sospensione o la decadenza del beneficio.",
             order: 2,
             category: 'Obbligatorietà',
           },
@@ -578,9 +602,77 @@ const SERVICES_DATA = [
         code: '730_2026',
         description: 'Dichiarazione dei redditi mediante modello 730',
         category: 'TAX',
-        basePrice: 36.60,
+        basePrice: 36.6,
         requiredDocuments: [],
-        faqs: [],
+        faqs: [
+          {
+            question:
+              'Quali sono le scadenze importanti per il Modello 730/2026?',
+            answer:
+              'La scadenza per la presentazione in forma ordinaria è fissata entro la fine di settembre 2026. Tuttavia, per ottenere il rimborso nella busta paga o nella pensione il prima possibile, è consigliabile presentare la dichiarazione il più presto possibile.',
+            order: 1,
+            category: 'Scadenze',
+          },
+          {
+            question: 'Cosa è il Modello 730/2026 e a cosa serve?',
+            answer:
+              'Il Modello 730/2026 è un modulo semplificato per la dichiarazione dei redditi 2026, relativo ai redditi percepiti nel 2025. Serve principalmente per dichiarare i propri redditi, calcolare le imposte dovute e richiedere eventuali rimborsi o detrazioni fiscali.',
+            order: 2,
+            category: 'Definizione',
+          },
+          {
+            question: 'Chi può fare il Modello 730/2026?',
+            answer:
+              'Il Modello 730/2026 può essere presentato da lavoratori dipendenti, pensionati e assimilati. Non può essere utilizzato da chi possiede redditi di impresa o da chi deve presentare il Modello Redditi Persone Fisiche.',
+            order: 3,
+            category: 'Richiedenti',
+          },
+          {
+            question: 'Quali documenti servono per il Modello 730/2026?',
+            answer:
+              'I documenti necessari includono: la Certificazione Unica (CU), ricevute e fatture per spese detraibili, documenti relativi ai redditi percepiti, dati anagrafici del contribuente e dei familiari a carico, e ogni altra documentazione fiscale rilevante.',
+            order: 4,
+            category: 'Documenti',
+          },
+          {
+            question:
+              'Quali sono i vantaggi di fare il Modello 730/2026 con il vostro servizio?',
+            answer:
+              'Il nostro servizio garantisce una compilazione accurata e professionale della dichiarazione dei redditi, riducendo il rischio di errori e massimizzando le detrazioni e i rimborsi a cui avete diritto.',
+            order: 5,
+            category: 'Vantaggi',
+          },
+          {
+            question: 'Cosa succede se commetto errori nel Modello 730/2026?',
+            answer:
+              'In caso di errori nel Modello 730/2026, è possibile presentare un Modello 730 integrativo entro il 25 ottobre dello stesso anno per correggere le informazioni errate.',
+            order: 6,
+            category: 'Errori',
+          },
+          {
+            question: 'Posso scaricare il Modello 730/2026 online?',
+            answer:
+              "Sì, il Modello 730/2026 è disponibile online sul sito dell'Agenzia delle Entrate. Tuttavia, per una compilazione corretta è consigliabile affidarsi a un professionista.",
+            order: 7,
+            category: 'Procedura',
+          },
+          {
+            question:
+              'Qual è la differenza tra Modello 730 e Modello Redditi Persone Fisiche (ex Unico)?',
+            answer:
+              'Il Modello 730 è semplificato e destinato a lavoratori dipendenti e pensionati, con rimborsi direttamente in busta paga. Il Modello Redditi è più complesso e rivolto a chi ha redditi di impresa, lavoro autonomo o altre tipologie non dichiarabili nel 730.',
+            order: 8,
+            category: 'Differenze',
+          },
+          {
+            question:
+              'Cosa si intende per familiari a carico nel Modello 730/2026?',
+            answer:
+              'I familiari a carico sono i membri del nucleo familiare che non superano un determinato limite di reddito annuo (generalmente €2.840,51 lordi, elevato a €4.000 per figli fino a 24 anni) e per i quali il contribuente può usufruire di detrazioni fiscali.',
+            order: 9,
+            category: 'Famiglia',
+          },
+        ],
       },
       {
         name: 'Integrazione 730',
@@ -590,7 +682,47 @@ const SERVICES_DATA = [
         category: 'TAX',
         basePrice: 12.2,
         requiredDocuments: [],
-        faqs: [],
+        faqs: [
+          {
+            question:
+              'A cosa serve il Modello 730 Integrativo e quando posso usarlo?',
+            answer:
+              'Il Modello 730 Integrativo ti permette di correggere o integrare la tua dichiarazione dei redditi 730 già inviata. È fondamentale se ti accorgi di aver dimenticato spese detraibili o deducibili, hai ricevuto una nuova Certificazione Unica, o se hai commesso un errore che incide sul rimborso o sul debito. Puoi presentarlo generalmente entro il 25 ottobre dello stesso anno fiscale.',
+            order: 1,
+            category: 'Definizione',
+          },
+          {
+            question: 'Quali vantaggi ottengo presentando il 730 Integrativo?',
+            answer:
+              "Presentare il 730 Integrativo ti permette di massimizzare il rimborso IRPEF aggiungendo detrazioni e deduzioni dimenticate, o di correggere errori che potrebbero averti fatto pagare più del dovuto. In questo modo, eviti future sanzioni o accertamenti da parte dell'Agenzia delle Entrate.",
+            order: 2,
+            category: 'Vantaggi',
+          },
+          {
+            question:
+              'Quali documenti sono necessari per compilare il 730 Integrativo?',
+            answer:
+              'Per compilare il Modello 730 Integrativo avremo bisogno della copia del tuo Modello 730 originario già presentato e di tutti i nuovi documenti o informazioni che vuoi includere (es. nuove fatture di spese sanitarie, Certificazioni Uniche aggiuntive, bonifici per ristrutturazioni).',
+            order: 3,
+            category: 'Documenti',
+          },
+          {
+            question:
+              'Il servizio è adatto se ho commesso un errore che aumenta il debito?',
+            answer:
+              "Assolutamente sì. Il nostro servizio per il Modello 730 Integrativo è pensato anche per chi ha commesso un errore che comporta un aumento del debito d'imposta o una diminuzione del credito. Correggere tempestivamente questi errori ti consente di sanare la tua posizione fiscale.",
+            order: 4,
+            category: 'Correzioni',
+          },
+          {
+            question:
+              "Quanto tempo ci vuole per l'elaborazione e l'invio del Modello 730 Integrativo?",
+            answer:
+              "L'elaborazione e l'invio del tuo Modello 730 Integrativo dipendono dalla complessità delle modifiche da apportare e dalla rapidità con cui ci fornisci la documentazione necessaria. Una volta ricevuti tutti i dati, il nostro team si impegna a procedere con la massima celerità.",
+            order: 5,
+            category: 'Tempi',
+          },
+        ],
       },
     ],
   },
@@ -617,9 +749,10 @@ const SERVICES_DATA = [
         ],
         faqs: [
           {
-            question: 'Cosa succede se non rispetto il periodo di preavviso?',
+            question:
+              'Cosa succede se non rispetto il periodo di preavviso stabilito?',
             answer:
-              "Nel caso in cui il periodo di preavviso non venga rispettato, il lavoratore sarà considerato inadempiente e l'azienda potrà detrarre dalla sua ultima busta paga l'importo corrispondente ai giorni di preavviso mancanti.",
+              'Nel caso in cui il periodo di preavviso non venga rispettato, o in presenza di una "giusta causa" pretestuosa, il lavoratore sarà considerato inadempiente e l\'azienda potrà detrarre dalla sua ultima busta paga l\'importo corrispondente ai giorni di preavviso mancanti.',
             order: 1,
             category: 'Preavviso',
           },
@@ -630,7 +763,8 @@ const SERVICES_DATA = [
             category: 'Tempi',
           },
           {
-            question: 'Se mi dimetto avrò diritto alla NASpI?',
+            question:
+              'Se decido di dare le dimissioni avrò diritto alla NASpI?',
             answer:
               'Se decidi di dimetterti volontariamente perderai il diritto alla NASpI, a meno che le dimissioni siano giustificate.',
             order: 3,
@@ -638,16 +772,17 @@ const SERVICES_DATA = [
           },
           {
             question:
-              'Come dare le dimissioni senza perdere il diritto alla NASpI?',
+              'Come posso dare le dimissioni senza perdere il diritto alla NASpI?',
             answer:
-              'Comunica all\'INPS che le dimissioni sono motivate da una "giusta causa".',
+              'Per evitare di perdere il diritto alla NASpI al momento delle dimissioni è importante comunicare all\'INPS che le dimissioni sono motivate da una "giusta causa".',
             order: 4,
             category: 'NASpI',
           },
           {
-            question: 'Cosa succede alle ferie non godute?',
+            question:
+              'Cosa succede alle ferie non godute in caso di dimissioni?',
             answer:
-              'Le ferie non godute devono essere retribuite dal datore di lavoro e possono essere convertite in denaro.',
+              'In caso di dimissioni volontarie, licenziamento o dimissioni per pensionamento, le ferie non godute devono essere retribuite dal datore di lavoro e possono essere convertite in denaro.',
             order: 5,
             category: 'Ferie',
           },
@@ -699,14 +834,14 @@ const SERVICES_DATA = [
           {
             question: 'Quando è possibile revocare le dimissioni?',
             answer:
-              'La normativa consente al dipendente di revocare le dimissioni volontarie entro 7 giorni successivi alla comunicazione. Decorso il termine di 7 giorni, per lo stesso rapporto di lavoro sarà possibile inviare nuove dimissioni, non revocabili.',
+              'La normativa consente comunque al dipendente di revocare ovvero ritirare le dimissioni volontarie entro 7 giorni successivi alla comunicazione. Decorso il termine di 7 giorni utile per la revoca, per lo stesso rapporto di lavoro sarà possibile inviare nuove dimissioni, non revocabili.',
             order: 1,
             category: 'Termini',
           },
           {
             question: 'Quante volte si possono revocare le dimissioni?',
             answer:
-              'Il lavoratore ha sempre la possibilità di revocare le dimissioni entro 7 giorni successivi alla comunicazione. Decorso il termine di 7 giorni, per lo stesso rapporto di lavoro sarà possibile inviare nuove dimissioni, non revocabili.',
+              'Il lavoratore ha sempre la possibilità di revocare le dimissioni o la risoluzione consensuale entro 7 giorni successivi alla comunicazione. Decorso il termine di 7 giorni utile per la revoca, per lo stesso rapporto di lavoro sarà possibile inviare nuove dimissioni, non revocabili.',
             order: 2,
             category: 'Limitazioni',
           },
@@ -990,7 +1125,8 @@ const SERVICES_DATA = [
       {
         name: 'Test di conoscenza della lingua Italiana A2',
         code: 'TEST_LINGUA_2026',
-        description: 'Test di conoscenza della lingua italiana livello A2 per stranieri',
+        description:
+          'Test di conoscenza della lingua italiana livello A2 per stranieri',
         category: 'IMMIGRATION',
         basePrice: 19.99,
         requiredDocuments: [
@@ -1022,7 +1158,40 @@ const SERVICES_DATA = [
           '02. Registro presenze con ore lavorate, straordinari e assenze',
           '03. Dati personali di colf/badante (nome, cognome, codice fiscale, dati anagrafici)',
         ],
-        faqs: [],
+        faqs: [
+          {
+            question:
+              'Quali informazioni sono necessarie per elaborare correttamente le buste paga delle colf e badanti?',
+            answer:
+              'Per elaborare buste paga precise, è fondamentale avere informazioni come le ore lavorate, il salario orario, eventuali straordinari e detrazioni fiscali.',
+            order: 1,
+            category: 'Documenti',
+          },
+          {
+            question:
+              'Quali sono i vantaggi di affidarsi a un servizio professionale per la gestione delle buste paga delle colf e badanti?',
+            answer:
+              'SmartCaf garantisce precisione nei calcoli, rispetto delle normative e risparmio di tempo prezioso per il datore di lavoro.',
+            order: 2,
+            category: 'Vantaggi',
+          },
+          {
+            question:
+              "Come viene gestita la comunicazione con l'INPS per le buste paga delle colf e badanti?",
+            answer:
+              "SmartCaf gestisce tutte le comunicazioni ufficiali con l'INPS, garantendo la conformità alle disposizioni normative e la trasmissione tempestiva dei dati necessari.",
+            order: 3,
+            category: 'INPS',
+          },
+          {
+            question:
+              'Come posso assicurarmi che i bollettini MAV per le contribuzioni previdenziali delle colf e badanti siano gestiti correttamente?',
+            answer:
+              'Affidandoti a SmartCaf, avrai la garanzia che i bollettini MAV per le contribuzioni previdenziali siano generati in modo accurato e inviati tempestivamente, assicurando il rispetto delle scadenze e delle obbligazioni fiscali.',
+            order: 4,
+            category: 'MAV',
+          },
+        ],
       },
       {
         name: 'MAV Trimestrale Colf e Badanti',
@@ -1035,7 +1204,48 @@ const SERVICES_DATA = [
           '02. Dati personali lavoratore (nome, cognome, codice fiscale, data di nascita, residenza)',
           '03. Registro presenze o giornaliero con ore lavorate nel trimestre',
         ],
-        faqs: [],
+        faqs: [
+          {
+            question:
+              'Quali sono i vantaggi di utilizzare il servizio di bollettino MAV trimestrale per colf e badanti?',
+            answer:
+              'Il nostro servizio semplifica la gestione delle contribuzioni previdenziali, garantendo tempestività e conformità normativa. Risparmia tempo e riduci il rischio di errori nella gestione amministrativa.',
+            order: 1,
+            category: 'Vantaggi',
+          },
+          {
+            question:
+              'Quali informazioni sono necessarie per richiedere il servizio di bollettino MAV trimestrale?',
+            answer:
+              'Abbiamo bisogno dei dati personali del datore di lavoro e del lavoratore, registro presenze, dettagli retributivi e contributi previdenziali per elaborare il bollettino MAV trimestrale in modo accurato.',
+            order: 2,
+            category: 'Documenti',
+          },
+          {
+            question:
+              'Come funziona il processo di elaborazione del bollettino MAV trimestrale con il vostro servizio?',
+            answer:
+              'Una volta forniti i documenti necessari, il nostro team si occupa di elaborare il bollettino MAV trimestrale in conformità con le normative vigenti, garantendo tempestività e precisione.',
+            order: 3,
+            category: 'Procedura',
+          },
+          {
+            question:
+              'Qual è la frequenza di emissione dei bollettini MAV trimestrali?',
+            answer:
+              "I bollettini MAV trimestrali vengono emessi ogni trimestre solare, rispettando le scadenze stabilite dall'INPS.",
+            order: 4,
+            category: 'Scadenze',
+          },
+          {
+            question:
+              'Cosa succede se ci sono modifiche nei dati durante il trimestre?',
+            answer:
+              "In caso di modifiche nei dati, è importante informare tempestivamente il nostro servizio per garantire l'aggiornamento corretto del bollettino MAV trimestrale e evitare eventuali problemi con le autorità competenti.",
+            order: 5,
+            category: 'Variazioni',
+          },
+        ],
       },
       {
         name: 'Assunzione Colf e Badanti',
@@ -1063,7 +1273,36 @@ const SERVICES_DATA = [
           "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
           '02. Codice fiscale richiedente',
         ],
-        faqs: [],
+        faqs: [
+          {
+            question: 'A cosa serve il CU per colf e badanti?',
+            answer:
+              "Il CU (Certificazione Unica) è indispensabile per la dichiarazione dei redditi, per il calcolo dell'ISEE per accedere a sconti e agevolazioni, e può essere richiesto per altre pratiche burocratiche come il rinnovo del permesso di soggiorno.",
+            order: 1,
+            category: 'Definizione',
+          },
+          {
+            question: 'Chi deve rilasciare il CU?',
+            answer:
+              'Il datore di lavoro (famiglia che ha assunto la colf o la badante) è tenuto a rilasciare il CU entro determinati termini stabiliti dalla legge.',
+            order: 2,
+            category: 'Obblighi',
+          },
+          {
+            question: 'Cosa contiene il CU?',
+            answer:
+              'Il CU riporta informazioni importanti come: dati anagrafici del datore di lavoro e del lavoratore, periodo di riferimento, importo dei compensi corrisposti e contributo previdenziale versato.',
+            order: 3,
+            category: 'Contenuto',
+          },
+          {
+            question: 'Perché è importante il CU?',
+            answer:
+              'Il CU è un documento essenziale per tutelare i diritti del lavoratore domestico e per garantire la corretta gestione amministrativa del rapporto di lavoro.',
+            order: 4,
+            category: 'Importanza',
+          },
+        ],
       },
       {
         name: 'Lettera di Assunzione Colf e Badanti',
@@ -1079,7 +1318,40 @@ const SERVICES_DATA = [
           "05. Retribuzione e modalita' di pagamento",
           '06. Durata del contratto (determinato o indeterminato)',
         ],
-        faqs: [],
+        faqs: [
+          {
+            question:
+              "Quali informazioni devono essere incluse nella lettera d'assunzione per una colf o una badante?",
+            answer:
+              "La lettera d'assunzione deve includere i dettagli personali del datore di lavoro e del lavoratore, le mansioni e i compiti da svolgere, l'orario di lavoro, la retribuzione e la durata del contratto.",
+            order: 1,
+            category: 'Contenuto',
+          },
+          {
+            question:
+              "Come posso garantire la conformità legale della lettera d'assunzione?",
+            answer:
+              "SmartCaf redige la lettera d'assunzione in conformità alle normative vigenti, includendo tutti i dettagli pertinenti come l'orario di lavoro, la retribuzione e le clausole contrattuali rilevanti.",
+            order: 2,
+            category: 'Conformità',
+          },
+          {
+            question:
+              "Quali sono le clausole importanti da includere nella lettera d'assunzione?",
+            answer:
+              'Alcune clausole importanti da includere riguardano la riservatezza delle informazioni, il trattamento dei dati personali, le ferie e il preavviso di licenziamento.',
+            order: 3,
+            category: 'Clausole',
+          },
+          {
+            question:
+              "Qual è l'importanza di una lettera d'assunzione ben redatta?",
+            answer:
+              "Una lettera d'assunzione ben redatta è importante per stabilire chiaramente i termini e le condizioni del rapporto di lavoro, garantendo trasparenza e rispettando le normative vigenti, riducendo il rischio di controversie future.",
+            order: 4,
+            category: 'Importanza',
+          },
+        ],
       },
       {
         name: 'Cessazione Colf e Badanti',
@@ -1151,7 +1423,31 @@ const SERVICES_DATA = [
           '04. Permesso di soggiorno valido (per cittadini non UE)',
           '05. IBAN del genitore richiedente',
         ],
-        faqs: [],
+        faqs: [
+          {
+            question: "Che cos'è il Bonus Nuovi Nati (o Bonus Bebè)?",
+            answer:
+              "Il Bonus Nuovi Nati, spesso denominato anche Bonus Bebè, è un contributo economico fornito dallo Stato per sostenere le famiglie in occasione della nascita, dell'adozione o dell'affidamento preadottivo di un bambino. Rappresenta un aiuto finanziario per far fronte alle prime spese legate all'arrivo di un nuovo membro in famiglia.",
+            order: 1,
+            category: 'Definizione',
+          },
+          {
+            question:
+              'Chi può richiedere il Bonus Bebè e quali sono i requisiti principali per il 2025?',
+            answer:
+              'Per poter richiedere il Bonus Bebè nel 2025, generalmente è necessario possedere la cittadinanza italiana, di un Paese UE o un regolare permesso di soggiorno, avere la residenza in Italia e un ISEE del nucleo familiare entro una determinata soglia (solitamente non superiore a 40.000 euro). Il figlio deve essere nato, adottato o in affido preadottivo a partire dal 1° gennaio 2025.',
+            order: 2,
+            category: 'Requisiti',
+          },
+          {
+            question:
+              'Entro quanto tempo va presentata la domanda per il Bonus Bebè?',
+            answer:
+              'La domanda per il Bonus Bebè deve essere presentata entro un termine stabilito dalla legge, che solitamente è di 60 giorni dalla data di nascita, adozione o ingresso in famiglia del minore in affido preadottivo. È cruciale rispettare questa scadenza per non perdere il diritto al contributo.',
+            order: 3,
+            category: 'Scadenze',
+          },
+        ],
       },
       {
         name: 'Congedo Parentale Dipendenti',
@@ -1307,7 +1603,40 @@ const SERVICES_DATA = [
           '03. Contratto di locazione',
           '04. Registrazione del contratto di locazione',
         ],
-        faqs: [],
+        faqs: [
+          {
+            question:
+              "Cos'è la cedolare secca e quando devo pagarla con il Modello F24?",
+            answer:
+              "La cedolare secca è un regime fiscale agevolato per chi affitta immobili a uso abitativo. Ti permette di pagare un'imposta fissa sul canone di locazione al posto di IRPEF, imposta di registro e di bollo. Il pagamento avviene tramite il Modello F24, seguendo le scadenze IRPEF: generalmente acconti a giugno e novembre, e saldo a giugno dell'anno successivo.",
+            order: 1,
+            category: 'Definizione',
+          },
+          {
+            question:
+              'Di quali documenti ho bisogno per richiedere il servizio?',
+            answer:
+              "Per elaborare il tuo F24 per la cedolare secca avremo bisogno del tuo Codice Fiscale, una copia del contratto di locazione registrato con il relativo codice identificativo, l'importo del canone annuo e, se disponibile, la dichiarazione dei redditi dell'anno precedente.",
+            order: 2,
+            category: 'Documenti',
+          },
+          {
+            question:
+              'Il vostro servizio è valido per tutti i tipi di contratto con cedolare secca?',
+            answer:
+              'Sì, il nostro servizio è adatto per tutti i contratti di locazione ad uso abitativo per i quali è stata optata la cedolare secca, inclusi i contratti a canone libero (4+4), a canone concordato (3+2) e le locazioni brevi.',
+            order: 3,
+            category: 'Contratti',
+          },
+          {
+            question:
+              'Come riceverò il Modello F24 compilato e come effettuerò il pagamento?',
+            answer:
+              'Una volta che avremo elaborato la tua richiesta, ti forniremo il Modello F24 già compilato e pronto per il pagamento. Riceverai istruzioni chiare e dettagliate su come procedere al versamento in autonomia, solitamente tramite i servizi di home banking della tua banca.',
+            order: 4,
+            category: 'Pagamento',
+          },
+        ],
       },
       {
         name: 'Dichiarazione e Calcolo IMU',
@@ -1321,7 +1650,39 @@ const SERVICES_DATA = [
           '03. Visura Catastale Aggiornata',
           '04. Dati dei Pagamenti Precedenti',
         ],
-        faqs: [],
+        faqs: [
+          {
+            question:
+              "Che cos'è il Calcolo IMU e perché è importante farlo correttamente?",
+            answer:
+              "Il calcolo IMU è l'operazione che determina l'ammontare esatto dell'Imposta Municipale Propria (IMU) che devi pagare sui tuoi immobili ogni anno. È cruciale farlo correttamente perché errori possono portare a sanzioni da parte del Comune o a versare più del dovuto.",
+            order: 1,
+            category: 'Definizione',
+          },
+          {
+            question: 'Chi deve richiedere il servizio di Calcolo IMU?',
+            answer:
+              "Il servizio è rivolto a tutti i proprietari di immobili (abitazioni, terreni, negozi) e ai titolari di altri diritti reali (come usufrutto, uso, abitazione). È particolarmente utile per chi ha seconde case, immobili in comodato d'uso gratuito, o per chi ha effettuato acquisti o vendite immobiliari nell'anno.",
+            order: 2,
+            category: 'Richiedenti',
+          },
+          {
+            question:
+              "Questo servizio include il Calcolo IMU per l'Abitazione Principale?",
+            answer:
+              "Sì, il nostro servizio copre anche l'abitazione principale, ma solo nei casi in cui questa non rientri nelle categorie esenti (categorie catastali di lusso A/1, A/8, A/9). Per queste abitazioni, calcoliamo l'imposta dovuta e verifichiamo le detrazioni IMU specifiche.",
+            order: 3,
+            category: 'Abitazione',
+          },
+          {
+            question:
+              "Con il vostro servizio ricevo anche l'F24 per il pagamento dell'IMU?",
+            answer:
+              "Assolutamente sì. Una volta completato il calcolo IMU, ti forniamo i modelli F24 precompilati con tutti i dati necessari per il versamento, inclusi i codici tributo e gli importi precisi per l'acconto (scadenza giugno) e il saldo (scadenza dicembre).",
+            order: 4,
+            category: 'Pagamento',
+          },
+        ],
       },
     ],
   },
@@ -1340,7 +1701,45 @@ const SERVICES_DATA = [
         category: 'BUSINESS',
         basePrice: 149.99,
         requiredDocuments: [],
-        faqs: [],
+        faqs: [
+          {
+            question:
+              'Quanto costa aprire la Partita IVA con il regime forfettario?',
+            answer:
+              "L'apertura della Partita IVA per i liberi professionisti non prevede costi vivi di bollo o diritti verso l'Agenzia delle Entrate. Il nostro servizio offre un pacchetto chiavi in mano che include la consulenza iniziale e l'invio telematico, garantendoti il massimo risparmio fiscale con la flat tax agevolata al 5% o 15%.",
+            order: 1,
+            category: 'Costi',
+          },
+          {
+            question:
+              "Quali documenti servono per l'apertura della Partita IVA online?",
+            answer:
+              "Sono necessari pochi e semplici documenti: una copia fronte-retro del tuo documento d'identità, il codice fiscale e un indirizzo email di riferimento. I nostri consulenti ti guideranno nella descrizione della tua attività per individuare il Codice ATECO più preciso.",
+            order: 2,
+            category: 'Documenti',
+          },
+          {
+            question: 'In quanto tempo viene attivata la nuova Partita IVA?',
+            answer:
+              "Una volta ricevuta tutta la documentazione necessaria, i nostri consulenti elaborano e inviano la dichiarazione di inizio attività all'Agenzia delle Entrate in tempi record. Solitamente, il numero di Partita IVA viene rilasciato e comunicato al cliente entro 24 ore lavorative.",
+            order: 3,
+            category: 'Tempi',
+          },
+          {
+            question: 'Come mi aiutate a scegliere il Codice ATECO corretto?',
+            answer:
+              "La selezione del Codice ATECO è fondamentale perché definisce la base imponibile su cui pagherai le tasse, specialmente nel regime forfettario. I nostri esperti effettuano un'analisi dettagliata del tuo profilo professionale per assegnarti il codice che meglio rispecchia il tuo business.",
+            order: 4,
+            category: 'ATECO',
+          },
+          {
+            question: "Gestite anche l'iscrizione alla Gestione Separata INPS?",
+            answer:
+              "Certamente. Durante la fase di apertura della Partita IVA, il team verifica il tuo inquadramento previdenziale e, se sei un libero professionista senza una cassa autonoma, procede contestualmente all'iscrizione alla Gestione Separata INPS.",
+            order: 5,
+            category: 'INPS',
+          },
+        ],
       },
       {
         name: 'Variazione Partita IVA',
@@ -1349,7 +1748,44 @@ const SERVICES_DATA = [
         category: 'BUSINESS',
         basePrice: 99.99,
         requiredDocuments: [],
-        faqs: [],
+        faqs: [
+          {
+            question: 'Come posso richiedere la variazione Partita IVA?',
+            answer:
+              "Basta compilare il nostro form online con i nuovi dati (come il cambio sede o il nuovo codice ATECO) e caricare i documenti richiesti. Un nostro consulente prenderà in carico la pratica, verificherà la correttezza dei dati e invierà la comunicazione telematica all'Agenzia delle Entrate.",
+            order: 1,
+            category: 'Procedura',
+          },
+          {
+            question:
+              'Perché scegliere il nostro servizio per modificare il codice ATECO?',
+            answer:
+              "I nostri esperti ti supportano nella scelta del codice ATECO corretto, fondamentale per l'inquadramento fiscale e previdenziale, evitando errori che potrebbero causare sanzioni o problemi con l'INPS e la Camera di Commercio.",
+            order: 2,
+            category: 'Vantaggi',
+          },
+          {
+            question: 'Quali documenti servono per la variazione dati?',
+            answer:
+              "Avrai bisogno del tuo documento d'identità in corso di validità, del codice fiscale e dei dettagli relativi alla modifica da effettuare (ad esempio l'indirizzo della nuova sede o la descrizione della nuova attività). Gestiremo noi l'invio del modello AA9/12 o AA7/10 entro 24h.",
+            order: 3,
+            category: 'Documenti',
+          },
+          {
+            question: 'Quanto costa il servizio di variazione Partita IVA?',
+            answer:
+              "Il nostro servizio offre tariffe trasparenti e competitive, che includono la consulenza professionale e l'invio telematico della pratica. Rispetto ai costi di un ufficio fisico, il nostro servizio online ti permette di risparmiare tempo e denaro.",
+            order: 4,
+            category: 'Costi',
+          },
+          {
+            question: 'Riceverò una ricevuta ufficiale dopo la variazione?',
+            answer:
+              "Al termine della procedura, ti invieremo la ricevuta di avvenuta presentazione rilasciata dall'Agenzia delle Entrate. Questo documento ufficiale attesta che l'aggiornamento dei dati della tua Partita IVA è stato registrato correttamente.",
+            order: 5,
+            category: 'Ricevuta',
+          },
+        ],
       },
       {
         name: 'Cessazione Ditta Individuale',
@@ -1358,7 +1794,47 @@ const SERVICES_DATA = [
         category: 'BUSINESS',
         basePrice: 99.99,
         requiredDocuments: [],
-        faqs: [],
+        faqs: [
+          {
+            question:
+              'Quanto tempo ho per chiudere la Partita IVA di una ditta individuale?',
+            answer:
+              'La legge prevede che la comunicazione di cessazione attività debba essere presentata entro 30 giorni dalla data di effettiva chiusura. Affidarsi a SmartCAF permette di rispettare queste tempistiche ed evitare le sanzioni amministrative.',
+            order: 1,
+            category: 'Tempi',
+          },
+          {
+            question:
+              'Cosa succede ai contributi INPS dopo la chiusura della ditta?',
+            answer:
+              "Una volta completata la pratica di cessazione, la comunicazione viene inoltrata all'INPS per la chiusura della posizione contributiva. Questo interrompe immediatamente l'obbligo di versamento dei contributi fissi (artigiani o commercianti).",
+            order: 2,
+            category: 'INPS',
+          },
+          {
+            question: 'È obbligatorio cancellarsi dalla Camera di Commercio?',
+            answer:
+              'Sì, per le ditte individuali iscritte al Registro Imprese la cancellazione è un atto dovuto. SmartCAF gestisce questa pratica contestualmente alla chiusura della Partita IVA per garantire che il diritto camerale annuale non venga più addebitato.',
+            order: 3,
+            category: 'Camera Commercio',
+          },
+          {
+            question:
+              'Posso chiudere una ditta individuale online senza andare allo sportello?',
+            answer:
+              "Certamente. Il servizio è progettato per gestire l'intero iter telematicamente. Caricando i documenti richiesti sulla nostra piattaforma, i nostri consulenti interfacceranno per tuo conto l'Agenzia delle Entrate, la Camera di Commercio e gli enti previdenziali.",
+            order: 4,
+            category: 'Procedura',
+          },
+          {
+            question:
+              'Quali costi fissi si smettono di pagare chiudendo la ditta?',
+            answer:
+              "Attraverso la cessazione completa, smetterai di versare il diritto camerale annuo alla Camera di Commercio, i contributi previdenziali minimi obbligatori all'INPS e l'eventuale premio assicurativo INAIL.",
+            order: 5,
+            category: 'Costi',
+          },
+        ],
       },
       {
         name: 'Comunicazione Camera Commercio',
@@ -1367,7 +1843,48 @@ const SERVICES_DATA = [
         category: 'BUSINESS',
         basePrice: 149.99,
         requiredDocuments: [],
-        faqs: [],
+        faqs: [
+          {
+            question:
+              'Qual è la differenza tra variazione Partita IVA e pratica Camera di Commercio?',
+            answer:
+              "Sono due adempimenti distinti. La variazione P.IVA comunica i cambiamenti all'Agenzia delle Entrate per fini fiscali, mentre la pratica Camera di Commercio (ComUnica) aggiorna il Registro Imprese. Per ditte individuali, artigiani e commercianti, la comunicazione al Registro Imprese è obbligatoria.",
+            order: 1,
+            category: 'Differenze',
+          },
+          {
+            question:
+              'Chi è obbligato a presentare la pratica al Registro Imprese?',
+            answer:
+              "L'obbligo riguarda tutti i soggetti iscritti alla Camera di Commercio, come Ditte Individuali, Società (Snc, Srl, Sas), Artigiani e Commercianti. I liberi professionisti iscritti esclusivamente alla Gestione Separata INPS non sono tenuti a questo adempimento.",
+            order: 2,
+            category: 'Obblighi',
+          },
+          {
+            question:
+              'Quali modifiche aziendali devono essere comunicate obbligatoriamente?',
+            answer:
+              "È necessario comunicare tramite ComUnica qualsiasi variazione rilevante, tra cui: il trasferimento della sede legale, l'apertura o chiusura di unità locali, la modifica dell'oggetto sociale e la nomina di nuovi amministratori o responsabili tecnici.",
+            order: 3,
+            category: 'Variazioni',
+          },
+          {
+            question:
+              'Cosa succede se non si comunica una variazione alla Camera di Commercio?',
+            answer:
+              "Il mancato aggiornamento del Registro Imprese comporta sanzioni amministrative pecuniarie. Inoltre, non comunicare i cambiamenti può bloccare l'ottenimento di certificazioni e visure aggiornate necessarie per bandi, prestiti bancari o contratti.",
+            order: 4,
+            category: 'Sanzioni',
+          },
+          {
+            question:
+              'Quanto costa presentare una pratica in Camera di Commercio?',
+            answer:
+              'Il costo del servizio si aggiunge ai costi fissi ministeriali (Diritti di Segreteria e Imposta di Bollo), che variano in base alla tipologia di pratica e di impresa.',
+            order: 5,
+            category: 'Costi',
+          },
+        ],
       },
     ],
   },
@@ -1382,7 +1899,8 @@ const SERVICES_DATA = [
       {
         name: 'Contratti di Locazione',
         code: 'CONTR_LOC_2026',
-        description: 'Gestione dei contratti di locazione (€85,40 + Spese di registrazione)',
+        description:
+          'Gestione dei contratti di locazione (€85,40 + Spese di registrazione)',
         category: 'REAL_ESTATE',
         basePrice: 85.4,
         requiredDocuments: [],
@@ -1405,7 +1923,31 @@ const SERVICES_DATA = [
         category: 'SOCIAL',
         basePrice: 24.4,
         requiredDocuments: [],
-        faqs: [],
+        faqs: [
+          {
+            question:
+              "Cosa determina l'importo dell'Assegno Unico e Universale?",
+            answer:
+              "L'importo dell'Assegno Unico e Universale è determinato dalla condizione economica del nucleo familiare, calcolata in base all'Indicatore della Situazione Economica Equivalente (ISEE) valido al momento della richiesta.",
+            order: 1,
+            category: 'Importo',
+          },
+          {
+            question:
+              "Posso richiedere l'Assegno Unico e Universale per un figlio con disabilità di qualsiasi età?",
+            answer:
+              "Sì, l'Assegno Unico e Universale può essere richiesto per ogni figlio con disabilità a carico, indipendentemente dalla loro età.",
+            order: 2,
+            category: 'Disabilità',
+          },
+          {
+            question: "L'Assegno Unico e Universale è soggetto a tassazione?",
+            answer:
+              "No, l'Assegno Unico e Universale è esente da tassazione e non è considerato come reddito imponibile.",
+            order: 3,
+            category: 'Fiscalità',
+          },
+        ],
       },
       {
         name: 'Assegno di Inclusione',
@@ -1414,7 +1956,83 @@ const SERVICES_DATA = [
         category: 'SOCIAL',
         basePrice: 24.4,
         requiredDocuments: [],
-        faqs: [],
+        faqs: [
+          {
+            question: "Quanti anni di residenza devo avere per chiedere l'ADI?",
+            answer:
+              'Bisogna essere residente in Italia per almeno cinque anni, di cui gli ultimi due anni in modo continuativo. La residenza in Italia è richiesta anche per i componenti del nucleo familiare che rientrano nei parametri della scala di equivalenza.',
+            order: 1,
+            category: 'Requisiti',
+          },
+          {
+            question:
+              "Se ho dato le dimissioni volontarie posso chiedere l'ADI?",
+            answer:
+              "Non ha diritto all'Assegno di inclusione il nucleo familiare di cui un componente risulta disoccupato a seguito di dimissioni volontarie nei 12 mesi successivi alla data delle dimissioni, fatte salve le dimissioni per giusta causa.",
+            order: 2,
+            category: 'Requisiti',
+          },
+          {
+            question:
+              "Per quanto tempo posso percepire l'assegno di inclusione?",
+            answer:
+              'Il beneficio è erogato mensilmente per un periodo continuativo non superiore a 18 mesi e può essere rinnovato, previa sospensione di un mese, per ulteriori 12 mesi.',
+            order: 3,
+            category: 'Durata',
+          },
+          {
+            question: 'Quanto deve essere il valore ISEE?',
+            answer:
+              "ISEE in corso di validità di valore non superiore a euro 9.360; nel caso di nuclei familiari con minorenni, l'ISEE è calcolato ai sensi dell'art. 7 del DPCM n. 159 del 2013.",
+            order: 4,
+            category: 'ISEE',
+          },
+          {
+            question: "Come viene erogato l'ADI?",
+            answer:
+              'Il contributo economico è erogato attraverso uno strumento di pagamento elettronico ricaricabile, denominato "Carta di inclusione", con prelievi di contante entro un limite mensile di 100 euro per un singolo individuo, moltiplicato per la scala di equivalenza.',
+            order: 5,
+            category: 'Erogazione',
+          },
+          {
+            question:
+              "Cosa devo fare se inizio un'attività lavorativa mentre percepisco l'ADI?",
+            answer:
+              "Entro 30 giorni dall'avvio dell'attività lavorativa, il lavoratore dovrà darne comunicazione all'INPS. L'erogazione del beneficio è sospesa fintanto che tale obbligo non è ottemperato e comunque non oltre tre mesi dall'avvio dell'attività.",
+            order: 6,
+            category: 'Lavoro',
+          },
+          {
+            question: "Se inizio un'attività lavorativa perdo l'ADI?",
+            answer:
+              'In caso di avvio di lavoro dipendente, il reddito da lavoro percepito non concorre alla determinazione del beneficio economico entro il limite massimo di 3.000 euro lordi annui. Il reddito eccedente tale soglia concorre alla determinazione del beneficio dal mese successivo.',
+            order: 7,
+            category: 'Lavoro',
+          },
+          {
+            question:
+              'Entro quanto tempo vanno comunicate le variazioni riguardante le condizioni e i requisiti di accesso?',
+            answer:
+              "È fatto obbligo al beneficiario di comunicare ogni variazione entro quindici giorni dall'evento modificativo, a pena di decadenza. In caso di variazione del nucleo familiare, l'interessato presenta entro un mese una DSU aggiornata.",
+            order: 8,
+            category: 'Comunicazioni',
+          },
+          {
+            question: 'Se il beneficio decade, posso rifare la richiesta?',
+            answer:
+              'Se il nucleo familiare è decaduto per mancata partecipazione alle politiche attive da parte di un componente, può fare nuova domanda solo dopo 6 mesi dalla revoca o decadenza.',
+            order: 9,
+            category: 'Decadenza',
+          },
+          {
+            question:
+              'Posso fare richiesta di ADI anche se sono percettore di RDC?',
+            answer:
+              "I percettori del Reddito di cittadinanza che rientrano nella categoria di nuclei con soggetti disabili, anziani o minori, dal 1 gennaio 2024 rientrano nel campo di applicazione dell'Assegno di inclusione.",
+            order: 10,
+            category: 'RDC',
+          },
+        ],
       },
       {
         name: 'Bonus Asilo Nido',
@@ -1441,7 +2059,32 @@ const SERVICES_DATA = [
         category: 'SOCIAL',
         basePrice: 24.4,
         requiredDocuments: [],
-        faqs: [],
+        faqs: [
+          {
+            question:
+              "Quali documenti sono necessari per effettuare l'aggiornamento dell'Assegno Unico?",
+            answer:
+              "I documenti richiesti possono variare in base al tipo di modifica da apportare. In genere, potrebbero essere richiesti documenti comprovanti le nuove informazioni, come la documentazione relativa al cambio dell'IBAN o al raggiungimento della maggiore età di un figlio.",
+            order: 1,
+            category: 'Documenti',
+          },
+          {
+            question:
+              "L'aggiornamento dei dati influisce sull'importo dell'Assegno Unico?",
+            answer:
+              "L'aggiornamento dei dati può influire sull'importo dell'Assegno Unico, soprattutto se riguarda cambiamenti significativi nella situazione familiare o nella composizione del nucleo familiare. In alcuni casi, potrebbe essere necessario rivalutare l'ISEE.",
+            order: 2,
+            category: 'Importo',
+          },
+          {
+            question:
+              "Cosa succede se non aggiorno i dati dell'Assegno Unico in caso di cambiamenti?",
+            answer:
+              "È importante aggiornare tempestivamente i dati in caso di cambiamenti nella situazione familiare. Ritardare o omettere l'aggiornamento potrebbe comportare un'errata erogazione dell'assegno o la perdita di eventuali benefici.",
+            order: 3,
+            category: 'Obblighi',
+          },
+        ],
       },
       {
         name: 'PAD Assegno di Inclusione',
@@ -1450,7 +2093,36 @@ const SERVICES_DATA = [
         category: 'SOCIAL',
         basePrice: 24.4,
         requiredDocuments: [],
-        faqs: [],
+        faqs: [
+          {
+            question: "Cos'è il PAD ADI?",
+            answer:
+              "Il PAD ADI, acronimo di Patto di Attivazione Digitale per l'Assegno di Inclusione, è un accordo che i beneficiari dell'ADI stipulano con i servizi per l'impiego. Obbligatorio per i maggiorenni in grado di lavorare, viene sottoscritto online tramite la piattaforma SIISL. L'obiettivo è definire un percorso personalizzato di inserimento lavorativo e inclusione sociale.",
+            order: 1,
+            category: 'Definizione',
+          },
+          {
+            question: 'Come faccio ad attivare il PAD ADI online?',
+            answer:
+              "L'attivazione del PAD ADI avviene online tramite il SIISL. Se hai bisogno di supporto nella compilazione, puoi rivolgerti al team di SmartCAF, che ti guiderà nella procedura e ti fornirà assistenza personalizzata. Dopo aver inviato il PAD, sarai contattato dai servizi per l'impiego per un colloquio di orientamento.",
+            order: 2,
+            category: 'Procedura',
+          },
+          {
+            question: 'PAD ADI: quali sono i vantaggi?',
+            answer:
+              "Aderire al PAD ADI offre diversi vantaggi: servizi personalizzati di supporto alla ricerca di lavoro, creazione del curriculum vitae, partecipazione a corsi di formazione professionale, tirocini, orientamento al lavoro e possibilità di accedere a incentivi per l'assunzione.",
+            order: 3,
+            category: 'Vantaggi',
+          },
+          {
+            question: 'Cosa succede se non rispetto il PAD ADI?',
+            answer:
+              "Il mancato rispetto degli impegni previsti dal PAD ADI può portare a conseguenze come la riduzione o la decadenza dell'Assegno di Inclusione. È fondamentale partecipare attivamente al percorso di inserimento lavorativo e sociale.",
+            order: 4,
+            category: 'Obblighi',
+          },
+        ],
       },
     ],
   },
