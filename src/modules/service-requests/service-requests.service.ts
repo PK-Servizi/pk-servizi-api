@@ -7,7 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In, ILike, Between } from 'typeorm';
+import { Repository, Between } from 'typeorm';
 import { NotificationsService } from '../notifications/notifications.service';
 import { EmailService } from '../notifications/email.service';
 import { AwsS3UploadService } from '../../common/services/aws-s3-upload.service';
@@ -1204,7 +1204,7 @@ export class ServiceRequestsService {
 
         // Exclude the type-specific 'id' field to prevent overwriting the main request ID
         if (typeData && typeData.id) {
-          const { id: _typeId, ...restTypeData } = typeData;
+          const { id: _, ...restTypeData } = typeData;
           typeSpecificData = restTypeData;
         } else {
           typeSpecificData = typeData || {};
@@ -1565,7 +1565,7 @@ export class ServiceRequestsService {
   /**
    * Add note to request
    */
-  async addNote(id: string, dto: AddNoteDto, userId: string): Promise<any> {
+  async addNote(id: string, dto: AddNoteDto, _userId: string): Promise<any> {
     try {
       const request = await this.serviceRequestRepository.findOne({
         where: { id },
@@ -1607,7 +1607,7 @@ export class ServiceRequestsService {
   /**
    * Get status history
    */
-  async getStatusHistory(id: string, userId: string): Promise<any> {
+  async getStatusHistory(id: string, _userId: string): Promise<any> {
     try {
       // Verify user has access to this request
       const request = await this.serviceRequestRepository.findOne({
@@ -1885,23 +1885,23 @@ export class ServiceRequestsService {
     }
   }
 
-  async findAssignedTo(userId: string): Promise<any> {
+  async findAssignedTo(_userId: string): Promise<any> {
     return { success: true, data: [] };
   }
 
-  async assign(id: string, dto: any): Promise<any> {
+  async assign(_id: string, _dto: any): Promise<any> {
     return { success: true, message: 'Request assigned' };
   }
 
-  async updateInternalNotes(id: string, dto: any): Promise<any> {
+  async updateInternalNotes(_id: string, _dto: any): Promise<any> {
     return { success: true, message: 'Internal notes updated' };
   }
 
-  async changePriority(id: string, dto: any): Promise<any> {
+  async changePriority(_id: string, _dto: any): Promise<any> {
     return { success: true, message: 'Priority changed' };
   }
 
-  async requestDocuments(id: string, dto: any): Promise<any> {
+  async requestDocuments(_id: string, _dto: any): Promise<any> {
     return { success: true, message: 'Additional documents requested' };
   }
 
@@ -1980,23 +1980,20 @@ export class ServiceRequestsService {
 
       // Get the actual payment intent ID (in case we stored a checkout session ID)
       let paymentIntentId = request.payment.stripePaymentIntentId;
-      
+
       // Check if this is a checkout session ID instead of payment intent
       if (paymentIntentId.startsWith('cs_')) {
         this.logger.log(
           `Detected checkout session ID, retrieving payment intent...`,
         );
-        const checkoutSession = await this.stripeService.getCheckoutSession(
-          paymentIntentId,
-        );
+        const checkoutSession =
+          await this.stripeService.getCheckoutSession(paymentIntentId);
         if (checkoutSession && checkoutSession.payment_intent) {
           paymentIntentId = checkoutSession.payment_intent as string;
           // Update the stored payment intent ID
           request.payment.stripePaymentIntentId = paymentIntentId;
           await this.paymentRepository.save(request.payment);
-          this.logger.log(
-            `Updated payment intent ID to: ${paymentIntentId}`,
-          );
+          this.logger.log(`Updated payment intent ID to: ${paymentIntentId}`);
         } else {
           throw new BadRequestException(
             'Payment intent not found in checkout session. Payment may not have been completed.',
@@ -2012,12 +2009,12 @@ export class ServiceRequestsService {
           `Stripe refund failed for payment intent ${paymentIntentId}: ${stripeError.message}`,
           stripeError.stack,
         );
-        
+
         // Re-throw BadRequestException as-is (already has a proper message)
         if (stripeError instanceof BadRequestException) {
           throw stripeError;
         }
-        
+
         // For other errors, show the actual Stripe error message for debugging
         throw new BadRequestException(
           `Stripe refund failed: ${stripeError.message}`,
@@ -2092,7 +2089,7 @@ export class ServiceRequestsService {
   }
 
   // Extended Document Workflow Methods
-  async getMissingDocuments(id: string, userId: string): Promise<any> {
+  async getMissingDocuments(id: string, _userId: string): Promise<any> {
     return {
       success: true,
       data: {
@@ -2107,7 +2104,7 @@ export class ServiceRequestsService {
     id: string,
     documentId: string,
     dto: ReuploadDocumentDto,
-    userId: string,
+    _userId: string,
   ): Promise<any> {
     return {
       success: true,

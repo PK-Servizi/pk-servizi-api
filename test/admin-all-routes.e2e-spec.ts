@@ -1467,7 +1467,7 @@ describe('Admin All Routes E2E Test - Real Data', () => {
     });
 
     it('POST /admin/service-requests/:id/request-documents - Request additional documents', async () => {
-      const response = await request(app.getHttpServer())
+      const _response = await request(app.getHttpServer())
         .post(`/service-requests/${serviceRequestId}/request-documents`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
@@ -1490,7 +1490,7 @@ describe('Admin All Routes E2E Test - Real Data', () => {
   describe('13. Cleanup & Logout', () => {
     it('DELETE /users/:id - Delete created user', async () => {
       if (createdUserId) {
-        const response = await request(app.getHttpServer())
+        const _response = await request(app.getHttpServer())
           .delete(`/users/${createdUserId}`)
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);

@@ -69,7 +69,7 @@ export class RolesService extends BaseService<
 
     // Transform the response to include flat permissions array
     const permissions = role.rolePermissions?.map((rp) => rp.permission) || [];
-    
+
     // Create a plain object response
     return {
       id: role.id,
@@ -130,10 +130,12 @@ export class RolesService extends BaseService<
    */
   async assignPermissions(id: string, dto: any) {
     // Verify role exists
-    const role = await this.findById(id);
-    
+    await this.findById(id);
+
     // Verify permissions exist
-    const permissions = await this.permissionRepository.findByIds(dto.permissionIds);
+    const permissions = await this.permissionRepository.findByIds(
+      dto.permissionIds,
+    );
     if (permissions.length !== dto.permissionIds.length) {
       throw new NotFoundException('One or more permissions not found');
     }
@@ -154,7 +156,9 @@ export class RolesService extends BaseService<
           roleId: id,
           permissionId: permission.id,
         });
-        rolePermissions.push(await this.rolePermissionRepository.save(rolePermission));
+        rolePermissions.push(
+          await this.rolePermissionRepository.save(rolePermission),
+        );
       }
     }
 
@@ -171,7 +175,7 @@ export class RolesService extends BaseService<
   async removePermission(roleId: string, permissionId: string) {
     // Verify role exists
     await this.findById(roleId);
-    
+
     // Verify permission exists
     const permission = await this.permissionRepository.findOne({
       where: { id: permissionId },
@@ -221,14 +225,14 @@ export class RolesService extends BaseService<
     const savedUser = await this.userRepository.save(user);
 
     // Return user without password
-    const { password, ...result } = savedUser;
+    const { password: _password, ...result } = savedUser;
     return result;
   }
 
   /**
    * Assign permission to user
    */
-  async assignPermissionToUser(id: string, dto: any) {
+  async assignPermissionToUser(id: string, _dto: any) {
     // Verify role exists
     await this.findById(id);
     // TODO: Implement user permission assignment

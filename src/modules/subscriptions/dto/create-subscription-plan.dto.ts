@@ -8,10 +8,8 @@ import {
   Min,
   MaxLength,
   IsNotEmpty,
-  ValidateNested,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
 
 /**
  * DTO for creating a new subscription plan

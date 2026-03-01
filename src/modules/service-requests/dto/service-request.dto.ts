@@ -1,20 +1,5 @@
-import { IsString, IsOptional, IsArray, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsString, IsOptional } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-
-class NoteDto {
-  @ApiProperty({ description: 'Content of the note' })
-  @IsString()
-  content: string;
-
-  @ApiPropertyOptional({
-    description: 'Type of note',
-    enum: ['internal', 'user'],
-  })
-  @IsOptional()
-  @IsString()
-  type?: 'internal' | 'user'; // internal for admin/operator, user for customer-visible
-}
 
 export class AddNoteDto {
   @ApiProperty({ description: 'Content of the note' })

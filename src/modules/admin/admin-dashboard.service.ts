@@ -402,8 +402,6 @@ export class AdminDashboardService {
    * Get user metrics
    */
   private async getUserMetrics(startDate: Date, endDate: Date): Promise<any> {
-    const now = new Date();
-
     const [totalUsers, activeUsers] = await Promise.all([
       this.userRepository.count(),
       this.userRepository.count({
@@ -656,7 +654,7 @@ export class AdminDashboardService {
    */
   async exportReport(
     format: 'pdf' | 'csv' | 'excel',
-    filters?: any,
+    _filters?: any,
   ): Promise<any> {
     this.logger.debug(`Exporting report in ${format} format`);
 

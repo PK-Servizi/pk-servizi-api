@@ -71,7 +71,7 @@ export class AuthService {
     });
 
     SafeLogger.log(`User registered successfully: ${dto.email}`, 'AuthService');
-    const { password, ...userWithoutPassword } = userResponse;
+    const { password: _password, ...userWithoutPassword } = userResponse;
 
     // Send welcome email and notification
     try {
@@ -377,7 +377,7 @@ export class AuthService {
     userId: string,
   ): Promise<{ success: boolean; message: string; data: any }> {
     const user = await this.usersService.findOne(userId);
-    const { password, ...userWithoutPassword } = user as any;
+    const { password: _password, ...userWithoutPassword } = user as any;
     return {
       success: true,
       message: 'User details retrieved successfully',
@@ -396,7 +396,7 @@ export class AuthService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    const { password, ...userWithoutPassword } = user as any;
+    const { password: _password, ...userWithoutPassword } = user as any;
     return userWithoutPassword;
   }
 

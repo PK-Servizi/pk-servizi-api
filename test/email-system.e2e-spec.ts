@@ -339,7 +339,7 @@ describe('Email Notification System (e2e)', () => {
         expect(response.body).toBeDefined();
 
         // Check notification
-        const notification = await checkNotificationInDB(
+        const _notification = await checkNotificationInDB(
           testUserId,
           'Disiscrizione',
         );

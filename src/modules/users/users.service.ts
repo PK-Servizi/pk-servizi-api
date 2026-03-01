@@ -204,7 +204,7 @@ export class UsersService {
       });
     }
 
-    const cacheKey = `users-list-${page}-${limit}-${search || 'all'}`;
+    const _cacheKey = `users-list-${page}-${limit}-${search || 'all'}`;
 
     const [users, total] = await query
       .orderBy('user.createdAt', 'DESC')
@@ -614,7 +614,7 @@ export class UsersService {
       }
 
       // Single update query instead of find + save pattern
-      const result = await this.userProfileRepository.upsert(
+      const _result = await this.userProfileRepository.upsert(
         { userId, avatarUrl: publicUrl },
         ['userId'],
       );
@@ -845,7 +845,10 @@ export class UsersService {
     };
   }
 
-  async requestAccountDeletion(userId: string, dto: AccountDeletionRequestDto) {
+  async requestAccountDeletion(
+    _userId: string,
+    _dto: AccountDeletionRequestDto,
+  ) {
     return {
       success: true,
       message: 'Account deletion request submitted',

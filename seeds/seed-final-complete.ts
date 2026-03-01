@@ -4,39 +4,28 @@ import { Service } from '../src/modules/services/entities/service.entity';
 import { ServiceType } from '../src/modules/service-types/entities/service-type.entity';
 import { Faq } from '../src/modules/faqs/entities/faq.entity';
 import {
-  FORM_SCHEMAS,
   PERSONAL_INFORMATION_SECTION,
   DECLARATIONS_AUTHORIZATION_SECTION,
 } from './form-schemas';
 import { getServiceQuestionnaires } from './questionnaires-from-data';
 
 const buildGenericFormSchema = (serviceName: string, description?: string, serviceCode?: string) => {
-  const sections = [PERSONAL_INFORMATION_SECTION];
-  
+  const sections: any[] = [PERSONAL_INFORMATION_SECTION];
+
   // Add service-specific questionnaires if defined
   const questionnaires = serviceCode ? getServiceQuestionnaires(serviceCode) : [];
   if (questionnaires.length > 0) {
     sections.push(...questionnaires);
-  } else {
-    // Fallback to generic service information section
-    sections.push({
-      id: 'service_information',
-      title: 'Informazioni Servizio',
-      description: 'Service specific information',
-      fields: [
-        {
-          name: 'notes',
-          label: 'Note',
-          type: 'textarea',
-          required: false,
-          order: 1,
-        },
-      ],
-    });
   }
-  
-  sections.push(DECLARATIONS_AUTHORIZATION_SECTION);
-  
+
+  // Only append default declarations if the questionnaires don't include a custom one
+  const hasCustomDeclarations = questionnaires.some(
+    (q: any) => q.id === 'declarations_authorization',
+  );
+  if (!hasCustomDeclarations) {
+    sections.push(DECLARATIONS_AUTHORIZATION_SECTION);
+  }
+
   return {
     title: serviceName,
     description: description || `Form for ${serviceName}`,
@@ -134,7 +123,6 @@ const SERVICES_DATA = [
             category: 'Residenza',
           },
         ],
-        formSchema: FORM_SCHEMAS.ISEE_ORD_2026,
       },
       {
         name: 'ISEE Universitario 2026',
@@ -197,7 +185,6 @@ const SERVICES_DATA = [
             category: 'Utilizzo',
           },
         ],
-        formSchema: FORM_SCHEMAS.ISEE_UNI_2026,
       },
       {
         name: 'ISEE Socio-Sanitario 2026',
@@ -241,7 +228,6 @@ const SERVICES_DATA = [
             category: 'Tempi',
           },
         ],
-        formSchema: FORM_SCHEMAS.ISEE_SOC_2026,
       },
       {
         name: 'ISEE Minorenni 2026',
@@ -302,7 +288,6 @@ const SERVICES_DATA = [
             category: 'Documenti',
           },
         ],
-        formSchema: FORM_SCHEMAS.ISEE_MIN_2026,
       },
       {
         name: 'ISEE Corrente 2026',
@@ -353,7 +338,6 @@ const SERVICES_DATA = [
             category: 'Validità',
           },
         ],
-        formSchema: FORM_SCHEMAS.ISEE_COR_2026,
       },
     ],
   },
@@ -476,7 +460,6 @@ const SERVICES_DATA = [
             category: 'Occupazione',
           },
         ],
-        formSchema: FORM_SCHEMAS.NASP_2026,
       },
       {
         name: 'Disoccupazione Agricola',
@@ -491,7 +474,6 @@ const SERVICES_DATA = [
           '03. Iban richiedente',
         ],
         faqs: [],
-        formSchema: FORM_SCHEMAS.DAGRN_2026,
       },
       {
         name: 'Anticipo NASPI',
@@ -508,7 +490,6 @@ const SERVICES_DATA = [
           "05. Certificato che attesta l'inizio attività (Visura camerale attiva, iscrizione gestione separata inps ecc)",
         ],
         faqs: [],
-        formSchema: FORM_SCHEMAS.ANTNAS_2026,
       },
       {
         name: 'DID - Dichiarazione Immediata Disponibilità',
@@ -522,7 +503,6 @@ const SERVICES_DATA = [
           '02. Codice fiscale richiedente',
         ],
         faqs: [],
-        formSchema: FORM_SCHEMAS.DID_2026,
       },
       {
         name: 'PAD NASPI/DIS-COLL',
@@ -565,6 +545,21 @@ const SERVICES_DATA = [
           '02. Codice fiscale richiedente',
           '03. Eventuale permesso di soggiorno del richiedente (se extracomunitario)',
           "04. Documento che attesta l'inizio di attività lavorativa (contratto di lavoro - certificato di attività autonoma)",
+        ],
+        faqs: [],
+      },
+      {
+        name: 'Ricorso NASPI',
+        code: 'RICORSO_NASP_2026',
+        description:
+          'Il servizio di Ricorso NASPI consente di presentare un ricorso contro il rigetto della domanda di disoccupazione NASPI',
+        category: 'EMPLOYMENT',
+        basePrice: 0,
+        requiredDocuments: [
+          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
+          '02. Codice fiscale richiedente',
+          '03. Lettera di Rigetto',
+          '04. Ultima Lettera di Licenziamento',
         ],
         faqs: [],
       },
@@ -670,6 +665,21 @@ const SERVICES_DATA = [
           '02. Codice Fiscale del richiedente',
           "03. Ultima Busta Paga/Modello Unilav/Contratto di lavoro (serve: il codice fiscale e la pec dell'azienda)",
           '04. Ultimo giorno lavorativo, compresi i giorni di preavviso',
+        ],
+        faqs: [],
+      },
+      {
+        name: 'Risoluzione Consensuale',
+        code: 'DISM_RISOL_2026',
+        description:
+          'La risoluzione consensuale del rapporto di lavoro è una procedura attraverso la quale datore di lavoro e dipendente decidono di comune accordo di terminare il rapporto lavorativo',
+        category: 'HR',
+        basePrice: 24.99,
+        requiredDocuments: [
+          "01. Carta d'identità richiedente",
+          '02. Codice Fiscale del richiedente',
+          "03. Ultima Busta Paga/Modello Unilav/Contratto di lavoro (serve: il codice fiscale e la pec dell'azienda)",
+          '04. Ultimo giorno lavorativo',
         ],
         faqs: [],
       },
@@ -1335,7 +1345,7 @@ const SERVICES_DATA = [
         code: 'MOD_REDD_PF_2026',
         description: 'Dichiarazione redditi per persone fisiche senza P.IVA',
         category: 'TAX',
-        basePrice: 129.99,
+        basePrice: 70,
         requiredDocuments: [
           "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
           '02. Codice fiscale richiedente',
@@ -1367,7 +1377,7 @@ const SERVICES_DATA = [
         code: 'MOD_REDD_PFIVA_2026',
         description: 'Dichiarazione redditi per regime forfettario',
         category: 'TAX',
-        basePrice: 50,
+        basePrice: 129.99,
         requiredDocuments: [
           "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
           '02. Codice fiscale richiedente',
@@ -1401,7 +1411,7 @@ const SERVICES_DATA = [
         code: 'INT_MOD_REDD_2026',
         description: 'Integrazione alla dichiarazione dei redditi',
         category: 'TAX',
-        basePrice: 29.99,
+        basePrice: 50,
         requiredDocuments: [
           "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
           '02. Codice fiscale richiedente',
@@ -1447,7 +1457,7 @@ const SERVICES_DATA = [
         code: 'DICH_IMU_2026',
         description: 'Dichiarazione e calcolo IMU',
         category: 'TAX',
-        basePrice: 0,
+        basePrice: 29.99,
         requiredDocuments: [
           "01. Carta d'identità",
           '02. Codice Fiscale',
@@ -1471,7 +1481,7 @@ const SERVICES_DATA = [
         code: 'APERT_PIVA_2026',
         description: 'Apertura della Partita IVA',
         category: 'BUSINESS',
-        basePrice: 0,
+        basePrice: 149.99,
         requiredDocuments: [],
         faqs: [],
       },
@@ -1590,7 +1600,7 @@ const SERVICES_DATA = [
         code: 'PAD_ASS_INCL_2026',
         description: 'PAD per assegno di inclusione',
         category: 'SOCIAL',
-        basePrice: 0,
+        basePrice: 24.4,
         requiredDocuments: [],
         faqs: [],
       },
@@ -1600,15 +1610,6 @@ const SERVICES_DATA = [
         description: 'Assegno sociale per famiglie',
         category: 'SOCIAL',
         basePrice: 0,
-        requiredDocuments: [],
-        faqs: [],
-      },
-      {
-        name: 'Residenza',
-        code: 'RESIDENZA_2026',
-        description: 'Certificato di residenza',
-        category: 'ADMINISTRATIVE',
-        basePrice: 12.2,
         requiredDocuments: [],
         faqs: [],
       },
@@ -1622,6 +1623,15 @@ const SERVICES_DATA = [
       description: 'Servizi di certificati',
     },
     services: [
+      {
+        name: 'Residenza',
+        code: 'RESIDENZA_2026',
+        description: 'Certificato di residenza',
+        category: 'ADMINISTRATIVE',
+        basePrice: 12.2,
+        requiredDocuments: [],
+        faqs: [],
+      },
       {
         name: 'Stato di Famiglia',
         code: 'STATO_FAM_2026',
@@ -1698,13 +1708,11 @@ export async function seedAllServices() {
         });
 
         if (!service) {
-          const formSchema =
-            serviceData.formSchema ??
-            buildGenericFormSchema(
-              serviceData.name,
-              serviceData.description,
-              serviceData.code,
-            );
+          const formSchema = buildGenericFormSchema(
+            serviceData.name,
+            serviceData.description,
+            serviceData.code,
+          );
 
           service = serviceRepo.create({
             name: serviceData.name,
@@ -1720,13 +1728,11 @@ export async function seedAllServices() {
           console.log(`   ✅ Servizio: ${serviceData.name}`);
           servicesCount++;
         } else {
-          const formSchema =
-            serviceData.formSchema ??
-            buildGenericFormSchema(
-              serviceData.name,
-              serviceData.description,
-              serviceData.code,
-            );
+          const formSchema = buildGenericFormSchema(
+            serviceData.name,
+            serviceData.description,
+            serviceData.code,
+          );
 
           service.name = serviceData.name;
           service.description = serviceData.description;

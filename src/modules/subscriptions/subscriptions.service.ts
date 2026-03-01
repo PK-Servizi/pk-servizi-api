@@ -75,7 +75,7 @@ export class SubscriptionsService {
       );
 
       // Use monthly billing by default
-      const price = plan.priceMonthly;
+      const _price = plan.priceMonthly;
 
       // Map plan to Stripe Price ID (you can configure these in environment or database)
       // For now, using a simple mapping based on plan name
@@ -523,7 +523,7 @@ export class SubscriptionsService {
 
   async processRefund(
     id: string,
-    dto: { reason?: string },
+    _dto: { reason?: string },
   ): Promise<{ success: boolean; message: string }> {
     await this.paymentRepository.update(id, { status: 'refunded' });
     return { success: true, message: 'Refund processed' };

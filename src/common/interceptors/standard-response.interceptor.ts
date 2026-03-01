@@ -3,7 +3,6 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-  HttpStatus,
   StreamableFile,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
@@ -16,8 +15,7 @@ import { map } from 'rxjs/operators';
 @Injectable()
 export class StandardResponseInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    const response = context.switchToHttp().getResponse();
-    const statusCode = response.statusCode || HttpStatus.OK;
+    const _response = context.switchToHttp().getResponse();
 
     return next.handle().pipe(
       map((data) => {

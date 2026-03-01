@@ -8,7 +8,6 @@ import {
   IsNotEmpty,
   Matches,
   IsBoolean,
-  IsDateString,
   Length,
 } from 'class-validator';
 import { Transform } from 'class-transformer';

@@ -37,7 +37,7 @@ cp .env.example .env
 npm run migration:run
 
 # Seed initial data
-npm run seed
+npm run seed:all
 
 # Start development server
 npm run start:dev

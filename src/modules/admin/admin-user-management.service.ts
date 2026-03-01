@@ -1,6 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Injectable, Logger } from '@nestjs/common';
 
 @Injectable()
 export class AdminUserManagementService {
@@ -20,7 +18,7 @@ export class AdminUserManagementService {
     sortBy?: string;
     sortOrder?: 'ASC' | 'DESC';
   }): Promise<any> {
-    const { skip = 0, take = 20, status, role, search } = query;
+    const { skip = 0, take = 20 } = query;
 
     this.logger.debug('Listing users with filters');
 
@@ -76,7 +74,7 @@ export class AdminUserManagementService {
   async updateUserStatus(
     userId: string,
     newStatus: 'active' | 'suspended' | 'deactivated',
-    reason?: string,
+    _reason?: string,
   ): Promise<any> {
     this.logger.log(`Updating user ${userId} status to ${newStatus}`);
 
@@ -96,8 +94,8 @@ export class AdminUserManagementService {
    */
   async sendMessage(
     userId: string,
-    subject: string,
-    message: string,
+    _subject: string,
+    _message: string,
   ): Promise<any> {
     this.logger.log(`Sending message to user ${userId}`);
 

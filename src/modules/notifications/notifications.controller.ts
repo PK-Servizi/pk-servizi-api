@@ -94,7 +94,7 @@ export class NotificationsController {
   @Permissions('notifications:delete_own')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Delete notification' })
-  remove(@Param('id') id: string, @CurrentUser() user: any) {
+  remove(@Param('id') id: string, @CurrentUser() _user: any) {
     return this.notificationsService.remove(id);
   }
 

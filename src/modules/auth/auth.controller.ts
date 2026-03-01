@@ -18,7 +18,6 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
-import { Permissions } from '../../common/decorators/permissions.decorator';
 import { AuditLog } from '../../common/decorators/audit-log.decorator';
 import { AuditLogInterceptor } from '../../common/interceptors/audit-log.interceptor';
 

@@ -225,7 +225,8 @@ export class PaymentsService {
 
       // If this is a checkout session ID, get the payment intent
       if (paymentIntentId.startsWith('cs_')) {
-        checkoutSession = await this.stripeService.getCheckoutSession(paymentIntentId);
+        checkoutSession =
+          await this.stripeService.getCheckoutSession(paymentIntentId);
         if (checkoutSession?.payment_intent) {
           paymentIntentId = checkoutSession.payment_intent as string;
         } else {
@@ -245,7 +246,8 @@ export class PaymentsService {
       }
 
       // Get the payment intent from Stripe
-      const paymentIntent = await this.stripeService.getPaymentIntent(paymentIntentId);
+      const paymentIntent =
+        await this.stripeService.getPaymentIntent(paymentIntentId);
 
       const diagnosis = {
         paymentId: payment.id,
@@ -255,7 +257,8 @@ export class PaymentsService {
         stripeAmount: paymentIntent.amount / 100,
         stripeCurrency: paymentIntent.currency,
         latestCharge: paymentIntent.latest_charge,
-        canRefund: paymentIntent.status === 'succeeded' && !!paymentIntent.latest_charge,
+        canRefund:
+          paymentIntent.status === 'succeeded' && !!paymentIntent.latest_charge,
         issue: null as string | null,
       };
 
@@ -263,14 +266,17 @@ export class PaymentsService {
       if (paymentIntent.status !== 'succeeded') {
         diagnosis.issue = `Stripe status is '${paymentIntent.status}', not 'succeeded'. Payment was not successfully captured.`;
       } else if (!paymentIntent.latest_charge) {
-        diagnosis.issue = 'Payment has no associated charge. This is unexpected for a succeeded payment.';
+        diagnosis.issue =
+          'Payment has no associated charge. This is unexpected for a succeeded payment.';
       } else {
         diagnosis.issue = null;
       }
 
       return {
         success: true,
-        message: diagnosis.canRefund ? 'Payment is refundable' : 'Payment cannot be refunded',
+        message: diagnosis.canRefund
+          ? 'Payment is refundable'
+          : 'Payment cannot be refunded',
         data: diagnosis,
       };
     } catch (error) {
@@ -383,12 +389,12 @@ export class PaymentsService {
           `Stripe refund failed for payment intent ${paymentIntentId}: ${stripeError.message}`,
           stripeError.stack,
         );
-        
+
         // Re-throw BadRequestException as-is (already has a proper message)
         if (stripeError instanceof BadRequestException) {
           throw stripeError;
         }
-        
+
         // For other errors, show the actual Stripe error message for debugging
         throw new BadRequestException(
           `Stripe refund failed: ${stripeError.message}`,

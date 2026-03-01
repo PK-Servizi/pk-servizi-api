@@ -22,13 +22,10 @@ import {
 } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UsersService } from './users.service';
-import { FamilyMembersService } from './family-members.service';
 import { UserRequest } from '../../common/interfaces/user-request.interface';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
-import { CreateFamilyMemberDto } from './dto/create-family-member.dto';
-import { UpdateFamilyMemberDto } from './dto/update-family-member.dto';
 import { UpdateGdprConsentDto } from './dto/update-gdpr-consent.dto';
 import { AccountDeletionRequestDto } from './dto/account-deletion-request.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';

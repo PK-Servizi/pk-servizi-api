@@ -4,7 +4,6 @@ import { Repository, LessThan } from 'typeorm';
 import { Notification } from './entities/notification.entity';
 import { EmailService } from './email.service';
 import { User } from '../users/entities/user.entity';
-import { CreateNotificationDto } from './dto/create-notification.dto';
 import { BroadcastNotificationDto } from './dto/broadcast-notification.dto';
 
 @Injectable()
@@ -218,7 +217,7 @@ export class NotificationsService {
     };
   }
 
-  async sendToRole(dto: any): Promise<any> {
+  async sendToRole(_dto: any): Promise<any> {
     return { success: true, message: 'Notification sent to role', count: 0 };
   }
 

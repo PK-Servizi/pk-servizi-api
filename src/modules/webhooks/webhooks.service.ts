@@ -258,14 +258,21 @@ export class WebhooksService {
           const invoice = await this.invoiceService.generateInvoiceFromPayment(
             payment.id,
           );
-          this.logger.log('Invoice generated for service payment: ' + invoice.id);
+          this.logger.log(
+            'Invoice generated for service payment: ' + invoice.id,
+          );
 
           // Send invoice email to user
           const user = await this.userRepository.findOne({
             where: { id: userId },
           });
           if (user && user.email) {
-            await this.sendServicePaymentInvoiceEmail(user, invoice, payment, session);
+            await this.sendServicePaymentInvoiceEmail(
+              user,
+              invoice,
+              payment,
+              session,
+            );
           }
         } catch (invoiceError) {
           this.logger.error(
@@ -874,11 +881,18 @@ export class WebhooksService {
 
     const emailText =
       'Payment Confirmation\n\n' +
-      'Dear ' + user.fullName + ',\n\n' +
+      'Dear ' +
+      user.fullName +
+      ',\n\n' +
       'Thank you for your purchase! Your payment has been successfully processed.\n\n' +
-      'Service: ' + serviceName + '\n' +
-      'Amount: €' + amount + '\n' +
-      'Invoice: ' + invoice.invoiceNumber;
+      'Service: ' +
+      serviceName +
+      '\n' +
+      'Amount: €' +
+      amount +
+      '\n' +
+      'Invoice: ' +
+      invoice.invoiceNumber;
 
     await this.notificationsService.send({
       userId: user.id,

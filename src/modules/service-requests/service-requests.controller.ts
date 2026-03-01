@@ -2,7 +2,6 @@ import {
   Controller,
   Get,
   Post,
-  Put,
   Delete,
   Patch,
   Param,
@@ -703,7 +702,7 @@ export class ServiceRequestsController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Admin] Change request priority' })
   @ApiBody({ type: UpdatePriorityDto })
-  changePriority(@Param('id') id: string, @Body() dto: UpdatePriorityDto) {
+  changePriority(@Param('id') _id: string, @Body() _dto: UpdatePriorityDto) {
     // Implement priority update
     return { success: true, message: 'Priority updated' };
   }
@@ -718,9 +717,9 @@ export class ServiceRequestsController {
   @ApiOperation({ summary: '[Admin] Request additional documents' })
   @ApiBody({ type: ReuploadDocumentDto })
   requestDocuments(
-    @Param('id') id: string,
-    @Body() dto: ReuploadDocumentDto,
-    @CurrentUser() user: UserRequest,
+    @Param('id') _id: string,
+    @Body() _dto: ReuploadDocumentDto,
+    @CurrentUser() _user: UserRequest,
   ) {
     // Implement document request
     return { success: true, message: 'Document request sent' };

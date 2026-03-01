@@ -7,7 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between, In, MoreThan, LessThan } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Appointment } from './entities/appointment.entity';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { User } from '../users/entities/user.entity';
@@ -697,7 +697,7 @@ export class AppointmentsService {
   }
 
   // Placeholder methods for future implementation
-  async createAdmin(dto: any, operatorId: string): Promise<any> {
+  async createAdmin(_dto: any, _operatorId: string): Promise<any> {
     throw new BadRequestException(
       'Admin appointment creation not yet implemented',
     );
@@ -706,7 +706,7 @@ export class AppointmentsService {
   async assign(
     id: string,
     operatorId: string,
-    assignedBy: string,
+    _assignedBy: string,
   ): Promise<any> {
     const appointment = await this.appointmentRepository.findOne({
       where: { id },
@@ -758,11 +758,11 @@ export class AppointmentsService {
     };
   }
 
-  async getReminderHistory(id: string, userId: string): Promise<any> {
+  async getReminderHistory(_id: string, _userId: string): Promise<any> {
     return { success: true, data: { reminders: [] } };
   }
 
-  async sendReminder(id: string): Promise<any> {
+  async sendReminder(_id: string): Promise<any> {
     return { success: true, message: 'Reminder sent successfully' };
   }
 
@@ -773,7 +773,7 @@ export class AppointmentsService {
     return this.findByOperator(operatorId, options);
   }
 
-  async exportCalendar(userId: string): Promise<any> {
+  async exportCalendar(_userId: string): Promise<any> {
     return {
       success: true,
       message: 'Calendar export feature not yet implemented',

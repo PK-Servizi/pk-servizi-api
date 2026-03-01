@@ -8,13 +8,9 @@ import {
   Delete,
   UseGuards,
   UseInterceptors,
-  UploadedFile,
   UploadedFiles,
 } from '@nestjs/common';
-import {
-  FileInterceptor,
-  FileFieldsInterceptor,
-} from '@nestjs/platform-express';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import {
   ApiTags,
   ApiOperation,
@@ -25,7 +21,6 @@ import { FamilyMembersService } from './family-members.service';
 import { UserRequest } from '../../common/interfaces/user-request.interface';
 import { CreateFamilyMemberDto } from './dto/create-family-member.dto';
 import { UpdateFamilyMemberDto } from './dto/update-family-member.dto';
-import { UploadDocumentDto } from '../documents/dto/upload-document.dto';
 import { UploadFamilyMemberDocumentsDto } from './dto/upload-family-member-documents.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';

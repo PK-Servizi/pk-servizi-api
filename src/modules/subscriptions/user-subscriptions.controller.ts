@@ -43,10 +43,10 @@ export class UserSubscriptionsController {
   @Permissions('subscriptions:read')
   @ApiOperation({ summary: '[Admin] List all user subscriptions' })
   async findAll(
-    @Query('status') status?: string,
-    @Query('planId') planId?: string,
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
+    @Query('status') _status?: string,
+    @Query('planId') _planId?: string,
+    @Query('page') _page?: number,
+    @Query('limit') _limit?: number,
   ) {
     return this.subscriptionsService.getAllSubscriptions();
   }

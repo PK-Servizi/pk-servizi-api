@@ -21,7 +21,6 @@ import { AppointmentsService } from './appointments.service';
 import { UserRequest } from '../../common/interfaces/user-request.interface';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { RescheduleAppointmentDto } from './dto/reschedule-appointment.dto';
-import { CreateAppointmentAdminDto } from './dto/create-appointment-admin.dto';
 import { AssignOperatorDto } from './dto/assign-operator.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';
 import { CreateTimeSlotsDto } from './dto/create-time-slots.dto';

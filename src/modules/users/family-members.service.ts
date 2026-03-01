@@ -109,7 +109,7 @@ export class FamilyMembersService {
   }
 
   // Extended Operations - Document Management
-  async getFamilyMemberDocuments(id: string, userId: string) {
+  async getFamilyMemberDocuments(_id: string, _userId: string) {
     return {
       success: true,
       message: 'Family member documents retrieved',

@@ -1,5 +1,5 @@
-import { IsString, IsUUID, IsOptional } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsUUID, IsOptional } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UploadFamilyMemberDocumentsDto {
   @ApiPropertyOptional({ description: 'Service request ID (optional)' })

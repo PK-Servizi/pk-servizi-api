@@ -103,7 +103,7 @@ export class DocumentsService {
   //   };
   // }
 
-  async findByRequest(requestId: string, userId: string): Promise<any> {
+  async findByRequest(requestId: string, _userId: string): Promise<any> {
     const documents = await this.documentRepository.find({
       where: { serviceRequestId: requestId },
     });
@@ -115,7 +115,7 @@ export class DocumentsService {
     return { success: true, data: document };
   }
 
-  async download(id: string, userId: string): Promise<any> {
+  async download(id: string, _userId: string): Promise<any> {
     const document = await this.documentRepository.findOne({
       where: { id },
     });

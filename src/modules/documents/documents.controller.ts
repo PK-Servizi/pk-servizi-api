@@ -107,7 +107,7 @@ export class DocumentsController {
   @Permissions('documents:read_own')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Get document details' })
-  findOne(@Param('id') id: string, @CurrentUser() user: any) {
+  findOne(@Param('id') id: string, @CurrentUser() _user: any) {
     return this.documentsService.findOne(id);
   }
 
@@ -155,7 +155,7 @@ export class DocumentsController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '[Customer] Delete document' })
   @AuditLog({ action: 'DOCUMENT_DELETED', resourceType: 'document' })
-  remove(@Param('id') id: string, @CurrentUser() user: any) {
+  remove(@Param('id') id: string, @CurrentUser() _user: any) {
     return this.documentsService.remove(id);
   }
 

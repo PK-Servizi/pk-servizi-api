@@ -6,8 +6,6 @@ import {
   IsOptional,
   IsNotEmpty,
   Matches,
-  IsBoolean,
-  IsDateString,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';

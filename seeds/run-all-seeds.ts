@@ -4,9 +4,7 @@ import { Role } from '../src/modules/roles/entities/role.entity';
 import { User } from '../src/modules/users/entities/user.entity';
 import * as bcrypt from 'bcryptjs';
 import { RoleEnum } from '../src/modules/roles/role.enum';
-import { seedServiceTypes } from './service-types-seed';
 import { seedRolePermissions } from './role-permission-seed';
-import { seedServicesWithDocuments } from './services-with-documents-seed';
 import { seedPermissions } from './permissions-seed';
 import { seedAllServices } from './seed-final-complete';
 import { seedSubscriptionPlans } from './subscription-plans-seed';
@@ -18,81 +16,94 @@ async function runAllSeeds() {
     await AppDataSource.initialize();
     console.log('✅ Database connection established\n');
 
+    // ── 1. CLEAN DATABASE ──────────────────────────────────────────
+    console.log('🧹 Cleaning up ALL tables (CASCADE)...');
+    // Order matters: dependent tables first, then parent tables
+    const tablesToTruncate = [
+      'audit_logs',
+      'request_status_history',
+      'isee_requests',
+      'modello_730_requests',
+      'imu_requests',
+      'documents',
+      'service_requests',
+      'invoices',
+      'payments',
+      'course_enrollments',
+      'courses',
+      'notifications',
+      'appointments',
+      'faqs',
+      'refresh_tokens',
+      'blacklisted_tokens',
+      'user_subscriptions',
+      'subscription_plans',
+      'user_permissions',
+      'user_profiles',
+      'family_members',
+      'services',
+      'service_types',
+      'role_permissions',
+      'permissions',
+      'users',
+      'roles',
+    ];
+
+    for (const table of tablesToTruncate) {
+      try {
+        await AppDataSource.query(`TRUNCATE TABLE "${table}" CASCADE;`);
+      } catch {
+        // Table may not exist yet — skip silently
+      }
+    }
+    console.log('✅ All tables truncated\n');
+
+    // ── 2. SEED ROLES ──────────────────────────────────────────────
+    console.log('📦 Seeding roles...');
     const roleRepo = AppDataSource.getRepository(Role);
     const userRepo = AppDataSource.getRepository(User);
 
-    // 1. Clean up existing data
-    console.log('🧹 Cleaning up database...');
-    await userRepo.query('TRUNCATE TABLE users CASCADE;');
-    await roleRepo.query('TRUNCATE TABLE roles CASCADE;');
-
-    // 2. Seed roles
-    console.log('📦 Seeding roles...');
     const rolesToSeed = [
       { name: RoleEnum.ADMIN, description: 'Administrator with full system access' },
       { name: RoleEnum.CUSTOMER, description: 'End user/Customer of the platform' },
       { name: RoleEnum.OPERATOR, description: 'CAF Consultant/Operator handling requests' },
       { name: RoleEnum.FINANCE, description: 'Finance manager handling payments and subscriptions' },
     ];
-    
+
     for (const roleData of rolesToSeed) {
-      let role = await roleRepo.findOne({ where: { name: roleData.name } });
-      if (!role) {
-        role = roleRepo.create(roleData);
-        await roleRepo.save(role);
-        console.log(`✅ Role "${roleData.name}" created.`);
-      }
+      const role = roleRepo.create(roleData);
+      await roleRepo.save(role);
+      console.log(`   ✅ Role "${roleData.name}" created`);
     }
 
-    // 3. Seed admin user
+    // ── 3. SEED ADMIN USER ─────────────────────────────────────────
     console.log('\n📦 Seeding admin user...');
-    const adminEmail = 'admin@pkservizi.com';
-    let adminUser = await userRepo.findOne({ where: { email: adminEmail } });
-    if (!adminUser) {
-      const adminRole = await roleRepo.findOne({ where: { name: RoleEnum.ADMIN } });
-      const password = await bcrypt.hash('Admin@123', 10);
-      adminUser = userRepo.create({
-        email: adminEmail,
-        password,
-        fullName: 'Super Admin',
-        roleId: adminRole.id,
-      });
-      await userRepo.save(adminUser);
-      console.log(`✅ Admin user "${adminEmail}" created with password: Admin@123`);
-    }
+    const adminRole = await roleRepo.findOne({ where: { name: RoleEnum.ADMIN } });
+    const password = await bcrypt.hash('Admin@123', 10);
+    const adminUser = userRepo.create({
+      email: 'admin@pkservizi.com',
+      password,
+      fullName: 'Super Admin',
+      roleId: adminRole.id,
+    });
+    await userRepo.save(adminUser);
+    console.log('   ✅ Admin user "admin@pkservizi.com" created (password: Admin@123)');
 
-    // 4. Seed role permissions
+    // ── 4. SEED ROLE PERMISSIONS ───────────────────────────────────
     console.log('\n📦 Seeding role permissions...');
     await seedRolePermissions(AppDataSource);
 
-    // 5. Seed permissions
+    // ── 5. SEED PERMISSIONS ────────────────────────────────────────
     console.log('\n📦 Seeding permissions...');
     await seedPermissions(AppDataSource);
 
-    // 6. Seed service types
-    console.log('\n📦 Seeding service types...');
-    await seedServiceTypes();
-
-    // 7. Seed services with documents
-    console.log('\n📦 Seeding services with documents...');
-    await seedServicesWithDocuments();
-
-    // 8. Seed all services with FAQs
-    console.log('\n📦 Seeding all services with FAQs...');
+    // ── 6. SEED ALL SERVICES (service types + services + FAQs + form schemas)
+    console.log('\n📦 Seeding all service types, services, FAQs, and form schemas...');
     await seedAllServices();
 
-    // 9. Seed subscription plans
+    // ── 7. SEED SUBSCRIPTION PLANS ─────────────────────────────────
     console.log('\n📦 Seeding subscription plans...');
     await seedSubscriptionPlans();
-
-    // 10. Update required documents
-    console.log('\n📦 Updating required documents...');
-    try {
-      const { updateRequiredDocuments } = await import('./update-required-documents');
-      await updateRequiredDocuments();
-    } catch (error) {
-      console.log('⚠️  Required documents update skipped:', error.message);
-    }
 
     console.log('\n✅ All seed operations completed successfully!');
   } catch (error) {
