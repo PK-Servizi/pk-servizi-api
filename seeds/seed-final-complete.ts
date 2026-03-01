@@ -295,7 +295,7 @@ const SERVICES_DATA = [
         description:
           "ISEE Corrente è un aggiornamento dell'ISEE ordinario per accedere a bonus, benefici e sussidi che richiedono un indicatore aggiornato",
         category: 'TAX',
-        basePrice: 0,
+        basePrice: 24.99,
         requiredDocuments: [
           '01. Documentation certifying the change in employment/income situation due to job loss or suspension: Letter of dismissal, copy of resignation, unrenewed fixed-term contract, wage supplementation documentation, mobility allowance receipts',
           '02. Documentation certifying the change in employment/income situation due to a reduction in work activity: Recent pay stubs demonstrating the reduction in hours or salary, Tax returns or accounting documentation certifying a decrease in income greater than 25%',
@@ -554,7 +554,7 @@ const SERVICES_DATA = [
         description:
           'Il servizio di Ricorso NASPI consente di presentare un ricorso contro il rigetto della domanda di disoccupazione NASPI',
         category: 'EMPLOYMENT',
-        basePrice: 0,
+        basePrice: 59.99,
         requiredDocuments: [
           "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
           '02. Codice fiscale richiedente',
@@ -578,7 +578,7 @@ const SERVICES_DATA = [
         code: '730_2026',
         description: 'Dichiarazione dei redditi mediante modello 730',
         category: 'TAX',
-        basePrice: 34.99,
+        basePrice: 36.60,
         requiredDocuments: [],
         faqs: [],
       },
@@ -866,19 +866,19 @@ const SERVICES_DATA = [
         faqs: [],
       },
       {
-        name: 'Aggiornamento Permesso di Soggiorno',
+        name: 'Aggiornamento Carta di Soggiorno',
         code: 'AGG_PERM_2026',
-        description: 'Aggiornamento del permesso di soggiorno per cambio dati',
+        description: 'Aggiornamento della carta di soggiorno per cambio dati',
         category: 'IMMIGRATION',
         basePrice: 44.99,
         requiredDocuments: [],
         faqs: [],
       },
       {
-        name: 'Rilascio Carta/Permesso di Soggiorno',
+        name: 'Rilascio Carta di Soggiorno per soggiornanti di lungo periodo',
         code: 'RILASC_CART_2026',
         description:
-          'Rilascio della carta permesso di soggiorno per soggiornanti di lungo periodo',
+          'Rilascio della carta di soggiorno per soggiornanti di lungo periodo',
         category: 'IMMIGRATION',
         basePrice: 44.99,
         requiredDocuments: [],
@@ -988,9 +988,9 @@ const SERVICES_DATA = [
     },
     services: [
       {
-        name: 'Test Lingua Italiana A2/B1',
+        name: 'Test di conoscenza della lingua Italiana A2',
         code: 'TEST_LINGUA_2026',
-        description: 'Test di conoscenza della lingua italiana per stranieri',
+        description: 'Test di conoscenza della lingua italiana livello A2 per stranieri',
         category: 'IMMIGRATION',
         basePrice: 19.99,
         requiredDocuments: [
@@ -1168,82 +1168,14 @@ const SERVICES_DATA = [
         ],
         faqs: [],
       },
-      {
-        name: 'Maternità Obbligatoria Post Parto',
-        code: 'MATERN_OBBL_2026',
-        description: 'Maternità obbligatoria dopo il parto',
-        category: 'HR',
-        basePrice: 29.99,
-        requiredDocuments: ['01. Codice fiscale del neonato/dei neonati'],
-        faqs: [],
-      },
-      {
-        name: 'Indennità Maternità Obbligatoria',
-        code: 'INDENNI_MATERN_2026',
-        description: 'Indennità di maternità obbligatoria per dipendenti',
-        category: 'HR',
-        basePrice: 29.99,
-        requiredDocuments: [
-          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
-          '02. Codice fiscale richiedente',
-          '03. Eventuale permesso di soggiorno',
-          '04. Certificato di gravidanza telematico con data presunta del parto',
-          "05. Eventuale certificato medico o autodichiarazione del datore di lavoro per lavorare fino all'inizio maternita'",
-        ],
-        faqs: [],
-      },
-      {
-        name: 'Maternità Anticipata Dipendenti',
-        code: 'MATERN_ANT_2026',
-        description: 'Maternità anticipata per dipendenti',
-        category: 'HR',
-        basePrice: 29.99,
-        requiredDocuments: [
-          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
-          '02. Codice fiscale richiedente',
-          '03. Eventuale permesso di soggiorno',
-          '04. Certificato di gravidanza telematico con data presunta del parto',
-          '05. Certificato medico ASL o direzione territoriale competente con gravi complicanze',
-          '06. Certificato di interdizione anticipata per condizioni di lavoro pesante o pericoloso',
-        ],
-        faqs: [],
-      },
-      {
-        name: 'Congedo Parentale Gestione Separata',
-        code: 'CONG_PAR_SEP_2026',
-        description: 'Congedo parentale gestione separata',
-        category: 'HR',
-        basePrice: 29.99,
-        requiredDocuments: [
-          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
-          '02. Codice fiscale richiedente',
-          '03. Codice fiscale altro genitore se presente',
-          '04. Codice fiscale del minore',
-        ],
-        faqs: [],
-      },
-      {
-        name: 'Congedo Parentale Autonomi',
-        code: 'CONG_PAR_AUT_2026',
-        description: 'Congedo parentale per autonomi',
-        category: 'HR',
-        basePrice: 29.99,
-        requiredDocuments: [
-          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
-          '02. Codice fiscale richiedente',
-          '03. Codice fiscale altro genitore se presente',
-          '04. Codice fiscale del minore',
-        ],
-        faqs: [],
-      },
     ],
   },
 
-  // 15. Invalidità
+  // 15. Invalidità Civile
   {
     serviceType: {
-      name: 'Invalidità',
-      description: 'Servizi per invalidità',
+      name: 'Invalidità Civile',
+      description: 'Servizi per invalidità civile',
     },
     services: [
       {
@@ -1255,85 +1187,10 @@ const SERVICES_DATA = [
         requiredDocuments: [],
         faqs: [],
       },
-      {
-        name: 'Permessi 104/92 per Assistenza Familiari',
-        code: 'PERM_104_2026',
-        description: 'Permessi per assistenza familiari disabili',
-        category: 'HR',
-        basePrice: 29.99,
-        requiredDocuments: [
-          "01. Documento di riconoscimento del familiare disabile (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
-          '02. Codice fiscale del familiare disabile',
-          '03. Verbale riconoscimento Handicap',
-          "04. Busta paga dell'attuale datore di lavoro",
-        ],
-        faqs: [],
-      },
     ],
   },
 
-  // 16. Pensione
-  {
-    serviceType: {
-      name: 'Pensione',
-      description: 'Servizi relativi a pensioni',
-    },
-    services: [
-      {
-        name: 'Estratto Conto Certificato e Calcolo Pensione',
-        code: 'ESTRAT_PENS_2026',
-        description: 'Estratto conto certificato e calcolo della pensione',
-        category: 'PENSION',
-        basePrice: 62,
-        requiredDocuments: [
-          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
-          '02. Codice fiscale richiedente',
-        ],
-        faqs: [],
-      },
-      {
-        name: 'Assegno Sociale',
-        code: 'ASS_SOC_2026',
-        description: 'Assegno sociale INPS',
-        category: 'PENSION',
-        basePrice: 0,
-        requiredDocuments: [],
-        faqs: [],
-      },
-      {
-        name: 'Pensione Indiretta',
-        code: 'PENS_INDIR_2026',
-        description: 'Pensione ai superstiti',
-        category: 'PENSION',
-        basePrice: 0,
-        requiredDocuments: [
-          "01. Carta d'identità richiedente",
-          '02. Codice fiscale/Tessera Sanitaria del richiedente',
-          "03. Carta d'identità della persona deceduta",
-          '04. Codice fiscale/Tessera Sanitaria della persona deceduta',
-          '05. Codice IBAN del titolare (dichiarante) della pensione',
-          '06. Codice fiscale/Tessera Sanitaria dei familiari che hanno diritto alla pensione',
-        ],
-        faqs: [],
-      },
-      {
-        name: 'Ricostituzione Reddituale',
-        code: 'RICOST_REDD_2026',
-        description: 'Ricostituzione reddituale INPS',
-        category: 'PENSION',
-        basePrice: 29.99,
-        requiredDocuments: [
-          "01. Documento d'identità valido del richiedente (fronte e retro)",
-          '02. Codice fiscale del richiedente',
-          '03. Codice fiscale del coniuge e dei familiari a carico (se rilevante)',
-          '04. Eventuale lettera ricevuta da INPS',
-        ],
-        faqs: [],
-      },
-    ],
-  },
-
-  // 17. Dichiarazione Redditi
+  // 16. Dichiarazione Redditi
   {
     serviceType: {
       name: 'Dichiarazione Redditi',
@@ -1439,9 +1296,9 @@ const SERVICES_DATA = [
         faqs: [],
       },
       {
-        name: 'Modello F24 Cedolare Secca',
+        name: 'Modello F24',
         code: 'F24_CEDOL_2026',
-        description: 'F24 per cedolare secca',
+        description: 'Modello F24 per pagamento imposte',
         category: 'TAX',
         basePrice: 29.99,
         requiredDocuments: [
@@ -1512,15 +1369,6 @@ const SERVICES_DATA = [
         requiredDocuments: [],
         faqs: [],
       },
-      {
-        name: 'Segnalazione Certificata Inizio Attività',
-        code: 'SCIA_ATTIV_2026',
-        description: 'SCIA per inizio attività',
-        category: 'BUSINESS',
-        basePrice: 149.99,
-        requiredDocuments: [],
-        faqs: [],
-      },
     ],
   },
 
@@ -1534,7 +1382,7 @@ const SERVICES_DATA = [
       {
         name: 'Contratti di Locazione',
         code: 'CONTR_LOC_2026',
-        description: 'Gestione dei contratti di locazione',
+        description: 'Gestione dei contratti di locazione (€85,40 + Spese di registrazione)',
         category: 'REAL_ESTATE',
         basePrice: 85.4,
         requiredDocuments: [],
@@ -1604,15 +1452,6 @@ const SERVICES_DATA = [
         requiredDocuments: [],
         faqs: [],
       },
-      {
-        name: 'Assegno Sociale Famiglie',
-        code: 'ASS_SOC_FAM_2026',
-        description: 'Assegno sociale per famiglie',
-        category: 'SOCIAL',
-        basePrice: 0,
-        requiredDocuments: [],
-        faqs: [],
-      },
     ],
   },
 
@@ -1624,47 +1463,22 @@ const SERVICES_DATA = [
     },
     services: [
       {
-        name: 'Residenza',
-        code: 'RESIDENZA_2026',
-        description: 'Certificato di residenza',
+        name: 'Certificati Anagrafici (Per Ciascun)',
+        code: 'CERT_ANAG_2026',
+        description:
+          'Certificati anagrafici: Residenza, Stato di Famiglia, Stato Civile. Prezzo per ciascun certificato richiesto.',
         category: 'ADMINISTRATIVE',
         basePrice: 12.2,
         requiredDocuments: [],
         faqs: [],
       },
       {
-        name: 'Stato di Famiglia',
-        code: 'STATO_FAM_2026',
-        description: 'Certificato di stato di famiglia',
+        name: 'Certificati Penali (Per Ciascun)',
+        code: 'CERT_PEN_2026',
+        description:
+          'Certificati penali: Casellario Giudiziale (Penale), Casellario dei Carichi Pendenti. Prezzo per ciascun certificato richiesto.',
         category: 'ADMINISTRATIVE',
-        basePrice: 12.2,
-        requiredDocuments: [],
-        faqs: [],
-      },
-      {
-        name: 'Stato Civile',
-        code: 'STATO_CIV_2026',
-        description: 'Certificato di stato civile',
-        category: 'ADMINISTRATIVE',
-        basePrice: 12.2,
-        requiredDocuments: [],
-        faqs: [],
-      },
-      {
-        name: 'Casellario Giudiziale',
-        code: 'CASEL_GIU_2026',
-        description: 'Certificato casellario giudiziale',
-        category: 'ADMINISTRATIVE',
-        basePrice: 60,
-        requiredDocuments: [],
-        faqs: [],
-      },
-      {
-        name: 'Certificato dei Carichi Pendenti',
-        code: 'CERT_CARICH_2026',
-        description: 'Certificato dei carichi pendenti',
-        category: 'ADMINISTRATIVE',
-        basePrice: 60,
+        basePrice: 70,
         requiredDocuments: [],
         faqs: [],
       },
