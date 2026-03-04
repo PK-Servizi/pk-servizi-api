@@ -1454,13 +1454,86 @@ const SERVICES_DATA = [
         code: 'CONG_PAR_DIP_2026',
         description: 'Congedo parentale per dipendenti',
         category: 'HR',
-        basePrice: 29.99,
+        basePrice: 0,
         requiredDocuments: [
           "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
           '02. Codice fiscale richiedente',
           '03. Codice fiscale altro genitore se presente',
           '04. Codice fiscale del minore',
           '05. Buste paga',
+        ],
+        faqs: [],
+      },
+      {
+        name: 'Maternità Obbligatoria Post Parto',
+        code: 'MATERN_OBB_POST_2026',
+        description:
+          'Il congedo di maternità obbligatoria da conseguire post parto',
+        category: 'SOCIAL',
+        basePrice: 0,
+        requiredDocuments: ['01. Codice fiscale del neonato/dei neonati'],
+        faqs: [],
+      },
+      {
+        name: 'Indennità di Maternità Obbligatoria Dipendenti',
+        code: 'MATERN_OBB_DIP_2026',
+        description:
+          'Il congedo di maternità è il periodo di astensione obbligatoria dal lavoro riconosciuto alle lavoratrici dipendenti durante la gravidanza e il puerperio',
+        category: 'SOCIAL',
+        basePrice: 0,
+        requiredDocuments: [
+          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
+          '02. Codice fiscale richiedente',
+          '03. Eventuale permesso di soggiorno',
+          '04. Certificato di gravidanza telematico che attesta la data presunta del parto',
+          '05. Eventuale certificato medico (del medico del lavoro) o autodichiarazione del datore di lavoro',
+        ],
+        faqs: [],
+      },
+      {
+        name: 'Maternità Anticipata Dipendenti',
+        code: 'MATERN_ANT_DIP_2026',
+        description:
+          "Il congedo di maternità è il periodo di astensione obbligatoria dal lavoro durante la gravidanza e il puerperio. Si può scegliere la maternità flessibile purché vi sia un attestato del medico che certifichi l'assenza di rischio",
+        category: 'SOCIAL',
+        basePrice: 0,
+        requiredDocuments: [
+          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
+          '02. Codice fiscale richiedente',
+          '03. Eventuale permesso di soggiorno',
+          '04. Certificato di gravidanza telematico che attesta la data presunta del parto',
+          "05. Certificato medico rilasciato dall'ASL o dalla direzione territoriale competente",
+          '06. Certificato di interdizione anticipata rilasciato dalla Direzione Territoriale del Lavoro',
+        ],
+        faqs: [],
+      },
+      {
+        name: 'Congedo Parentale Gestione Separata',
+        code: 'CONG_PAR_GS_2026',
+        description:
+          'Il congedo parentale è un periodo di astensione facoltativo dal lavoro concesso ai genitori. Per lavoratrici autonome iscritte alla gestione separata INPS',
+        category: 'SOCIAL',
+        basePrice: 0,
+        requiredDocuments: [
+          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
+          '02. Codice fiscale richiedente',
+          '03. Codice fiscale altro genitore se presente',
+          '04. Codice fiscale del minore',
+        ],
+        faqs: [],
+      },
+      {
+        name: 'Congedo Parentale Autonomi',
+        code: 'CONG_PAR_AUT_2026',
+        description:
+          'Il congedo parentale è un periodo di astensione facoltativo dal lavoro concesso ai genitori lavoratori autonomi per prendersi cura del bambino nei primi anni di vita',
+        category: 'SOCIAL',
+        basePrice: 0,
+        requiredDocuments: [
+          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
+          '02. Codice fiscale richiedente',
+          '03. Codice fiscale altro genitore se presente',
+          '04. Codice fiscale del minore',
         ],
         faqs: [],
       },
@@ -1477,16 +1550,186 @@ const SERVICES_DATA = [
       {
         name: 'Invalidità Civile',
         code: 'INVAL_CIV_2026',
-        description: 'Servizio di invalidità civile',
+        description:
+          "L'invalidità civile è una misura di assistenza sociale che garantisce assistenza sociale e mantenimento agli inabili al lavoro",
         category: 'SOCIAL',
-        basePrice: 29.99,
+        basePrice: 0,
         requiredDocuments: [],
         faqs: [],
+      },
+      {
+        name: 'Permessi 104/92 per Assistenza Familiari Disabili',
+        code: 'PERM_104_2026',
+        description:
+          'La Legge n. 104/92 concede ai lavoratori con disabilità grave il diritto di usufruire di tre giorni di permesso retribuito al mese, oppure di due ore di permesso al giorno',
+        category: 'SOCIAL',
+        basePrice: 0,
+        requiredDocuments: [
+          "01. Documento di riconoscimento del familiare disabile (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
+          '02. Codice fiscale del familiare disabile',
+          '03. Verbale riconoscimento Handicap',
+          "04. Busta paga dell'attuale datore di lavoro",
+        ],
+        faqs: [
+          {
+            question:
+              'Quali sono i benefici dei permessi previsti dalla Legge 104/92?',
+            answer:
+              'I benefici includono la possibilità di fruire di giorni o ore di permesso retribuito per i lavoratori con disabilità grave o per coloro che assistono familiari con disabilità grave.',
+            order: 1,
+            category: 'Benefici',
+          },
+          {
+            question: 'Chi ha diritto ai permessi della Legge 104/92?',
+            answer:
+              'Hanno diritto ai permessi coloro che sono riconosciuti come portatori di disabilità grave secondo quanto stabilito dalla Legge 104/92, così come i lavoratori che assistono familiari con disabilità grave.',
+            order: 2,
+            category: 'Requisiti',
+          },
+          {
+            question:
+              'Qual è la durata massima dei permessi retribuiti previsti dalla Legge 104/92?',
+            answer:
+              'La durata massima è di tre giorni al mese per i lavoratori con disabilità grave, e lo stesso vale per i lavoratori che assistono familiari con disabilità grave.',
+            order: 3,
+            category: 'Durata',
+          },
+          {
+            question:
+              'È possibile utilizzare i permessi della Legge 104/92 in modo frazionato?',
+            answer:
+              'Sì, i permessi possono essere utilizzati anche in modo frazionato, sia a livello giornaliero che orario, a seconda delle esigenze del lavoratore e della situazione familiare.',
+            order: 4,
+            category: 'Modalità',
+          },
+          {
+            question:
+              'I permessi della Legge 104/92 comportano una diminuzione del salario?',
+            answer:
+              'No, i permessi sono retribuiti e non comportano una diminuzione del salario per il lavoratore che ne usufruisce.',
+            order: 5,
+            category: 'Retribuzione',
+          },
+        ],
       },
     ],
   },
 
-  // 16. Dichiarazione Redditi
+  // 16. Pensione
+  {
+    serviceType: {
+      name: 'Pensione',
+      description: 'Servizi per la pensione',
+    },
+    services: [
+      {
+        name: 'Estratto Conto Certificato e Calcolo Pensione',
+        code: 'EST_CERT_PENS_2026',
+        description:
+          "Richiesta dell'estratto conto certificativo utile al calcolo della pensione e il calcolo effettivo del periodo che manca per andare in pensione",
+        category: 'SOCIAL',
+        basePrice: 0,
+        requiredDocuments: [
+          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
+          '02. Codice fiscale richiedente',
+        ],
+        faqs: [
+          {
+            question: 'In quanto tempo viene elaborata la mia richiesta?',
+            answer:
+              "Il team trasmette la richiesta dell'estratto conto certificato entro 6h dalla richiesta, l'INPS emette il documento entro 30 giorni e lo riceviamo noi tramite PEC. Una volta ricevuto procediamo con il calcolo del periodo mancante alla pensione e glielo comunichiamo.",
+            order: 1,
+            category: 'Tempistiche',
+          },
+        ],
+      },
+      {
+        name: 'Assegno Sociale',
+        code: 'ASS_SOCIALE_2026',
+        description:
+          "L'assegno sociale è una prestazione economica a sostegno dei cittadini italiani e stranieri residenti in Italia che si trovano in condizioni economiche disagiate. A differenza della pensione di vecchiaia, l'assegno sociale non richiede il versamento di contributi previdenziali",
+        category: 'SOCIAL',
+        basePrice: 0,
+        requiredDocuments: [],
+        faqs: [],
+      },
+      {
+        name: 'Pensione Indiretta',
+        code: 'PENS_IND_2026',
+        description:
+          "La pensione ai superstiti è un trattamento pensionistico riconosciuto in caso di decesso dell'assicurato in favore dei familiari superstiti",
+        category: 'SOCIAL',
+        basePrice: 0,
+        requiredDocuments: [
+          "01. Carta d'identità richiedente",
+          '02. Codice fiscale/Tessera Sanitaria del richiedente',
+          "03. Carta d'identità della persona deceduta",
+          '04. Codice fiscale/Tessera Sanitaria della persona deceduta',
+          '05. Codice IBAN del titolare (dichiarante) della pensione',
+          '06. Codice fiscale/Tessera Sanitaria dei familiari che hanno diritto alla pensione',
+        ],
+        faqs: [],
+      },
+      {
+        name: 'Ricostituzione Reddituale',
+        code: 'RICOST_REDD_2026',
+        description:
+          "Il servizio di ricostituzione reddituale INPS è una procedura amministrativa che consente ai pensionati di comunicare all'INPS redditi diversi dalla pensione percepiti dopo la data di decorrenza del trattamento pensionistico",
+        category: 'SOCIAL',
+        basePrice: 0,
+        requiredDocuments: [
+          "01. Documento d'identità valido del richiedente (fronte e retro)",
+          '02. Codice fiscale del richiedente',
+          '03. Codice fiscale del coniuge e dei familiari a carico (se rilevante)',
+          '04. Eventuale lettera ricevuta da INPS',
+        ],
+        faqs: [
+          {
+            question:
+              "Cos'è la ricostituzione reddituale INPS e a cosa serve?",
+            answer:
+              "La ricostituzione reddituale INPS è il servizio che permette ai pensionati di comunicare all'INPS i redditi percepiti dopo la pensione (lavoro, affitti, ecc.) per verificare il cumulo pensione-reddito e assicurare un adeguamento pensione corretto.",
+            order: 1,
+            category: 'Definizione',
+          },
+          {
+            question:
+              'Chi deve richiedere la ricostituzione reddituale INPS?',
+            answer:
+              'Devono richiedere la ricostituzione reddituale INPS i pensionati INPS (sia pubblici che privati) che, dopo essere andati in pensione, hanno iniziato a percepire redditi aggiuntivi di qualsiasi natura.',
+            order: 2,
+            category: 'Requisiti',
+          },
+          {
+            question:
+              "Come si fa la domanda di ricostituzione reddituale all'INPS?",
+            answer:
+              "La domanda di ricostituzione reddituale INPS può essere presentata online tramite il sito INPS con SPID/CIE/CNS, tramite Patronato o tramite il Contact Center INPS.",
+            order: 3,
+            category: 'Procedura',
+          },
+          {
+            question:
+              "Perché è importante comunicare i redditi all'INPS dopo la pensione?",
+            answer:
+              "Comunicare i redditi post-pensione all'INPS tramite la ricostituzione reddituale è importante per rispettare gli obblighi di legge sul cumulo pensione-reddito, evitare indebiti pensionistici e garantire la corretta erogazione della pensione.",
+            order: 4,
+            category: 'Importanza',
+          },
+          {
+            question:
+              'Quali sono le conseguenze della ricostituzione reddituale INPS?',
+            answer:
+              "La ricostituzione reddituale INPS può portare alla conferma dell'importo pensionistico, a un suo adeguamento (generalmente una riduzione se si superano i limiti di cumulo), o alla necessità di adempiere a specifici obblighi di comunicazione verso l'INPS.",
+            order: 5,
+            category: 'Conseguenze',
+          },
+        ],
+      },
+    ],
+  },
+
+  // 17. Dichiarazione Redditi
   {
     serviceType: {
       name: 'Dichiarazione Redditi',
@@ -2123,6 +2366,15 @@ const SERVICES_DATA = [
             category: 'Obblighi',
           },
         ],
+      },
+      {
+        name: 'Assegno Sociale',
+        code: 'ASS_SOCIALE_SOST_2026',
+        description: 'Domanda di Assegno Sociale (sotto Sostegno alle Famiglie)',
+        category: 'SOCIAL',
+        basePrice: 0,
+        requiredDocuments: [],
+        faqs: [],
       },
     ],
   },

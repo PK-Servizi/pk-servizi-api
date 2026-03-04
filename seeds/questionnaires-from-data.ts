@@ -1343,25 +1343,205 @@ export const SERVICE_QUESTIONNAIRES: Record<string, any[]> = {
 
   // =====================================================================
   // DISOCCUPAZIONE / NASPI
+  // Order: 1-NASPI, 2-Agricola, 3-Anticipo, 4-DID, 5-PAD, 6-NASPI-Com, 7-Ricorso
   // =====================================================================
 
-  NASP_2026: [],
-  DAGRN_2026: [],
-  ANTNAS_2026: [],
-  DID_2026: [],
-
-  PAD_2026: [
+  NASP_2026: [
     {
-      id: 'curriculum_vitae',
-      title: 'Curriculum',
-      description: 'Upload your updated CV',
+      id: 'documenti_richiesti',
+      title: 'Documenti Richiesti',
+      description: 'Carica i documenti necessari per la domanda NASPI',
       fields: [
         {
-          name: 'cv_upload',
-          label: 'Allega CV aggiornato',
+          name: 'documento_riconoscimento',
+          label: 'Documento di riconoscimento',
           type: 'file',
           required: true,
           order: 1,
+          description: 'Carta d\'identità italiana, Carta d\'identità di un paese comunitario, Patente o Passaporto',
+        },
+        {
+          name: 'codice_fiscale_tessera',
+          label: 'Codice Fiscale o Tessera Sanitaria',
+          type: 'file',
+          required: true,
+          order: 2,
+          description: 'Fronte e retro',
+        },
+        {
+          name: 'permesso_soggiorno',
+          label: 'Permesso di soggiorno del richiedente',
+          type: 'file',
+          required: false,
+          order: 3,
+          description: 'Obbligatorio se extracomunitario',
+        },
+        {
+          name: 'ultima_busta_paga',
+          label: 'Ultima Busta Paga in possesso',
+          type: 'file',
+          required: true,
+          order: 4,
+          description: 'Allega l\'ultima busta paga',
+        },
+        {
+          name: 'lettera_licenziamento',
+          label: 'Lettera di licenziamento / Contratto scaduto',
+          type: 'file',
+          required: true,
+          order: 5,
+          description: 'Allega la lettera di licenziamento o il contratto scaduto',
+        },
+      ],
+    },
+  ],
+
+  DAGRN_2026: [
+    {
+      id: 'documenti_richiesti',
+      title: 'Documenti Richiesti',
+      description: 'Carica i documenti necessari per la domanda di disoccupazione agricola',
+      fields: [
+        {
+          name: 'carta_identita',
+          label: 'Carta d\'identità richiedente',
+          type: 'file',
+          required: true,
+          order: 1,
+          description: 'Fronte e retro',
+        },
+        {
+          name: 'codice_fiscale_tessera',
+          label: 'Codice Fiscale / Tessera Sanitaria del richiedente',
+          type: 'file',
+          required: true,
+          order: 2,
+          description: 'Fronte e retro',
+        },
+        {
+          name: 'iban',
+          label: 'IBAN richiedente',
+          type: 'text',
+          required: true,
+          order: 3,
+          description: 'Inserisci il tuo IBAN',
+        },
+      ],
+    },
+  ],
+
+  ANTNAS_2026: [
+    {
+      id: 'documenti_richiesti',
+      title: 'Documenti Richiesti',
+      description: 'Carica i documenti necessari per la richiesta di anticipo NASPI',
+      fields: [
+        {
+          name: 'documento_riconoscimento',
+          label: 'Documento di riconoscimento',
+          type: 'file',
+          required: true,
+          order: 1,
+          description: 'Carta d\'identità fronte e retro, Patente fronte e retro, o Passaporto',
+        },
+        {
+          name: 'codice_fiscale',
+          label: 'Codice Fiscale',
+          type: 'file',
+          required: true,
+          order: 2,
+          description: 'Fronte e retro',
+        },
+        {
+          name: 'permesso_soggiorno',
+          label: 'Permesso di soggiorno del richiedente',
+          type: 'file',
+          required: false,
+          order: 3,
+          description: 'Obbligatorio se extracomunitario',
+        },
+        {
+          name: 'certificato_piva',
+          label: 'Certificato di attribuzione P.IVA',
+          type: 'file',
+          required: true,
+          order: 4,
+          description: 'Allega il certificato di attribuzione della Partita IVA',
+        },
+        {
+          name: 'certificato_inizio_attivita',
+          label: 'Certificato che attesta l\'inizio attività',
+          type: 'file',
+          required: true,
+          order: 5,
+          description: 'Visura camerale attiva, iscrizione gestione separata INPS, ecc.',
+        },
+      ],
+    },
+  ],
+
+  DID_2026: [
+    {
+      id: 'documenti_richiesti',
+      title: 'Documenti Richiesti',
+      description: 'Carica i documenti necessari per la dichiarazione DID',
+      fields: [
+        {
+          name: 'documento_riconoscimento',
+          label: 'Documento di riconoscimento',
+          type: 'file',
+          required: true,
+          order: 1,
+          description: 'Carta d\'identità fronte e retro, Patente fronte e retro, o Passaporto',
+        },
+        {
+          name: 'codice_fiscale',
+          label: 'Codice Fiscale richiedente',
+          type: 'file',
+          required: true,
+          order: 2,
+          description: 'Fronte e retro',
+        },
+      ],
+    },
+  ],
+
+  PAD_2026: [
+    {
+      id: 'documenti_richiesti',
+      title: 'Documenti Richiesti',
+      description: 'Carica i documenti necessari per il PAD',
+      fields: [
+        {
+          name: 'carta_identita',
+          label: 'Carta d\'identità',
+          type: 'file',
+          required: true,
+          order: 1,
+          description: 'Fronte e retro',
+        },
+        {
+          name: 'codice_fiscale',
+          label: 'Codice Fiscale',
+          type: 'file',
+          required: true,
+          order: 2,
+          description: 'Fronte e retro',
+        },
+      ],
+    },
+    {
+      id: 'curriculum',
+      title: 'Curriculum',
+      description: 'Carica il tuo CV aggiornato',
+      fields: [
+        {
+          name: 'cv_upload',
+          label: 'CV (Curriculum Vitae)',
+          type: 'file',
+          required: true,
+          order: 1,
+          description: 'Allega CV aggiornato',
         },
       ],
     },
@@ -1369,17 +1549,48 @@ export const SERVICE_QUESTIONNAIRES: Record<string, any[]> = {
 
   NASPICOM_2026: [
     {
-      id: 'variazione_info',
-      title: 'Variazione',
-      description: 'Employment variation documentation',
+      id: 'documenti_richiesti',
+      title: 'Documenti Richiesti',
+      description: 'Carica i documenti necessari per la comunicazione NASPI',
       fields: [
         {
-          name: 'documentazione_variazione',
-          label: 'UNILAV/Contratto di lavoro/Certificato di attività autonoma',
+          name: 'documento_riconoscimento',
+          label: 'Documento di riconoscimento',
           type: 'file',
           required: true,
           order: 1,
-          description: 'Allega file',
+          description: 'Carta d\'identità fronte e retro, Patente fronte e retro, o Passaporto',
+        },
+        {
+          name: 'codice_fiscale',
+          label: 'Codice Fiscale richiedente',
+          type: 'file',
+          required: true,
+          order: 2,
+          description: 'Fronte e retro',
+        },
+        {
+          name: 'permesso_soggiorno',
+          label: 'Permesso di soggiorno del richiedente',
+          type: 'file',
+          required: false,
+          order: 3,
+          description: 'Obbligatorio se extracomunitario',
+        },
+      ],
+    },
+    {
+      id: 'variazione',
+      title: 'Variazione',
+      description: 'Documentazione della variazione della situazione lavorativa',
+      fields: [
+        {
+          name: 'documentazione_variazione',
+          label: 'UNILAV / Contratto di lavoro / Certificato di attività autonoma',
+          type: 'file',
+          required: true,
+          order: 1,
+          description: 'Allega il documento che attesta l\'inizio di attività lavorativa',
         },
       ],
     },
@@ -1389,7 +1600,7 @@ export const SERVICE_QUESTIONNAIRES: Record<string, any[]> = {
     {
       id: 'prove_ricorso',
       title: 'Le prove per Ricorso',
-      description: 'Documents needed for NASPI appeal',
+      description: 'Carica i documenti necessari per il ricorso NASPI',
       fields: [
         {
           name: 'lettera_rigetto',
@@ -1397,6 +1608,7 @@ export const SERVICE_QUESTIONNAIRES: Record<string, any[]> = {
           type: 'file',
           required: true,
           order: 1,
+          description: 'Allega la lettera di rigetto ricevuta dall\'INPS',
         },
         {
           name: 'lettera_licenziamento',
@@ -1404,6 +1616,7 @@ export const SERVICE_QUESTIONNAIRES: Record<string, any[]> = {
           type: 'file',
           required: true,
           order: 2,
+          description: 'Allega l\'ultima lettera di licenziamento',
         },
       ],
     },
@@ -3177,6 +3390,139 @@ export const SERVICE_QUESTIONNAIRES: Record<string, any[]> = {
     IBAN_SECTION,
   ],
 
+  MATERN_OBB_POST_2026: [
+    {
+      id: 'dati_neonato',
+      title: 'Dati del Neonato',
+      fields: [
+        {
+          name: 'cf_neonato',
+          label: 'Codice fiscale del neonato/i',
+          type: 'file',
+          required: true,
+          order: 1,
+          multiple: true,
+        },
+      ],
+    },
+  ],
+
+  MATERN_OBB_DIP_2026: [
+    {
+      id: 'documenti_maternita',
+      title: 'Documenti Maternità',
+      fields: [
+        {
+          name: 'certificato_gravidanza',
+          label: 'Certificato di gravidanza telematico (data presunta del parto)',
+          type: 'file',
+          required: true,
+          order: 1,
+        },
+        {
+          name: 'certificato_medico',
+          label: 'Eventuale certificato medico (del medico del lavoro) o autodichiarazione del datore di lavoro',
+          type: 'file',
+          required: false,
+          order: 2,
+          description: 'Con il quale sei autorizzata a lavorare fino alla data di inizio maternità',
+        },
+      ],
+    },
+  ],
+
+  MATERN_ANT_DIP_2026: [
+    {
+      id: 'documenti_maternita_anticipata',
+      title: 'Documenti Maternità Anticipata',
+      fields: [
+        {
+          name: 'certificato_gravidanza',
+          label: 'Certificato di gravidanza telematico (data presunta del parto)',
+          type: 'file',
+          required: true,
+          order: 1,
+        },
+        {
+          name: 'certificato_medico_asl',
+          label: "Certificato medico rilasciato dall'ASL o dalla direzione territoriale competente",
+          type: 'file',
+          required: true,
+          order: 2,
+          description: 'Che attesta le gravi complicanze della gestazione o persistenti forme morbose',
+        },
+        {
+          name: 'certificato_interdizione',
+          label: 'Certificato di interdizione anticipata',
+          type: 'file',
+          required: true,
+          order: 3,
+          description: 'Rilasciato per condizioni di lavoro pesante o pericoloso dalla Direzione Territoriale del Lavoro',
+        },
+      ],
+    },
+  ],
+
+  CONG_PAR_GS_2026: [
+    {
+      id: 'dati_figlio',
+      title: 'Dati del Figlio / Figlia',
+      fields: [
+        {
+          name: 'cf_figlio',
+          label: 'Codice Fiscale del minore',
+          type: 'file',
+          required: true,
+          order: 1,
+        },
+      ],
+    },
+    {
+      id: 'altro_genitore',
+      title: 'Altro Genitore',
+      fields: [
+        {
+          name: 'ag_codice_fiscale',
+          label: 'Codice Fiscale altro genitore (se presente)',
+          type: 'text',
+          required: false,
+          order: 1,
+          maxLength: 16,
+        },
+      ],
+    },
+  ],
+
+  CONG_PAR_AUT_2026: [
+    {
+      id: 'dati_figlio',
+      title: 'Dati del Figlio / Figlia',
+      fields: [
+        {
+          name: 'cf_figlio',
+          label: 'Codice Fiscale del minore',
+          type: 'file',
+          required: true,
+          order: 1,
+        },
+      ],
+    },
+    {
+      id: 'altro_genitore',
+      title: 'Altro Genitore',
+      fields: [
+        {
+          name: 'ag_codice_fiscale',
+          label: 'Codice Fiscale altro genitore (se presente)',
+          type: 'text',
+          required: false,
+          order: 1,
+          maxLength: 16,
+        },
+      ],
+    },
+  ],
+
   CONG_PAR_DIP_2026: [
     {
       id: 'dati_figlio',
@@ -3564,6 +3910,124 @@ export const SERVICE_QUESTIONNAIRES: Record<string, any[]> = {
       ],
     },
     DECLARATIONS_INVALIDITA,
+  ],
+
+  PERM_104_2026: [
+    {
+      id: 'dati_familiare_disabile',
+      title: 'Dati del Familiare Disabile',
+      fields: [
+        {
+          name: 'doc_familiare',
+          label: "Documento di riconoscimento del familiare disabile (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
+          type: 'file',
+          required: true,
+          order: 1,
+        },
+        {
+          name: 'cf_familiare',
+          label: 'Codice fiscale del familiare disabile',
+          type: 'file',
+          required: true,
+          order: 2,
+        },
+        {
+          name: 'verbale_handicap',
+          label: 'Verbale riconoscimento Handicap',
+          type: 'file',
+          required: true,
+          order: 3,
+        },
+        {
+          name: 'busta_paga',
+          label: "Busta paga dell'attuale datore di lavoro",
+          type: 'file',
+          required: true,
+          order: 4,
+        },
+      ],
+    },
+    DECLARATIONS_INVALIDITA,
+  ],
+
+  // =====================================================================
+  // PENSIONE
+  // =====================================================================
+
+  EST_CERT_PENS_2026: [DECLARATIONS_PATRONATO],
+
+  ASS_SOCIALE_2026: [],
+
+  PENS_IND_2026: [
+    {
+      id: 'dati_persona_deceduta',
+      title: 'Dati della Persona Deceduta',
+      fields: [
+        {
+          name: 'ci_deceduto',
+          label: "Carta d'identità della persona deceduta",
+          type: 'file',
+          required: true,
+          order: 1,
+        },
+        {
+          name: 'cf_deceduto',
+          label: 'Codice fiscale/Tessera Sanitaria della persona deceduta',
+          type: 'file',
+          required: true,
+          order: 2,
+        },
+      ],
+    },
+    {
+      id: 'familiari_diritto',
+      title: 'Familiari Aventi Diritto',
+      fields: [
+        {
+          name: 'cf_familiari',
+          label: 'Codice fiscale/Tessera Sanitaria dei familiari che hanno diritto alla pensione',
+          type: 'file',
+          required: true,
+          order: 1,
+          multiple: true,
+        },
+      ],
+    },
+    IBAN_SECTION,
+    DECLARATIONS_PATRONATO,
+  ],
+
+  RICOST_REDD_2026: [
+    {
+      id: 'dati_ricostituzione',
+      title: 'Dati per la Ricostituzione Reddituale',
+      fields: [
+        {
+          name: 'cf_coniuge',
+          label: 'Codice fiscale del coniuge (se rilevante)',
+          type: 'text',
+          required: false,
+          order: 1,
+          maxLength: 16,
+        },
+        {
+          name: 'cf_familiari',
+          label: 'Codice fiscale dei familiari a carico',
+          type: 'file',
+          required: false,
+          order: 2,
+          multiple: true,
+        },
+        {
+          name: 'lettera_inps',
+          label: 'Eventuale lettera ricevuta da INPS',
+          type: 'file',
+          required: false,
+          order: 3,
+        },
+      ],
+    },
+    DECLARATIONS_PATRONATO,
   ],
 
   // =====================================================================
@@ -5435,6 +5899,8 @@ export const SERVICE_QUESTIONNAIRES: Record<string, any[]> = {
     IBAN_SECTION,
     DECLARATIONS_SOSTEGNO_ADI,
   ],
+
+  ASS_SOCIALE_SOST_2026: [],
 
   // =====================================================================
   // CERTIFICATI

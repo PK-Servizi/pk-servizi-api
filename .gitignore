@@ -72,3 +72,6 @@ test-*.ps1
 *.pdf
 receipt-*.pdf
 invoice-*.pdf
+
+# Deploy tracking
+.last-deployed-commit
