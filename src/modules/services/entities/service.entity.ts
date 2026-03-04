@@ -24,7 +24,7 @@ export class Service {
   @Column({ length: 100 })
   name: string;
 
-  @Column({ length: 20, unique: true })
+  @Column({ length: 30, unique: true })
   code: string;
 
   @Column({ type: 'text', nullable: true })

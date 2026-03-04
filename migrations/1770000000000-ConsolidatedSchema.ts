@@ -111,7 +111,7 @@ export class ConsolidatedSchema1770000000000 implements MigrationInterface {
       CREATE TABLE "services" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
         "name" character varying(100) NOT NULL,
-        "code" character varying(20) NOT NULL,
+        "code" character varying(30) NOT NULL,
         "description" text,
         "category" character varying(50),
         "base_price" numeric(10,2),
