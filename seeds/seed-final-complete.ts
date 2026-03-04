@@ -921,7 +921,11 @@ const SERVICES_DATA = [
           'Servizio di consulenza, utile a risolvere questioni in campo fiscale, previdenziale, pensionistico, colf e badanti e immigrazione',
         category: 'CONSULTING',
         basePrice: 49.99,
-        requiredDocuments: [],
+        requiredDocuments: [
+          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
+          '02. Codice fiscale richiedente',
+          '03. Documentazione relativa alla questione da risolvere',
+        ],
         faqs: [],
       },
     ],
@@ -1566,7 +1570,12 @@ const SERVICES_DATA = [
           "L'invalidità civile è una misura di assistenza sociale che garantisce assistenza sociale e mantenimento agli inabili al lavoro",
         category: 'SOCIAL',
         basePrice: 29.99,
-        requiredDocuments: [],
+        requiredDocuments: [
+          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
+          '02. Codice fiscale richiedente',
+          '03. Certificato medico telematico del medico curante',
+          '04. Documentazione sanitaria (cartelle cliniche, referti medici, lettere di dimissione)',
+        ],
         faqs: [],
       },
     ],
@@ -1783,10 +1792,16 @@ const SERVICES_DATA = [
       {
         name: 'Apertura Partita IVA',
         code: 'APERT_PIVA_2026',
-        description: 'Apertura della Partita IVA',
+        description:
+          "Affida l'apertura della tua Partita IVA a professionisti esperti per iniziare il tuo business con sicurezza e rapidità. Il nostro servizio gestisce ogni aspetto burocratico: dall'individuazione del miglior Codice ATECO alla scelta del regime fiscale più conveniente",
         category: 'BUSINESS',
         basePrice: 149.99,
-        requiredDocuments: [],
+        requiredDocuments: [
+          "01. Documento d'Identità: copia leggibile e in corso di validità della carta d'identità (cartacea o elettronica) o del passaporto del richiedente",
+          '02. Codice Fiscale: Tessera sanitaria o certificato ufficiale del codice fiscale',
+          "03. Descrizione dell'Attività: una sintesi delle mansioni che andrai a svolgere, utile per individuare il Codice ATECO più corretto e vantaggioso",
+          "04. Indirizzo di Sede Fiscale: l'indirizzo presso cui sarà eletto il domicilio fiscale dell'attività",
+        ],
         faqs: [
           {
             question:
@@ -1830,10 +1845,17 @@ const SERVICES_DATA = [
       {
         name: 'Variazione Partita IVA',
         code: 'VAR_PIVA_2026',
-        description: 'Variazione della Partita IVA',
+        description:
+          'Il tuo business evolve e la tua posizione fiscale deve restare al passo. Il nostro servizio professionale di variazione Partita IVA ti permette di gestire ogni modifica in modo rapido e sicuro: cambio di sede legale, aggiunta di un nuovo codice ATECO',
         category: 'BUSINESS',
         basePrice: 99.99,
-        requiredDocuments: [],
+        requiredDocuments: [
+          "01. Documento d'Identità: Copia leggibile della carta d'identità (o patente/passaporto) del titolare della Partita IVA",
+          '02. Codice Fiscale: Copia della tessera sanitaria o del tesserino del codice fiscale',
+          '03. Certificato di Attribuzione Partita IVA: il documento attuale che riporta il numero di Partita IVA e i dati registrati',
+          '04. Dati della Nuova Sede (se applicabile): Indirizzo completo, CAP, Comune e Provincia',
+          "05. Descrizione della Nuova Attività (per codice ATECO): una breve descrizione della nuova attività che intendi svolgere",
+        ],
         faqs: [
           {
             question: 'Come posso richiedere la variazione Partita IVA?',
@@ -1876,10 +1898,16 @@ const SERVICES_DATA = [
       {
         name: 'Cessazione Ditta Individuale',
         code: 'CESS_DITA_2026',
-        description: 'Cessazione della ditta individuale',
+        description:
+          "Il servizio di Cessazione Ditta Individuale ti permette di chiudere la tua attività in modo rapido, sicuro e interamente online. Gestiamo per te l'intero iter burocratico: dalla chiusura della Partita IVA presso l'Agenzia delle Entrate alla cancellazione dal Registro Imprese",
         category: 'BUSINESS',
         basePrice: 99.99,
-        requiredDocuments: [],
+        requiredDocuments: [
+          "01. Documento d'identità: Copia fronte/retro della carta d'identità o del passaporto in corso di validità del titolare",
+          '02. Codice Fiscale: Copia della tessera sanitaria o del tesserino del codice fiscale',
+          "03. Certificato di attribuzione Partita IVA o visura camerale aggiornata per recuperare i dati corretti dell'attività",
+          "04. Data di cessazione: l'indicazione precisa dell'ultimo giorno di attività della ditta",
+        ],
         faqs: [
           {
             question:
@@ -1925,10 +1953,17 @@ const SERVICES_DATA = [
       {
         name: 'Comunicazione Camera Commercio',
         code: 'COMM_CAM_2026',
-        description: 'Comunicazione alla Camera di Commercio',
+        description:
+          'La Comunicazione Camera di Commercio (ComUnica) è la procedura telematica obbligatoria con cui ogni titolare di impresa comunica al Registro delle Imprese la nascita, le modifiche o la chiusura della propria attività',
         category: 'BUSINESS',
         basePrice: 149.99,
-        requiredDocuments: [],
+        requiredDocuments: [
+          "01. Documento d'Identità e Codice Fiscale: Copia fronte/retro in corso di validità del titolare o del legale rappresentante",
+          "02. Visura Camerale Aggiornata: una copia della visura dell'impresa per verificare l'attuale stato dei dati nel Registro",
+          '03. Dati della variazione: in caso di Cambio Sede, il nuovo indirizzo completo (se in affitto, i dati del contratto)',
+          '04. Firma Digitale (Obbligatoria): per il deposito telematico il titolare deve firmare i file digitalmente',
+          '05. Indirizzo PEC Attivo: la Camera di Commercio comunica esclusivamente tramite Posta Elettronica Certificata',
+        ],
         faqs: [
           {
             question:
@@ -1986,10 +2021,16 @@ const SERVICES_DATA = [
         name: 'Contratti di Locazione',
         code: 'CONTR_LOC_2026',
         description:
-          'Gestione dei contratti di locazione (€85,40 + Spese di registrazione)',
+          'Gestione dei contratti di locazione (€85,40 + Spese di registrazione). Servizio di registrazione, proroga, cessazione e risoluzione dei contratti di affitto',
         category: 'REAL_ESTATE',
         basePrice: 85.4,
-        requiredDocuments: [],
+        requiredDocuments: [
+          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
+          '02. Codice fiscale locatore (proprietario)',
+          '03. Codice fiscale conduttore (inquilino)',
+          "04. Contratto di locazione firmato dalle parti",
+          "05. Dati catastali dell'immobile (visura catastale)",
+        ],
         faqs: [],
       },
     ],
@@ -2005,10 +2046,19 @@ const SERVICES_DATA = [
       {
         name: 'Assegno Unico',
         code: 'ASS_UNICO_2026',
-        description: 'Assegno Unico Universale',
+        description:
+          "L'Assegno Unico e Universale è un sostegno economico alle famiglie attribuito per ogni figlio a carico fino al compimento dei 21 anni (in determinate condizioni) e senza limiti di età per i figli disabili. L'importo dell'assegno varia in base alla condizione economica del nucleo familiare",
         category: 'SOCIAL',
         basePrice: 24.4,
-        requiredDocuments: [],
+        requiredDocuments: [
+          "01. Carta d'identità richiedente",
+          '02. Codice Fiscale richiedente',
+          '03. Codice fiscale Figli',
+          '04. Codice fiscale altro genitore',
+          '05. Eventuale certificato di invalidità',
+          '06. Attestazione ISEE in corso di validità',
+          '07. Coordinate bancarie IBAN',
+        ],
         faqs: [
           {
             question:
