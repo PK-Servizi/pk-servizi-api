@@ -56,18 +56,18 @@ const SERVICES_DATA = [
         category: 'TAX',
         basePrice: 0,
         requiredDocuments: [
-          "01. Identification Document: ID card (front and back), Driver's License (front and back), or Passport of the declarant",
-          '02. Tax Code: Tax code (Codice Fiscale) of the declarant',
-          '03. Family Tax Codes: Tax codes for all members of the household',
-          "04. Rent Agreement: Rental contract (Contratto d'affitto)",
-          '05. Mortgage: Residual mortgage capital as of 31/12/2024',
-          '06. Bank Accounts: Accounting balance and average balance (giacenza media) as of 31/12/2024 for current accounts of all household members',
-          '07. Savings/Postal Books: Accounting balance and average balance as of 31/12/2024 for deposit accounts or postal books of all household members',
-          '08. Investments: Euro value as of 31/12/2024 for funds, securities, and investments',
-          '09. Prepaid Cards: Accounting balance and average balance for current accounts and prepaid cards with an IBAN held by the household',
-          '10. Deposit Accounts: Accounting balance and average balance for deposit accounts held by the household',
-          '11. Vehicles: License plate numbers for cars owned by household members',
-          '12. Disability Certification: For disabled or invalid individuals, the latest certification stating the condition (medium disability, severe disability, or non-self-sufficiency)',
+          "01. Documento di riconoscimento del dichiarante (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
+          '02. Codice fiscale dichiarante',
+          '03. Codice fiscale dei membri del nucleo familiare',
+          "04. Contratto d'affitto",
+          '05. Capitale residuo mutuo al 31/12/2024',
+          '06. Saldo contabile e giacenza media al 31/12/2024 dei conti correnti di tutti i membri del nucleo familiare',
+          '07. Saldo contabile e giacenza media al 31/12/2024 dei conti deposito o libretti postali di tutti i membri del nucleo familiare',
+          '08. Controvalore in euro al 31/12/2024 di fondi, titoli e investimenti',
+          '09. Saldo contabile e Giacenza media dei conti correnti e carte prepagate con IBAN, aperti di tutto il nucleo familiare',
+          '10. Saldo contabile e Giacenza media dei conti deposito aperti di tutto il nucleo familiare',
+          '11. Targa delle auto in possesso ai membri del nucleo familiare',
+          '12. Per disabili e invalidi, ultima certificazione attestante la condizione di disabilità media, disabilità grave e non autosufficienza',
         ],
         faqs: [
           {
@@ -134,23 +134,23 @@ const SERVICES_DATA = [
         name: 'ISEE Universitario 2026',
         code: 'ISEE_UNI_2026',
         description:
-          "L'ISEE Universitario è un indicatore determinato da uno specifico tipo di DSU richiesto dello studente per il diritto allo studio",
+          "L'ISEE Università conosciuto anche come ISEEU è un indicatore determinato da una tipologia specifica di DSU richiesta allo studente da Atenei ed Enti per il diritto allo studio per poter accedere ad agevolazioni quali borse di studio, alloggi e servizi mensa",
         category: 'TAX',
         basePrice: 0,
         requiredDocuments: [
-          '01. Valid identity document of the declarant',
-          '02. Health card for all family members',
-          '03. For disabled and invalids, the latest certification attesting to the condition of medium disability, severe disability and non-self-sufficiency',
-          '04. Vehicle registration document/registration or license plate of motor vehicles, motorcycles with an engine capacity of 500 cc and above registered to members of the nucleus',
-          '05. In case of rental, last registered contract',
-          '06. Documentation proving that spousal allowances and child support payments for children living with another parent',
-          '07. Statement issued by the bank certifying the remaining capital of the mortgage',
-          '08. Account balance and average balance of current accounts and prepaid cards with IBAN, opened by the entire household',
-          '09. Account balance and average balance of open deposit accounts for the entire household',
-          '10. Nominal value of government bonds (e.g. BOT, CCT), bonds, certificates of deposit, savings bonds and similar',
-          '11. University Student Tax Code',
-          '12. Name of the University',
-          '13. In case of the presence of an unmarried and non-cohabiting parent: Tax Code of the Unmarried and Non-Cohabiting Parent',
+          '01. Documento di identità in corso di validità del dichiarante',
+          '02. Tessera sanitaria di tutti i componenti del nucleo familiare',
+          '03. Per disabili e invalidi, ultima certificazione attestante la condizione di disabilità media, disabilità grave e non autosufficienza',
+          '04. Libretto di circolazione/registrazione o targa degli autoveicoli, motoveicoli di cilindrata pari a 500 cc e superiore intestati a componenti del nucleo',
+          '05. In caso di locazione, ultimo contratto registrato',
+          '06. Documentazione comprovante gli assegni al coniuge e per il mantenimento dei figli conviventi con altro genitore',
+          '07. Dichiarazione rilasciata dalla banca attestante il capitale residuo del mutuo',
+          '08. Saldo contabile e Giacenza media dei conti correnti e carte prepagate con IBAN, aperti di tutto il nucleo familiare',
+          '09. Saldo contabile e Giacenza media dei conti deposito aperti di tutto il nucleo familiare',
+          '10. Valore nominale di titoli di stato (es. BOT, CCT), obbligazioni, certificati di deposito, buoni fruttiferi e assimilati',
+          '11. Codice Fiscale dello studente Universitario',
+          "12. Nome dell'Università",
+          '13. In caso di presenza di genitore non coniugato e non convivente: Codice Fiscale Genitore non Coniugato e non Convivente',
         ],
         faqs: [
           {
@@ -196,20 +196,20 @@ const SERVICES_DATA = [
         name: 'ISEE Socio-Sanitario 2026',
         code: 'ISEE_SOC_2026',
         description:
-          "ISEE Socio-Sanitario è l'indicatore della situazione economica necessario per ottenere servizi di assistenza domiciliare",
+          "L'ISEE Socio Sanitario è l'indicatore della situazione economica necessario per ottenere prestazioni assistenziali a domicilio o per accedere a strutture residenziali o semiresidenziali, dove viene considerato per definire le tariffe e i contributi a carico dell'utente",
         category: 'TAX',
         basePrice: 0,
         requiredDocuments: [
-          '01. Valid identity document of the declarant',
-          '02. Health card for all family members',
-          '03. For disabled and invalids, the latest certification attesting to the condition of medium disability, severe disability and non-self-sufficiency',
-          '04. Vehicle registration document/registration or license plate of motor vehicles, motorcycles with an engine capacity of 500 cc and above registered to members of the nucleus',
-          '05. In case of rental, last registered contract',
-          '06. Documentation proving that spousal allowances and child support payments for children living with another parent',
-          '07. Statement issued by the bank certifying the remaining capital of the mortgage',
-          '08. Account balance and average balance of current accounts and prepaid cards with IBAN, opened by the entire household',
-          '09. Account balance and average balance of open deposit accounts for the entire household',
-          '10. Nominal value of government bonds (e.g. BOT, CCT), bonds, certificates of deposit, savings bonds and similar',
+          '01. Documento di identità in corso di validità del dichiarante',
+          '02. Tessera sanitaria di tutti i componenti del nucleo familiare',
+          '03. Per disabili e invalidi, ultima certificazione attestante la condizione di disabilità media, disabilità grave e non autosufficienza',
+          '04. Libretto di circolazione/registrazione o targa degli autoveicoli, motoveicoli di cilindrata pari a 500 cc e superiore intestati a componenti del nucleo',
+          '05. In caso di locazione, ultimo contratto registrato',
+          '06. Documentazione comprovante gli assegni al coniuge e per il mantenimento dei figli conviventi con altro genitore',
+          '07. Dichiarazione rilasciata dalla banca attestante il capitale residuo del mutuo',
+          '08. Saldo contabile e Giacenza media dei conti correnti e carte prepagate con IBAN, aperti di tutto il nucleo familiare',
+          '09. Saldo contabile e Giacenza media dei conti deposito aperti di tutto il nucleo familiare',
+          '10. Valore nominale di titoli di stato (es. BOT, CCT), obbligazioni, certificati di deposito, buoni fruttiferi e assimilati',
         ],
         faqs: [
           {
@@ -239,21 +239,21 @@ const SERVICES_DATA = [
         name: 'ISEE Minorenni 2026',
         code: 'ISEE_MIN_2026',
         description:
-          'ISEE Minorenni è un strumento progettato per figli di genitori non coniugati e non conviventi',
+          "L'ISEE Minorenni è uno strumento rivolto ai figli di genitori non sposati né conviventi, ed è utilizzato per fare richiesta di prestazioni sociali o bonus destinati a bambini che si trovano in questa particolare situazione",
         category: 'TAX',
         basePrice: 0,
         requiredDocuments: [
-          '01. Valid identity document of the declarant',
-          '02. Health card for all family members',
-          '03. For disabled and invalids, the latest certification attesting to the condition of medium disability, severe disability and non-self-sufficiency',
-          '04. Vehicle registration document/registration or license plate of motor vehicles, motorcycles with an engine capacity of 500 cc and above registered to members of the nucleus',
-          '05. In case of rental, last registered contract',
-          '06. Documentation proving that spousal allowances and child support payments for children living with another parent',
-          '07. Statement issued by the bank certifying the remaining capital of the mortgage',
-          '08. Account balance and average balance of current accounts and prepaid cards with IBAN, opened by the entire household',
-          '09. Account balance and average balance of open deposit accounts for the entire household',
-          '10. Nominal value of government bonds (e.g. BOT, CCT), bonds, certificates of deposit, savings bonds and similar',
-          '11. Valid identity document of the unmarried and non-cohabiting parent',
+          '01. Documento di identità in corso di validità del dichiarante',
+          '02. Tessera sanitaria di tutti i componenti del nucleo familiare',
+          '03. Per disabili e invalidi, ultima certificazione attestante la condizione di disabilità media, disabilità grave e non autosufficienza',
+          '04. Libretto di circolazione/registrazione o targa degli autoveicoli, motoveicoli di cilindrata pari a 500 cc e superiore intestati a componenti del nucleo',
+          '05. In caso di locazione, ultimo contratto registrato',
+          '06. Documentazione comprovante gli assegni al coniuge e per il mantenimento dei figli conviventi con altro genitore',
+          '07. Dichiarazione rilasciata dalla banca attestante il capitale residuo del mutuo',
+          '08. Saldo contabile e Giacenza media dei conti correnti e carte prepagate con IBAN, aperti di tutto il nucleo familiare',
+          '09. Saldo contabile e Giacenza media dei conti deposito aperti di tutto il nucleo familiare',
+          '10. Valore nominale di titoli di stato (es. BOT, CCT), obbligazioni, certificati di deposito, buoni fruttiferi e assimilati',
+          '11. Documento di identità in corso di validità del genitore non coniugato e non convivente',
         ],
         faqs: [
           {
@@ -299,13 +299,13 @@ const SERVICES_DATA = [
         name: 'ISEE Corrente 2026',
         code: 'ISEE_COR_2026',
         description:
-          "ISEE Corrente è un aggiornamento dell'ISEE ordinario per accedere a bonus, benefici e sussidi che richiedono un indicatore aggiornato",
+          "L'ISEE Corrente è un aggiornamento del tuo ISEE ordinario che tiene conto della tua situazione economica più recente. Serve per riflettere variazioni significative di reddito, patrimonio o nucleo familiare avvenute negli ultimi mesi",
         category: 'TAX',
         basePrice: 24.99,
         requiredDocuments: [
-          '01. Documentation certifying the change in employment/income situation due to job loss or suspension: Letter of dismissal, copy of resignation, unrenewed fixed-term contract, wage supplementation documentation, mobility allowance receipts',
-          '02. Documentation certifying the change in employment/income situation due to a reduction in work activity: Recent pay stubs demonstrating the reduction in hours or salary, Tax returns or accounting documentation certifying a decrease in income greater than 25%',
-          '03. Documentation certifying the change in financial position: Bank and postal account statements updated as of December 31 of the year preceding the year in which the current ISEE was submitted',
+          '01. Documentazione attestante la variazione della situazione lavorativa/reddituale per perdita o sospensione del lavoro: Lettera di licenziamento, copia delle dimissioni, contratto a termine non rinnovato, documentazione cassa integrazione',
+          '02. Documentazione attestante la variazione della situazione lavorativa/reddituale per riduzione dell\'attività lavorativa: Buste paga recenti che dimostrino la riduzione di ore o stipendio, dichiarazioni fiscali o documentazione contabile che certifichi una diminuzione del reddito superiore al 25%',
+          '03. Documentazione attestante la variazione della situazione patrimoniale: Estratti conto bancari e postali aggiornati al 31 dicembre dell\'anno precedente a quello di presentazione dell\'ISEE corrente',
         ],
         faqs: [
           {
@@ -600,10 +600,32 @@ const SERVICES_DATA = [
       {
         name: 'Modello 730',
         code: '730_2026',
-        description: 'Dichiarazione dei redditi mediante modello 730',
+        description:
+          'Il Modello 730/2026 è il modulo semplificato per la dichiarazione dei redditi destinato principalmente a lavoratori dipendenti e pensionati. Permette di dichiarare i redditi percepiti nell\'anno precedente e di ottenere eventuali rimborsi IRPEF direttamente in busta paga o sulla pensione',
         category: 'TAX',
         basePrice: 36.6,
-        requiredDocuments: [],
+        requiredDocuments: [
+          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
+          '02. Codice fiscale richiedente',
+          '03. Codice fiscale familiari a carico',
+          '04. CU (ex CUD) 2026 redditi 2025',
+          '05. Spese sanitarie',
+          '06. Contratto di locazione',
+          '07. Interessi passivi sul mutuo',
+          "08. Spese frequenza di scuole dell'infanzia, del primo ciclo di istruzione e della scuola secondaria di secondo grado",
+          '09. Assicurazione sulla vita, infortuni, invalidità, non autosufficienza superiore al 5% e eventi calamitosi (contratto e quietanze)',
+          '10. Spese funebri',
+          '11. Spese frequenza corsi istruzione universitaria presso università statali e non statali',
+          '12. Spese per addetti all\'assistenza personale',
+          '13. Spese per attività sportive dei ragazzi',
+          '14. Spese Veterinarie',
+          '15. Spese asilo nido',
+          '16. Versamenti ONLUS',
+          '17. Contributi previdenziali assistenziali',
+          '18. Contributi servizi domestici',
+          '19. Spese di ristrutturazione',
+          '20. Spese condominiali straordinarie',
+        ],
         faqs: [
           {
             question:
@@ -678,10 +700,13 @@ const SERVICES_DATA = [
         name: 'Integrazione 730',
         code: '730INT_2026',
         description:
-          'Integrazione della dichiarazione dei redditi mediante modello 730',
+          'Il Modello 730 Integrativo ti permette di correggere o integrare la tua dichiarazione dei redditi già inviata, assicurandoti di non perdere opportunità fiscali o di sanare eventuali inesattezze',
         category: 'TAX',
         basePrice: 12.2,
-        requiredDocuments: [],
+        requiredDocuments: [
+          '01. Copia del Modello 730 originario già presentato',
+          '02. Documenti relativi alle nuove informazioni/correzioni',
+        ],
         faqs: [
           {
             question:
@@ -958,65 +983,125 @@ const SERVICES_DATA = [
       {
         name: 'Rinnovo Permesso Soggiorno per Lavoro Subordinato',
         code: 'RINN_PERM_LAV_2026',
-        description: 'Rinnovo del permesso di soggiorno per lavoro subordinato',
+        description:
+          'Compilazione del modulo per il Rinnovo del permesso di soggiorno per lavoro subordinato. Rivolto ai cittadini extracomunitari che richiedono il rilascio/rinnovo del permesso di soggiorno per motivi di lavoro subordinato',
         category: 'IMMIGRATION',
         basePrice: 44.99,
-        requiredDocuments: [],
+        requiredDocuments: [
+          "01. Carta d'identità del richiedente",
+          '02. Codice Fiscale del richiedente',
+          '03. Permesso di soggiorno del richiedente',
+          '04. Passaporto del richiedente',
+          '05. Mod. Unilav',
+          '06. Ultima CU',
+          '07. Ultima Busta Paga in possesso',
+          '08. Se ha sposato/sposata: Documenti d\'identità del marito/moglie',
+          '09. Se ha figli minori di 14 anni a carico: Tessera Sanitaria Figlio/i',
+        ],
         faqs: [],
       },
       {
         name: 'Rinnovo Permesso Soggiorno per Lavoro Autonomo',
         code: 'RINN_PERM_AUT_2026',
-        description: 'Rinnovo del permesso di soggiorno per lavoro autonomo',
+        description:
+          'La domanda di rinnovo del Permesso di Soggiorno per continuare a soggiornare in Italia per motivi di lavoro autonomo quando il permesso sia in scadenza o scaduto',
         category: 'IMMIGRATION',
         basePrice: 44.99,
-        requiredDocuments: [],
+        requiredDocuments: [
+          "01. Carta d'identità del richiedente",
+          '02. Codice Fiscale del richiedente',
+          '03. Permesso di soggiorno in possesso del richiedente',
+          '04. Passaporto del richiedente',
+          '05. Certificati di attribuzione della P.Iva/Visura Camerale',
+          '06. Ultimo Modello Redditi in possesso',
+          '07. Se ha coniuge a carico: codice fiscale del Coniuge',
+          '08. Se ha figli minori di 14 anni a carico: codice fiscale del/i Figlio/i',
+        ],
         faqs: [],
       },
       {
         name: 'Rinnovo Permesso Soggiorno per Motivi Familiari',
         code: 'RINN_PERM_FAM_2026',
-        description: 'Rinnovo del permesso di soggiorno per motivi familiari',
+        description:
+          'La domanda di rinnovo del Permesso di Soggiorno per continuare a soggiornare in Italia per Motivi Familiari quando il permesso sia in scadenza o scaduto',
         category: 'IMMIGRATION',
         basePrice: 44.99,
-        requiredDocuments: [],
+        requiredDocuments: [
+          '01. Passaporto del richiedente',
+          '02. Codice Fiscale del richiedente',
+          '03. Permesso di soggiorno del richiedente',
+          "04. Documento d'identità del coniuge",
+          '05. Codice fiscale del coniuge',
+          '06. Eventuale permesso di soggiorno del coniuge',
+          '07. Se ha figli minori di 14 anni a carico: Permesso di soggiorno figlio/i',
+        ],
         faqs: [],
       },
       {
         name: 'Rinnovo Permesso Soggiorno per Studenti',
         code: 'RINN_PERM_STU_2026',
-        description: 'Rinnovo del permesso di soggiorno per studenti',
+        description:
+          'Rinnovo del permesso di soggiorno per studenti extracomunitari che frequentano corsi di istruzione in Italia',
         category: 'IMMIGRATION',
         basePrice: 44.99,
-        requiredDocuments: [],
+        requiredDocuments: [
+          "01. Carta d'identità del richiedente",
+          '02. Codice Fiscale del richiedente',
+          '03. Permesso di soggiorno del richiedente',
+          '04. Passaporto del richiedente',
+          "05. Certificato di iscrizione all'istituto scolastico/università",
+          '06. Documentazione attestante la copertura sanitaria',
+        ],
         faqs: [],
       },
       {
         name: 'Rinnovo Permesso Soggiorno per Asilo/Protezione',
         code: 'RINN_PERM_ASI_2026',
-        description: 'Rinnovo del permesso di soggiorno per asilo/protezione',
+        description:
+          'Rinnovo del permesso di soggiorno per richiedenti asilo o titolari di protezione internazionale',
         category: 'IMMIGRATION',
         basePrice: 44.99,
-        requiredDocuments: [],
+        requiredDocuments: [
+          "01. Carta d'identità del richiedente",
+          '02. Codice Fiscale del richiedente',
+          '03. Permesso di soggiorno del richiedente',
+          '04. Passaporto del richiedente (se disponibile)',
+          '05. Documentazione relativa allo status di protezione',
+        ],
         faqs: [],
       },
       {
         name: 'Aggiornamento Carta di Soggiorno',
         code: 'AGG_PERM_2026',
-        description: 'Aggiornamento della carta di soggiorno per cambio dati',
+        description:
+          'Aggiornamento della carta di soggiorno per cambio dati anagrafici o foto',
         category: 'IMMIGRATION',
         basePrice: 44.99,
-        requiredDocuments: [],
+        requiredDocuments: [
+          "01. Carta d'identità del richiedente",
+          '02. Codice Fiscale del richiedente',
+          '03. Carta di soggiorno attuale',
+          '04. Passaporto del richiedente',
+          '05. Documenti relativi alle variazioni da comunicare',
+        ],
         faqs: [],
       },
       {
         name: 'Rilascio Carta di Soggiorno per soggiornanti di lungo periodo',
         code: 'RILASC_CART_2026',
         description:
-          'Rilascio della carta di soggiorno per soggiornanti di lungo periodo',
+          'Rilascio della carta di soggiorno per soggiornanti di lungo periodo (Permesso UE)',
         category: 'IMMIGRATION',
         basePrice: 44.99,
-        requiredDocuments: [],
+        requiredDocuments: [
+          "01. Carta d'identità del richiedente",
+          '02. Codice Fiscale del richiedente',
+          '03. Permesso di soggiorno attuale',
+          '04. Passaporto del richiedente',
+          '05. CU o modello redditi degli ultimi anni',
+          '06. Certificato di idoneità alloggiativa',
+          '07. Certificato di lingua italiana livello A2',
+        ],
         faqs: [],
       },
     ],
@@ -1464,79 +1549,6 @@ const SERVICES_DATA = [
         ],
         faqs: [],
       },
-      {
-        name: 'Maternità Obbligatoria Post Parto',
-        code: 'MATERN_OBB_POST_2026',
-        description:
-          'Il congedo di maternità obbligatoria da conseguire post parto',
-        category: 'SOCIAL',
-        basePrice: 0,
-        requiredDocuments: ['01. Codice fiscale del neonato/dei neonati'],
-        faqs: [],
-      },
-      {
-        name: 'Indennità di Maternità Obbligatoria Dipendenti',
-        code: 'MATERN_OBB_DIP_2026',
-        description:
-          'Il congedo di maternità è il periodo di astensione obbligatoria dal lavoro riconosciuto alle lavoratrici dipendenti durante la gravidanza e il puerperio',
-        category: 'SOCIAL',
-        basePrice: 0,
-        requiredDocuments: [
-          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
-          '02. Codice fiscale richiedente',
-          '03. Eventuale permesso di soggiorno',
-          '04. Certificato di gravidanza telematico che attesta la data presunta del parto',
-          '05. Eventuale certificato medico (del medico del lavoro) o autodichiarazione del datore di lavoro',
-        ],
-        faqs: [],
-      },
-      {
-        name: 'Maternità Anticipata Dipendenti',
-        code: 'MATERN_ANT_DIP_2026',
-        description:
-          "Il congedo di maternità è il periodo di astensione obbligatoria dal lavoro durante la gravidanza e il puerperio. Si può scegliere la maternità flessibile purché vi sia un attestato del medico che certifichi l'assenza di rischio",
-        category: 'SOCIAL',
-        basePrice: 0,
-        requiredDocuments: [
-          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
-          '02. Codice fiscale richiedente',
-          '03. Eventuale permesso di soggiorno',
-          '04. Certificato di gravidanza telematico che attesta la data presunta del parto',
-          "05. Certificato medico rilasciato dall'ASL o dalla direzione territoriale competente",
-          '06. Certificato di interdizione anticipata rilasciato dalla Direzione Territoriale del Lavoro',
-        ],
-        faqs: [],
-      },
-      {
-        name: 'Congedo Parentale Gestione Separata',
-        code: 'CONG_PAR_GS_2026',
-        description:
-          'Il congedo parentale è un periodo di astensione facoltativo dal lavoro concesso ai genitori. Per lavoratrici autonome iscritte alla gestione separata INPS',
-        category: 'SOCIAL',
-        basePrice: 0,
-        requiredDocuments: [
-          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
-          '02. Codice fiscale richiedente',
-          '03. Codice fiscale altro genitore se presente',
-          '04. Codice fiscale del minore',
-        ],
-        faqs: [],
-      },
-      {
-        name: 'Congedo Parentale Autonomi',
-        code: 'CONG_PAR_AUT_2026',
-        description:
-          'Il congedo parentale è un periodo di astensione facoltativo dal lavoro concesso ai genitori lavoratori autonomi per prendersi cura del bambino nei primi anni di vita',
-        category: 'SOCIAL',
-        basePrice: 0,
-        requiredDocuments: [
-          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
-          '02. Codice fiscale richiedente',
-          '03. Codice fiscale altro genitore se presente',
-          '04. Codice fiscale del minore',
-        ],
-        faqs: [],
-      },
     ],
   },
 
@@ -1553,183 +1565,14 @@ const SERVICES_DATA = [
         description:
           "L'invalidità civile è una misura di assistenza sociale che garantisce assistenza sociale e mantenimento agli inabili al lavoro",
         category: 'SOCIAL',
-        basePrice: 0,
+        basePrice: 29.99,
         requiredDocuments: [],
         faqs: [],
-      },
-      {
-        name: 'Permessi 104/92 per Assistenza Familiari Disabili',
-        code: 'PERM_104_2026',
-        description:
-          'La Legge n. 104/92 concede ai lavoratori con disabilità grave il diritto di usufruire di tre giorni di permesso retribuito al mese, oppure di due ore di permesso al giorno',
-        category: 'SOCIAL',
-        basePrice: 0,
-        requiredDocuments: [
-          "01. Documento di riconoscimento del familiare disabile (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
-          '02. Codice fiscale del familiare disabile',
-          '03. Verbale riconoscimento Handicap',
-          "04. Busta paga dell'attuale datore di lavoro",
-        ],
-        faqs: [
-          {
-            question:
-              'Quali sono i benefici dei permessi previsti dalla Legge 104/92?',
-            answer:
-              'I benefici includono la possibilità di fruire di giorni o ore di permesso retribuito per i lavoratori con disabilità grave o per coloro che assistono familiari con disabilità grave.',
-            order: 1,
-            category: 'Benefici',
-          },
-          {
-            question: 'Chi ha diritto ai permessi della Legge 104/92?',
-            answer:
-              'Hanno diritto ai permessi coloro che sono riconosciuti come portatori di disabilità grave secondo quanto stabilito dalla Legge 104/92, così come i lavoratori che assistono familiari con disabilità grave.',
-            order: 2,
-            category: 'Requisiti',
-          },
-          {
-            question:
-              'Qual è la durata massima dei permessi retribuiti previsti dalla Legge 104/92?',
-            answer:
-              'La durata massima è di tre giorni al mese per i lavoratori con disabilità grave, e lo stesso vale per i lavoratori che assistono familiari con disabilità grave.',
-            order: 3,
-            category: 'Durata',
-          },
-          {
-            question:
-              'È possibile utilizzare i permessi della Legge 104/92 in modo frazionato?',
-            answer:
-              'Sì, i permessi possono essere utilizzati anche in modo frazionato, sia a livello giornaliero che orario, a seconda delle esigenze del lavoratore e della situazione familiare.',
-            order: 4,
-            category: 'Modalità',
-          },
-          {
-            question:
-              'I permessi della Legge 104/92 comportano una diminuzione del salario?',
-            answer:
-              'No, i permessi sono retribuiti e non comportano una diminuzione del salario per il lavoratore che ne usufruisce.',
-            order: 5,
-            category: 'Retribuzione',
-          },
-        ],
       },
     ],
   },
 
-  // 16. Pensione
-  {
-    serviceType: {
-      name: 'Pensione',
-      description: 'Servizi per la pensione',
-    },
-    services: [
-      {
-        name: 'Estratto Conto Certificato e Calcolo Pensione',
-        code: 'EST_CERT_PENS_2026',
-        description:
-          "Richiesta dell'estratto conto certificativo utile al calcolo della pensione e il calcolo effettivo del periodo che manca per andare in pensione",
-        category: 'SOCIAL',
-        basePrice: 0,
-        requiredDocuments: [
-          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
-          '02. Codice fiscale richiedente',
-        ],
-        faqs: [
-          {
-            question: 'In quanto tempo viene elaborata la mia richiesta?',
-            answer:
-              "Il team trasmette la richiesta dell'estratto conto certificato entro 6h dalla richiesta, l'INPS emette il documento entro 30 giorni e lo riceviamo noi tramite PEC. Una volta ricevuto procediamo con il calcolo del periodo mancante alla pensione e glielo comunichiamo.",
-            order: 1,
-            category: 'Tempistiche',
-          },
-        ],
-      },
-      {
-        name: 'Assegno Sociale',
-        code: 'ASS_SOCIALE_2026',
-        description:
-          "L'assegno sociale è una prestazione economica a sostegno dei cittadini italiani e stranieri residenti in Italia che si trovano in condizioni economiche disagiate. A differenza della pensione di vecchiaia, l'assegno sociale non richiede il versamento di contributi previdenziali",
-        category: 'SOCIAL',
-        basePrice: 0,
-        requiredDocuments: [],
-        faqs: [],
-      },
-      {
-        name: 'Pensione Indiretta',
-        code: 'PENS_IND_2026',
-        description:
-          "La pensione ai superstiti è un trattamento pensionistico riconosciuto in caso di decesso dell'assicurato in favore dei familiari superstiti",
-        category: 'SOCIAL',
-        basePrice: 0,
-        requiredDocuments: [
-          "01. Carta d'identità richiedente",
-          '02. Codice fiscale/Tessera Sanitaria del richiedente',
-          "03. Carta d'identità della persona deceduta",
-          '04. Codice fiscale/Tessera Sanitaria della persona deceduta',
-          '05. Codice IBAN del titolare (dichiarante) della pensione',
-          '06. Codice fiscale/Tessera Sanitaria dei familiari che hanno diritto alla pensione',
-        ],
-        faqs: [],
-      },
-      {
-        name: 'Ricostituzione Reddituale',
-        code: 'RICOST_REDD_2026',
-        description:
-          "Il servizio di ricostituzione reddituale INPS è una procedura amministrativa che consente ai pensionati di comunicare all'INPS redditi diversi dalla pensione percepiti dopo la data di decorrenza del trattamento pensionistico",
-        category: 'SOCIAL',
-        basePrice: 0,
-        requiredDocuments: [
-          "01. Documento d'identità valido del richiedente (fronte e retro)",
-          '02. Codice fiscale del richiedente',
-          '03. Codice fiscale del coniuge e dei familiari a carico (se rilevante)',
-          '04. Eventuale lettera ricevuta da INPS',
-        ],
-        faqs: [
-          {
-            question:
-              "Cos'è la ricostituzione reddituale INPS e a cosa serve?",
-            answer:
-              "La ricostituzione reddituale INPS è il servizio che permette ai pensionati di comunicare all'INPS i redditi percepiti dopo la pensione (lavoro, affitti, ecc.) per verificare il cumulo pensione-reddito e assicurare un adeguamento pensione corretto.",
-            order: 1,
-            category: 'Definizione',
-          },
-          {
-            question:
-              'Chi deve richiedere la ricostituzione reddituale INPS?',
-            answer:
-              'Devono richiedere la ricostituzione reddituale INPS i pensionati INPS (sia pubblici che privati) che, dopo essere andati in pensione, hanno iniziato a percepire redditi aggiuntivi di qualsiasi natura.',
-            order: 2,
-            category: 'Requisiti',
-          },
-          {
-            question:
-              "Come si fa la domanda di ricostituzione reddituale all'INPS?",
-            answer:
-              "La domanda di ricostituzione reddituale INPS può essere presentata online tramite il sito INPS con SPID/CIE/CNS, tramite Patronato o tramite il Contact Center INPS.",
-            order: 3,
-            category: 'Procedura',
-          },
-          {
-            question:
-              "Perché è importante comunicare i redditi all'INPS dopo la pensione?",
-            answer:
-              "Comunicare i redditi post-pensione all'INPS tramite la ricostituzione reddituale è importante per rispettare gli obblighi di legge sul cumulo pensione-reddito, evitare indebiti pensionistici e garantire la corretta erogazione della pensione.",
-            order: 4,
-            category: 'Importanza',
-          },
-          {
-            question:
-              'Quali sono le conseguenze della ricostituzione reddituale INPS?',
-            answer:
-              "La ricostituzione reddituale INPS può portare alla conferma dell'importo pensionistico, a un suo adeguamento (generalmente una riduzione se si superano i limiti di cumulo), o alla necessità di adempiere a specifici obblighi di comunicazione verso l'INPS.",
-            order: 5,
-            category: 'Conseguenze',
-          },
-        ],
-      },
-    ],
-  },
-
-  // 17. Dichiarazione Redditi
+  // 16. Dichiarazione Redditi
   {
     serviceType: {
       name: 'Dichiarazione Redditi',
@@ -1930,7 +1773,7 @@ const SERVICES_DATA = [
     ],
   },
 
-  // 18. Partita IVA
+  // 17. Partita IVA
   {
     serviceType: {
       name: 'Partita IVA',
@@ -2132,7 +1975,7 @@ const SERVICES_DATA = [
     ],
   },
 
-  // 19. Contratti Locazione
+  // 18. Contratti Locazione
   {
     serviceType: {
       name: 'Contratti di Locazione',
@@ -2152,7 +1995,7 @@ const SERVICES_DATA = [
     ],
   },
 
-  // 20. Sostegno Famiglie
+  // 19. Sostegno Famiglie
   {
     serviceType: {
       name: 'Sostegno alle Famiglie',
@@ -2195,10 +2038,15 @@ const SERVICES_DATA = [
       {
         name: 'Assegno di Inclusione',
         code: 'ASS_INCL_2026',
-        description: 'Assegno di inclusione',
+        description:
+          "L'Assegno di inclusione è una misura di sostegno economico e di inclusione sociale e professionale, condizionata al possesso di requisiti di residenza, cittadinanza e soggiorno, alla prova dei mezzi sulla base dell'ISEE",
         category: 'SOCIAL',
         basePrice: 24.4,
-        requiredDocuments: [],
+        requiredDocuments: [
+          "01. Carta d'identità richiedente",
+          '02. Codice Fiscale richiedente',
+          '03. Attestazione ISEE con valore inferiore o uguale a 9.360€',
+        ],
         faqs: [
           {
             question: "Quanti anni di residenza devo avere per chiedere l'ADI?",
@@ -2280,28 +2128,48 @@ const SERVICES_DATA = [
       {
         name: 'Bonus Asilo Nido',
         code: 'BON_ASILO_2026',
-        description: 'Bonus asilo nido',
+        description:
+          'Il Bonus Asilo Nido è una misura di sostegno economico rivolta alle famiglie con figli fino ai 3 anni di età, erogato sotto forma di rimborso delle spese sostenute fino a 3.000,00€',
         category: 'SOCIAL',
         basePrice: 24.4,
-        requiredDocuments: [],
+        requiredDocuments: [
+          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
+          '02. Codice fiscale richiedente',
+          '03. Eventuale permesso di soggiorno',
+          '04. Codice fiscale figlio per il quale chiedi il bonus',
+          "05. Ricevute di pagamento delle rette dell'asilo",
+          "06. Certificato d'iscrizione all'asilo",
+        ],
         faqs: [],
       },
       {
         name: 'Bonus Nuovi Nati',
         code: 'BON_NATI_SOC_2026',
-        description: 'Bonus per nuovi nati',
+        description:
+          'Il Bonus Nuovi Nati è un contributo economico erogato dallo Stato per sostenere le famiglie in occasione della nascita o dell\'adozione di un bambino',
         category: 'SOCIAL',
         basePrice: 24.4,
-        requiredDocuments: [],
+        requiredDocuments: [
+          "01. Documento d'identità valido del genitore richiedente",
+          '02. Codice fiscale del genitore richiedente e del bambino/i',
+          '03. Attestazione ISEE minorenni in corso di validità (non superiore a 40.000 euro)',
+          '04. Permesso di soggiorno valido (per cittadini non UE)',
+          '05. IBAN del genitore richiedente',
+        ],
         faqs: [],
       },
       {
         name: 'Aggiornamento Assegno Unico',
         code: 'AGG_ASS_UNIV_2026',
-        description: 'Aggiornamento ISEE assegno unico',
+        description:
+          "L'Aggiornamento dell'Assegno Unico permette di apportare modifiche e aggiornamenti ai dati relativi all'Assegno Unico in corso di erogazione, come la modifica dell'IBAN",
         category: 'SOCIAL',
         basePrice: 24.4,
-        requiredDocuments: [],
+        requiredDocuments: [
+          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
+          '02. Codice fiscale richiedente',
+          '03. Documenti relativi ai dati da integrare',
+        ],
         faqs: [
           {
             question:
@@ -2332,10 +2200,14 @@ const SERVICES_DATA = [
       {
         name: 'PAD Assegno di Inclusione',
         code: 'PAD_ASS_INCL_2026',
-        description: 'PAD per assegno di inclusione',
+        description:
+          "Il Patto di Attivazione Digitale (PAD) è un accordo tra il beneficiario dell'Assegno di Inclusione e i servizi per l'impiego. Rappresenta il primo passo per l'attivazione di percorsi personalizzati di inclusione sociale e lavorativa",
         category: 'SOCIAL',
         basePrice: 24.4,
-        requiredDocuments: [],
+        requiredDocuments: [
+          "01. Carta d'identità",
+          '02. Codice fiscale',
+        ],
         faqs: [
           {
             question: "Cos'è il PAD ADI?",
@@ -2367,19 +2239,10 @@ const SERVICES_DATA = [
           },
         ],
       },
-      {
-        name: 'Assegno Sociale',
-        code: 'ASS_SOCIALE_SOST_2026',
-        description: 'Domanda di Assegno Sociale (sotto Sostegno alle Famiglie)',
-        category: 'SOCIAL',
-        basePrice: 0,
-        requiredDocuments: [],
-        faqs: [],
-      },
     ],
   },
 
-  // 21. Certificati
+  // 20. Certificati
   {
     serviceType: {
       name: 'Certificati',
@@ -2393,7 +2256,10 @@ const SERVICES_DATA = [
           'Certificati anagrafici: Residenza, Stato di Famiglia, Stato Civile. Prezzo per ciascun certificato richiesto.',
         category: 'ADMINISTRATIVE',
         basePrice: 12.2,
-        requiredDocuments: [],
+        requiredDocuments: [
+          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
+          '02. Codice fiscale richiedente',
+        ],
         faqs: [],
       },
       {
@@ -2403,7 +2269,10 @@ const SERVICES_DATA = [
           'Certificati penali: Casellario Giudiziale (Penale), Casellario dei Carichi Pendenti. Prezzo per ciascun certificato richiesto.',
         category: 'ADMINISTRATIVE',
         basePrice: 70,
-        requiredDocuments: [],
+        requiredDocuments: [
+          "01. Documento di riconoscimento (Carta d'identità fronte e retro - Patente fronte e retro - Passaporto)",
+          '02. Codice fiscale richiedente',
+        ],
         faqs: [],
       },
     ],
