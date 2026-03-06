@@ -39,9 +39,15 @@ const SERVICE_REQUEST_STATUSES = {
   COMPLETED: 'completed',
   CLOSED: 'closed',
   REJECTED: 'rejected',
+  PAYMENT_PENDING: 'payment_pending',
+  AWAITING_FORM: 'awaiting_form',
+  AWAITING_DOCUMENTS: 'awaiting_documents',
 };
 
 const ALLOWED_STATUS_TRANSITIONS = {
+  payment_pending: ['awaiting_form', 'closed'],
+  awaiting_form: ['draft', 'closed'],
+  awaiting_documents: ['draft', 'closed'],
   draft: ['submitted', 'closed'],
   submitted: ['in_review', 'missing_documents', 'closed'],
   in_review: ['missing_documents', 'completed', 'rejected'],
@@ -337,8 +343,9 @@ export class ServiceRequestsService {
   }
 
   /**
-   * Step 2: Submit questionnaire answers
+   * Step 2: Submit questionnaire answers with optional documents
    * User fills out the form after payment (or immediately for free services)
+   * Can also upload documents together with the questionnaire
    * Validates: If service is paid, payment must be completed
    * If service is free, no payment validation needed
    */
@@ -346,6 +353,7 @@ export class ServiceRequestsService {
     serviceRequestId: string,
     userId: string,
     formData: any,
+    files?: Record<string, Express.Multer.File[]>,
   ) {
     const serviceRequest = await this.serviceRequestRepository.findOne({
       where: { id: serviceRequestId, userId },
@@ -381,10 +389,75 @@ export class ServiceRequestsService {
     }
     // For free services, no payment validation needed
 
+    // Parse formData if it's a JSON string (for multipart form-data support)
+    let parsedFormData = formData;
+    if (typeof formData === 'string') {
+      try {
+        parsedFormData = JSON.parse(formData);
+      } catch (error) {
+        throw new BadRequestException('Invalid formData JSON');
+      }
+    }
+
     // Update service request with form data
-    serviceRequest.formData = formData;
+    serviceRequest.formData = parsedFormData;
     serviceRequest.formCompletedAt = new Date();
-    serviceRequest.status = 'awaiting_documents';
+    // Change to 'draft' instead of 'awaiting_documents' - user will submit after this
+    serviceRequest.status = 'draft';
+
+    // Process document uploads if files are provided
+    const uploadedDocuments = [];
+    if (files && Object.keys(files).length > 0) {
+      const service = serviceRequest.service;
+      const documentRequirements = service.documentRequirements || [];
+
+      // Validate and upload files
+      for (const [fieldName, uploadedFiles] of Object.entries(files)) {
+        if (!uploadedFiles || uploadedFiles.length === 0) continue;
+
+        const docReq = documentRequirements.find(
+          (r) => r.fieldName === fieldName,
+        );
+
+        // Validate file count
+        if (docReq && docReq.maxCount && uploadedFiles.length > docReq.maxCount) {
+          throw new BadRequestException(
+            `Too many files for ${docReq.label}. Max: ${docReq.maxCount}`,
+          );
+        }
+
+        for (const file of uploadedFiles) {
+          // Validate file against requirements
+          if (docReq) {
+            this.validateFile(file, docReq);
+          } else {
+            // Basic validation for unknown document types
+            this.validateFile(file, {
+              fieldName: fieldName,
+              label: fieldName,
+              documentType: 'other',
+              required: false,
+              maxCount: 10,
+              maxSizeMB: 10,
+              acceptedFormats: ['pdf', 'jpg', 'jpeg', 'png'],
+            });
+          }
+
+          // Upload to S3 and save to database
+          const doc = await this.uploadServiceRequestDocument(
+            file,
+            serviceRequestId,
+            userId,
+            docReq?.documentType || 'other',
+            docReq?.required || false,
+          );
+          uploadedDocuments.push(doc);
+        }
+      }
+
+      // Update document upload timestamp
+      serviceRequest.documentsUploadedAt = new Date();
+    }
 
     await this.serviceRequestRepository.save(serviceRequest);
 
@@ -392,45 +465,47 @@ export class ServiceRequestsService {
     await this.statusHistoryRepository.save({
       serviceRequestId: serviceRequest.id,
       fromStatus: 'awaiting_form',
-      toStatus: 'awaiting_documents',
+      toStatus: 'draft',
       changedById: userId,
-      notes: 'Questionnaire submitted',
+      notes: uploadedDocuments.length > 0
+        ? `Questionnaire submitted with ${uploadedDocuments.length} documents`
+        : 'Questionnaire submitted',
     });
 
-    // Get required documents
-    const requiredDocs = (serviceRequest.service.documentRequirements || [])
-      .filter((doc) => doc.required)
-      .map((doc) => ({
-        fieldName: doc.fieldName,
-        label: doc.label,
-        description: doc.description,
-        maxCount: doc.maxCount,
-        allowedMimeTypes: doc.allowedMimeTypes,
-        maxSizeBytes: doc.maxSizeBytes,
-      }));
-
     // Send notifications
+    const notificationMessage = uploadedDocuments.length > 0
+      ? `Questionnaire and ${uploadedDocuments.length} document(s) submitted for ${serviceRequest.service.name}. Submit when ready.`
+      : `Questionnaire completed for ${serviceRequest.service.name}. You can upload documents and submit when ready.`;
+
     await this.notificationsService.send({
       userId,
       title: '📋 Questionnaire Completed',
-      message: `Great! Now please upload the required documents for ${serviceRequest.service.name}`,
+      message: notificationMessage,
       type: 'success',
-      actionUrl: `/service-requests/${serviceRequest.id}/documents`,
+      actionUrl: `/service-requests/${serviceRequest.id}`,
     });
 
     this.logger.log(
-      `Questionnaire submitted for service request ${serviceRequestId}`,
+      `Questionnaire submitted for service request ${serviceRequestId}` +
+        (uploadedDocuments.length > 0 ? ` with ${uploadedDocuments.length} documents` : ''),
     );
 
     return {
       success: true,
-      message:
-        'Questionnaire submitted successfully. Please upload required documents.',
+      message: uploadedDocuments.length > 0
+        ? `Questionnaire and ${uploadedDocuments.length} documents submitted successfully. You can now submit the service request.`
+        : 'Questionnaire submitted successfully. You can upload documents and submit when ready.',
       data: {
         serviceRequestId: serviceRequest.id,
         status: serviceRequest.status,
-        requiredDocuments: requiredDocs,
-        nextStep: 'upload_documents',
+        documentsUploaded: uploadedDocuments.length,
+        documents: uploadedDocuments.map((doc) => ({
+          id: doc.id,
+          filename: doc.filename,
+          category: doc.category,
+          status: doc.status,
+        })),
+        nextStep: 'submit',
       },
     };
   }

@@ -81,22 +81,22 @@ export class ServiceRequestsController {
     });
   }
 
-  // ========== PAYMENT → QUESTIONNAIRE → DOCUMENTS WORKFLOW ==========
+  // ========== PAYMENT → QUESTIONNAIRE (WITH DOCUMENTS) → SUBMIT WORKFLOW ==========
 
   /**
    * Step 1: Initiate service request
    * - If service price > 0: Creates payment workflow (payment_pending status) → User completes payment → Step 2
    * - If service price = 0: Skips payment entirely, goes directly to questionnaire (awaiting_form status) → Step 2
    *
-   * FREE SERVICES (price = 0): Only 2 steps total
+   * FREE SERVICES (price = 0): 3 steps total
    *   1. Initiate (this endpoint) → awaiting_form status
-   *   2. Submit questionnaire → awaiting_documents status
-   *   3. Upload documents → submitted status
+   *   2. Submit questionnaire with documents → draft status
+   *   3. Submit service request → submitted status
    *
-   * PAID SERVICES (price > 0): 3 steps total
+   * PAID SERVICES (price > 0): 4 steps total
    *   1. Initiate (this endpoint) → payment_pending status → Complete payment → awaiting_form status
-   *   2. Submit questionnaire → awaiting_documents status
-   *   3. Upload documents → submitted status
+   *   2. Submit questionnaire with documents → draft status
+   *   3. Submit service request → submitted status
    */
   @Post('initiate')
   @UseGuards(JwtAuthGuard, PermissionsGuard)
@@ -133,11 +133,13 @@ export class ServiceRequestsController {
   }
 
   /**
-   * Step 2: Submit questionnaire
+   * Step 2: Submit questionnaire with optional documents
    * - For PAID services: Submit after payment is completed
    * - For FREE services: Submit immediately after Step 1 (no payment required)
+   * - Documents can be uploaded together with the questionnaire (optional)
    *
    * This is Step 2 for both free and paid services
+   * After this step, user can call /submit to finalize the service request
    */
   @Patch(':id/questionnaire')
   @UseGuards(PermissionsGuard)
@@ -147,24 +149,108 @@ export class ServiceRequestsController {
     action: 'QUESTIONNAIRE_SUBMITTED',
     resourceType: 'service_request',
   })
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'identityDocument', maxCount: 1 },
+      { name: 'fiscalCode', maxCount: 1 },
+      { name: 'incomeCertificate', maxCount: 1 },
+      { name: 'bankStatement', maxCount: 1 },
+      { name: 'propertyDocument', maxCount: 1 },
+      { name: 'visuraCatastale', maxCount: 1 },
+      { name: 'cuCertificate', maxCount: 1 },
+      { name: 'propertyDeed', maxCount: 1 },
+      { name: 'medicalReceipts', maxCount: 5 },
+      { name: 'expenseReceipts', maxCount: 5 },
+      { name: 'incomeDocuments', maxCount: 5 },
+      { name: 'familyDocuments', maxCount: 5 },
+      { name: 'otherDocument', maxCount: 10 },
+    ]),
+  )
+  @ApiConsumes('multipart/form-data')
   @ApiOperation({
     summary:
-      '[Customer] Step 2: Submit questionnaire (for both free and paid services)',
+      '[Customer] Step 2: Submit questionnaire with optional documents',
     description:
-      'FREE SERVICES: Submit immediately after initiation. PAID SERVICES: Submit after payment completed. Status: awaiting_form → awaiting_documents',
+      'Submit questionnaire answers and optionally upload documents in a single request. ' +
+      'FREE SERVICES: Submit immediately after initiation. PAID SERVICES: Submit after payment completed. ' +
+      'Status: awaiting_form → draft. After this, call /submit to finalize.',
   })
   @ApiBody({
+    description:
+      'Submit questionnaire with optional documents. formData must be a JSON string when uploading files.',
     schema: {
       type: 'object',
       properties: {
         formData: {
-          type: 'object',
-          description: 'Questionnaire answers as JSON object',
-          example: {
-            familyMembers: 4,
-            hasDisabledMembers: true,
-            income: 25000,
-          },
+          type: 'string',
+          description:
+            'Questionnaire answers as JSON string (e.g., {"familyMembers":4,"income":25000})',
+          example: '{"familyMembers":4,"hasDisabledMembers":true,"income":25000}',
+        },
+        identityDocument: {
+          type: 'string',
+          format: 'binary',
+          description: 'Identity Document (optional)',
+        },
+        fiscalCode: {
+          type: 'string',
+          format: 'binary',
+          description: 'Fiscal Code (optional)',
+        },
+        incomeCertificate: {
+          type: 'string',
+          format: 'binary',
+          description: 'Income Certificate (optional)',
+        },
+        bankStatement: {
+          type: 'string',
+          format: 'binary',
+          description: 'Bank Statement (optional)',
+        },
+        propertyDocument: {
+          type: 'string',
+          format: 'binary',
+          description: 'Property Document (optional)',
+        },
+        visuraCatastale: {
+          type: 'string',
+          format: 'binary',
+          description: 'Visura Catastale (optional)',
+        },
+        cuCertificate: {
+          type: 'string',
+          format: 'binary',
+          description: 'CU Certificate (optional)',
+        },
+        propertyDeed: {
+          type: 'string',
+          format: 'binary',
+          description: 'Property Deed (optional)',
+        },
+        medicalReceipts: {
+          type: 'array',
+          items: { type: 'string', format: 'binary' },
+          description: 'Medical Receipts (up to 5 files, optional)',
+        },
+        expenseReceipts: {
+          type: 'array',
+          items: { type: 'string', format: 'binary' },
+          description: 'Expense Receipts (up to 5 files, optional)',
+        },
+        incomeDocuments: {
+          type: 'array',
+          items: { type: 'string', format: 'binary' },
+          description: 'Income Documents (up to 5 files, optional)',
+        },
+        familyDocuments: {
+          type: 'array',
+          items: { type: 'string', format: 'binary' },
+          description: 'Family Documents (up to 5 files, optional)',
+        },
+        otherDocument: {
+          type: 'array',
+          items: { type: 'string', format: 'binary' },
+          description: 'Other Documents (up to 10 files, optional)',
         },
       },
       required: ['formData'],
@@ -174,18 +260,36 @@ export class ServiceRequestsController {
     @Param('id') id: string,
     @Body('formData') formData: any,
     @CurrentUser() user: UserRequest,
+    @UploadedFiles()
+    files?: {
+      identityDocument?: Express.Multer.File[];
+      fiscalCode?: Express.Multer.File[];
+      incomeCertificate?: Express.Multer.File[];
+      bankStatement?: Express.Multer.File[];
+      propertyDocument?: Express.Multer.File[];
+      visuraCatastale?: Express.Multer.File[];
+      cuCertificate?: Express.Multer.File[];
+      propertyDeed?: Express.Multer.File[];
+      medicalReceipts?: Express.Multer.File[];
+      expenseReceipts?: Express.Multer.File[];
+      incomeDocuments?: Express.Multer.File[];
+      familyDocuments?: Express.Multer.File[];
+      otherDocument?: Express.Multer.File[];
+    },
   ) {
     return this.serviceRequestsService.submitQuestionnaire(
       id,
       user.id,
       formData,
+      files,
     );
   }
 
   /**
-   * Step 3: Upload required documents
-   * Automatically validates which documents are required based on service type
-   * This is Step 3 for both free and paid services
+   * Optional: Upload additional documents
+   * Documents can be uploaded with the questionnaire in Step 2.
+   * This endpoint allows uploading additional documents after questionnaire submission.
+   * Validates which documents are required based on service type.
    */
   @Post(':id/documents')
   @UseGuards(JwtAuthGuard, PermissionsGuard)
@@ -211,9 +315,9 @@ export class ServiceRequestsController {
   )
   @ApiConsumes('multipart/form-data')
   @ApiOperation({
-    summary: '[Customer] Step 3: Upload required documents',
+    summary: '[Customer] Optional: Upload additional documents',
     description:
-      'Upload documents after completing questionnaire. System automatically validates which documents are required for the service type. Status flow: awaiting_documents → submitted',
+      'Upload additional documents after questionnaire submission. Documents can also be uploaded with the questionnaire in Step 2. Use this endpoint to add missing or supplementary documents.',
   })
   @ApiBody({
     description:
