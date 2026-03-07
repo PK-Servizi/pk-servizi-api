@@ -16,20 +16,53 @@ interface EmailData {
 export class EmailService {
   private transporter: nodemailer.Transporter;
   private readonly logger = new Logger(EmailService.name);
+  private isTransporterReady = false;
 
   constructor(private configService: ConfigService) {
+    const smtpHost = this.configService.get<string>('SMTP_HOST');
+    const smtpPort = this.configService.get<number>('SMTP_PORT') || 587;
+    const smtpSecure = this.configService.get<string>('SMTP_SECURE') === 'true';
+    const smtpUser = this.configService.get<string>('SMTP_USER');
+    const smtpPass = this.configService.get<string>('SMTP_PASS');
+
+    if (!smtpUser || !smtpPass) {
+      this.logger.error(
+        'SMTP credentials missing! Set SMTP_USER and SMTP_PASS environment variables. ' +
+        'For Gmail, use an App Password: https://myaccount.google.com/apppasswords',
+      );
+    }
+
     this.transporter = nodemailer.createTransport({
-      host: this.configService.get<string>('SMTP_HOST'),
-      port: this.configService.get<number>('SMTP_PORT'),
-      secure: this.configService.get<boolean>('SMTP_SECURE'),
+      host: smtpHost,
+      port: smtpPort,
+      secure: smtpSecure,
       auth: {
-        user: this.configService.get<string>('SMTP_USER'),
-        pass: this.configService.get<string>('SMTP_PASS'),
+        user: smtpUser,
+        pass: smtpPass,
+      },
+      tls: {
+        rejectUnauthorized: false,
       },
       connectionTimeout: 60000,
       greetingTimeout: 30000,
       socketTimeout: 60000,
     });
+
+    // Verify SMTP connection on startup
+    this.transporter.verify()
+      .then(() => {
+        this.isTransporterReady = true;
+        this.logger.log(`SMTP transporter ready (host: ${smtpHost}, port: ${smtpPort}, user: ${smtpUser})`);
+      })
+      .catch((err) => {
+        this.isTransporterReady = false;
+        this.logger.error(
+          `SMTP transporter verification failed: ${err.message}. ` +
+          'If using Gmail, you MUST use an App Password (not your regular password). ' +
+          'Enable 2-Step Verification then create an App Password at: ' +
+          'https://myaccount.google.com/apppasswords',
+        );
+      });
   }
 
   /**
@@ -139,12 +172,22 @@ export class EmailService {
     }
 
     try {
+      if (!this.isTransporterReady) {
+        this.logger.warn(
+          `SMTP not ready - skipping email to ${data.to}. ` +
+          'Check SMTP credentials. For Gmail, use an App Password.',
+        );
+        return false;
+      }
+
       const html = this.getEmailTemplate(data);
+      const fromAddress = this.configService.get<string>('EMAIL_FROM_ADDRESS') ||
+        this.configService.get<string>('SMTP_USER');
       const mailOptions = {
         from: {
           name:
             this.configService.get<string>('EMAIL_FROM_NAME') || 'PK SERVIZI',
-          address: this.configService.get<string>('EMAIL_FROM_ADDRESS'),
+          address: fromAddress,
         },
         to: data.to,
         subject: data.subject,
@@ -156,7 +199,10 @@ export class EmailService {
       this.logger.log(`Email sent to ${data.to}: ${result.messageId}`);
       return true;
     } catch (error) {
-      this.logger.error(`Failed to send email to ${data.to}: ${error.message}`);
+      const hint = error.message?.includes('535')
+        ? ' HINT: For Gmail SMTP, use an App Password (not your regular password). Go to https://myaccount.google.com/apppasswords'
+        : '';
+      this.logger.error(`Failed to send email to ${data.to}: ${error.message}.${hint}`);
       return false;
     }
   }

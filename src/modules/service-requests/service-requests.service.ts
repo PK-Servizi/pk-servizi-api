@@ -46,7 +46,7 @@ const SERVICE_REQUEST_STATUSES = {
 
 const ALLOWED_STATUS_TRANSITIONS = {
   payment_pending: ['awaiting_form', 'closed'],
-  awaiting_form: ['draft', 'closed'],
+  awaiting_form: ['draft', 'submitted', 'closed'],
   awaiting_documents: ['draft', 'closed'],
   draft: ['submitted', 'closed'],
   submitted: ['in_review', 'missing_documents', 'closed'],
@@ -1420,8 +1420,15 @@ export class ServiceRequestsService {
         throw new NotFoundException('Service request not found');
       }
 
-      if (request.status !== SERVICE_REQUEST_STATUSES.DRAFT) {
-        throw new ConflictException('Only draft requests can be submitted');
+      const submittableStatuses = [
+        SERVICE_REQUEST_STATUSES.DRAFT,
+        SERVICE_REQUEST_STATUSES.AWAITING_FORM,
+      ];
+      if (!submittableStatuses.includes(request.status)) {
+        throw new ConflictException(
+          `Cannot submit request with status '${request.status}'. ` +
+          `Allowed statuses: ${submittableStatuses.join(', ')}`,
+        );
       }
 
       if (request.userId !== userId) {
@@ -1481,7 +1488,7 @@ export class ServiceRequestsService {
       // Create status history entry
       await this.statusHistoryRepository.save({
         serviceRequestId: id,
-        fromStatus: SERVICE_REQUEST_STATUSES.DRAFT,
+        fromStatus: request.status,
         toStatus: SERVICE_REQUEST_STATUSES.SUBMITTED,
         changedById: userId,
         notes: dto?.notes || 'Request submitted by user',
