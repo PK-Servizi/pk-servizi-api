@@ -189,71 +189,73 @@ const PERSONAL_INFORMATION_SECTION = {
         },
       ],
     },
-    // 9. Current residence (Country, Province, City, Address, House#, CAP)
+    // 9. Paese (Country)
     {
-      name: 'current_residence',
-      label: 'Residenza attuale',
-      type: 'group',
+      name: 'paese',
+      label: 'Paese',
+      type: 'select',
+      options: COUNTRY_OPTIONS,
       required: true,
       order: 9,
-      subFields: [
-        {
-          name: 'country',
-          label: 'Paese',
-          type: 'select',
-          options: COUNTRY_OPTIONS,
-          required: true,
-          defaultValue: 'Italia',
-        },
-        {
-          name: 'province',
-          label: 'Provincia',
-          type: 'text',
-          required: true,
-          placeholder: 'Inserisci la provincia',
-        },
-        {
-          name: 'city',
-          label: 'Città',
-          type: 'text',
-          required: true,
-          placeholder: 'Inserisci la città',
-        },
-        {
-          name: 'address',
-          label: 'Indirizzo',
-          type: 'text',
-          required: true,
-          placeholder: 'Inserisci l\'indirizzo',
-        },
-        {
-          name: 'house_number',
-          label: 'Numero civico',
-          type: 'text',
-          required: true,
-          placeholder: 'Inserisci il numero civico',
-        },
-        {
-          name: 'postal_code',
-          label: 'CAP',
-          type: 'text',
-          required: true,
-          maxLength: 5,
-          placeholder: 'Inserisci il CAP',
-        },
-      ],
+      defaultValue: 'Italia',
     },
-    // 10. Identification document (file upload + expiration date)
+    // 10. Provincia
     {
-      name: 'identification_document',
-      label: 'Documento di riconoscimento (fronte e retro Carta d\'identità / Passaporto / Patente)',
-      type: 'group',
+      name: 'provincia',
+      label: 'Provincia',
+      type: 'text',
       required: true,
       order: 10,
+      placeholder: 'Inserisci la provincia',
+    },
+    // 11. Città
+    {
+      name: 'citta',
+      label: 'Città',
+      type: 'text',
+      required: true,
+      order: 11,
+      placeholder: 'Inserisci la città',
+    },
+    // 12. Indirizzo
+    {
+      name: 'indirizzo',
+      label: 'Indirizzo',
+      type: 'text',
+      required: true,
+      order: 12,
+      placeholder: 'Inserisci l\'indirizzo',
+    },
+    // 13. Numero civico
+    {
+      name: 'numero_civico',
+      label: 'Numero civico',
+      type: 'text',
+      required: true,
+      order: 13,
+      placeholder: 'Inserisci il numero civico',
+    },
+    // 14. Codice Postale (CAP)
+    {
+      name: 'codice_postale',
+      label: 'Codice Postale',
+      type: 'text',
+      required: true,
+      order: 14,
+      maxLength: 5,
+      placeholder: 'Inserisci il CAP',
+    },
+    // 15. Identification document (file upload + expiration date)
+    {
+      name: 'identification_document',
+      label: 'Documento di riconoscimento (Carta d\'identità fronte e retro / Passaporto / Patente)',
+      type: 'group',
+      required: true,
+      order: 15,
       subFields: [
         {
           name: 'document_file',
-          label: 'Carica documento',
+          label: 'Scegli file da caricare',
           type: 'file',
           required: true,
           description: 'Allega fronte e retro del documento di riconoscimento',
@@ -268,13 +270,13 @@ const PERSONAL_INFORMATION_SECTION = {
         },
       ],
     },
-    // 11. Tax Code / Health Card (file + text input)
+    // 16. Tax Code / Health Card (file + text input)
     {
       name: 'tax_code_health_card',
       label: 'Codice Fiscale / Tessera Sanitaria',
       type: 'group',
       required: true,
-      order: 11,
+      order: 16,
       subFields: [
         {
           name: 'tax_card_file',
@@ -294,13 +296,13 @@ const PERSONAL_INFORMATION_SECTION = {
         },
       ],
     },
-    // 12. Residence permit (for non-EU citizens)
+    // 17. Residence permit (for non-EU citizens)
     {
       name: 'residence_permit',
       label: 'Permesso di soggiorno (se extracomunitario)',
       type: 'group',
       required: false,
-      order: 12,
+      order: 17,
       description: 'Obbligatorio per cittadini non UE',
       conditionalOn: {
         field: 'nationality',
@@ -344,14 +346,14 @@ const PERSONAL_INFORMATION_SECTION = {
         },
       ],
     },
-    // 13. Marital status
+    // 18. Marital status
     {
       name: 'marital_status',
       label: 'Stato civile',
       type: 'select',
       options: ['Celibe/Nubile', 'Coniugato/a', 'Separato/a', 'Divorziato/a', 'Vedovo/a'],
       required: true,
-      order: 13,
+      order: 18,
     },
   ],
 };
