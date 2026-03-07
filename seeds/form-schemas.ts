@@ -1,6 +1,35 @@
 // Form schemas for all services based on DATA.md requirements
 // Every service includes comprehensive personal information section
 
+// Type definitions for flexible form fields
+interface FormField {
+  name: string;
+  label: string;
+  type: string;
+  required: boolean;
+  order?: number;
+  maxLength?: number;
+  placeholder?: string;
+  options?: string[] | readonly string[];
+  defaultValue?: string;
+  description?: string;
+  subFields?: FormField[];
+  conditionalOn?: {
+    field: string;
+    equals?: string;
+    notIn?: string[] | readonly string[];
+  };
+  accept?: string;
+  pattern?: string;
+}
+
+interface FormSection {
+  id: string;
+  title: string;
+  description: string;
+  fields: FormField[];
+}
+
 // List of countries for dropdowns
 const COUNTRY_OPTIONS = [
   'Italia',
@@ -74,7 +103,7 @@ const EU_COUNTRIES = [
   'Ungheria',
 ];
 
-const PERSONAL_INFORMATION_SECTION = {
+const PERSONAL_INFORMATION_SECTION: FormSection = {
   id: 'personal_information',
   title: 'Informazioni Personali',
   description: 'Informazioni personali e di contatto del dichiarante',
@@ -380,7 +409,7 @@ const PERSONAL_INFORMATION_SECTION = {
 };
 
 // Declarations and Authorization Section - MUST be last section in all services
-const DECLARATIONS_AUTHORIZATION_SECTION = {
+const DECLARATIONS_AUTHORIZATION_SECTION: FormSection = {
   id: 'declarations_authorization',
   title: 'Dichiarazioni e Autorizzazioni',
   description: 'Consensi richiesti e firma digitale',
@@ -424,9 +453,10 @@ const DECLARATIONS_AUTHORIZATION_SECTION = {
   ],
 };
 
-// Export reusable sections
+// Export reusable sections and types
 export { PERSONAL_INFORMATION_SECTION };
 export { DECLARATIONS_AUTHORIZATION_SECTION };
+export type { FormSection, FormField };
 
 export const FORM_SCHEMAS = {
   // 1. ISEE Services
