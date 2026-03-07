@@ -11,7 +11,7 @@
 const HOUSEHOLD_SECTION = (includeDocuments = true) => ({
   id: 'household_info',
   title: 'Nucleo Familiare',
-  description: 'Household composition and family members',
+  description: 'Composizione del nucleo familiare e membri della famiglia',
   fields: [
     {
       name: 'solo',
@@ -176,7 +176,7 @@ const HOUSEHOLD_SECTION = (includeDocuments = true) => ({
 const FINANCIAL_ASSETS_SECTION = {
   id: 'patrimonio_mobiliare',
   title: 'Patrimonio Mobiliare – al 31/12/2024',
-  description: 'Financial assets for every household member',
+  description: 'Attività finanziarie per ogni componente del nucleo familiare',
   fields: [
     {
       name: 'ha_conti_correnti',
@@ -220,7 +220,7 @@ const FINANCIAL_ASSETS_SECTION = {
 const REAL_ESTATE_SECTION = {
   id: 'patrimonio_immobiliare',
   title: 'Patrimonio Immobiliare',
-  description: 'Real estate assets',
+  description: 'Beni immobili',
   fields: [
     {
       name: 'possiede_immobili',
@@ -287,7 +287,7 @@ const REAL_ESTATE_SECTION = {
 const PRIMARY_RESIDENCE_SECTION = {
   id: 'residenza_principale',
   title: 'Residenza Principale',
-  description: 'Primary residence details — only if applicable',
+  description: 'Dettagli sulla residenza principale — solo se applicabile',
   fields: [
     {
       name: 'tipo_residenza',
@@ -312,7 +312,7 @@ const PRIMARY_RESIDENCE_SECTION = {
 const VEHICLES_SECTION = {
   id: 'veicoli',
   title: 'Veicoli',
-  description: 'Vehicles for all family members',
+  description: 'Veicoli per tutti i componenti del nucleo familiare',
   fields: [
     {
       name: 'ha_auto',
@@ -368,7 +368,7 @@ const VEHICLES_SECTION = {
 const SPECIAL_SITUATIONS_SECTION = {
   id: 'situazioni_particolari',
   title: 'Situazioni Particolari',
-  description: 'Special family situations',
+  description: 'Situazioni familiari particolari',
   fields: [
     {
       name: 'genitori_non_conviventi',
@@ -413,7 +413,7 @@ const SPECIAL_SITUATIONS_SECTION = {
 const makeDeclarations = (
   mandatoryLabels: string[],
   optionalLabels: string[] = [],
-  desc = 'Declarations & Authorization',
+  desc = 'Dichiarazioni e Autorizzazioni',
 ) => {
   const fields: any[] = [];
   let order = 1;
@@ -443,7 +443,7 @@ const makeDeclarations = (
     type: 'signature',
     required: true,
     order,
-    description: 'Please provide your digital signature',
+    description: 'Inserisci la tua firma digitale',
   });
   order++;
   fields.push({
@@ -452,7 +452,7 @@ const makeDeclarations = (
     type: 'text',
     required: true,
     order,
-    description: 'Full name for signature verification',
+    description: 'Nome completo per la verifica della firma',
   });
   return {
     id: 'declarations_authorization',
@@ -625,7 +625,7 @@ const SPID_SECTION = {
 const ADDRESS_RESIDENZA_OSPITALITA = {
   id: 'indirizzo_residenza_ospitalita',
   title: 'Indirizzo di Residenza/Ospitalità',
-  description: 'Residence and kit delivery address',
+  description: 'Indirizzo di residenza/ospitalità e consegna kit',
   fields: [
     {
       name: 'indirizzo_uguale',
@@ -717,7 +717,7 @@ const PERSONAL_INFO_COLF_BADANTE = {
   id: 'personal_info_colf_badante',
   title: 'Informazioni personali (Colf/Badante)',
   description:
-    'Personal information of the domestic worker — same as standard personal info fields',
+    'Informazioni personali del lavoratore domestico — stessi campi delle informazioni personali standard',
   fields: [
     { name: 'cb_nome', label: 'Nome', type: 'text', required: true, order: 1 },
     {
@@ -828,7 +828,7 @@ const PERSONAL_INFO_COLF_BADANTE = {
 const UNILAV_CONTRATTO_SECTION = {
   id: 'unilav_contratto',
   title: 'UNILAV/Contratto di lavoro',
-  description: 'Employment contract documentation',
+  description: 'Documentazione contratto di lavoro',
   fields: [
     {
       name: 'unilav_file',
@@ -845,7 +845,7 @@ const UNILAV_CONTRATTO_SECTION = {
 const PERSONAL_INFO_SECOND_PERSON = (id: string, title: string) => ({
   id,
   title,
-  description: `${title} — same as standard personal info fields`,
+  description: `${title} — stessi campi delle informazioni personali standard`,
   fields: [
     {
       name: `${id}_nome`,
@@ -958,7 +958,7 @@ const STATO_CIVILE_NUCLEO = (
 ) => ({
   id: 'stato_civile_nucleo',
   title: 'Stato Civile e Nucleo Familiare',
-  description: 'Marital status and family composition',
+  description: 'Stato civile e composizione del nucleo familiare',
   fields: [
     {
       name: 'stato_civile',
@@ -1012,7 +1012,7 @@ const FIGLI_CARICHI_SECTION = (
 ) => ({
   id: 'figli_carichi',
   title: 'Figli e Altri Carichi Familiari',
-  description: 'Children and dependents — repeatable for each',
+  description: 'Figli e persone a carico — ripetibile per ciascuno',
   fields: [
     {
       name: 'figli',
@@ -1045,7 +1045,7 @@ const FIGLI_CARICHI_SECTION = (
           name: 'residenza_uguale',
           label: 'Residenza',
           type: 'radio',
-          options: ['Same as dichiarante', 'No'],
+          options: ['Uguale al dichiarante', 'No'],
           required: true,
         },
         {
@@ -1156,7 +1156,7 @@ const FIGLI_CARICHI_SECTION = (
 const ISEE_SECTION = {
   id: 'isee_reddito',
   title: 'Reddito e Patrimonio (ISEE)',
-  description: 'ISEE information',
+  description: 'Informazioni ISEE',
   fields: [
     {
       name: 'isee_presente',
@@ -1181,7 +1181,7 @@ const ISEE_SECTION = {
 const IBAN_SECTION = {
   id: 'modalita_pagamento',
   title: 'Modalità di pagamento',
-  description: 'Payment method',
+  description: 'Modalità di pagamento',
   fields: [
     {
       name: 'iban',
@@ -1227,7 +1227,7 @@ export const SERVICE_QUESTIONNAIRES: Record<string, any[]> = {
     {
       id: 'universita_info',
       title: 'Università',
-      description: 'University student information',
+      description: 'Informazioni studente universitario',
       fields: [
         {
           name: 'codice_fiscale_studente',
@@ -1280,7 +1280,7 @@ export const SERVICE_QUESTIONNAIRES: Record<string, any[]> = {
     {
       id: 'variazione_situazione',
       title: 'Variazione della Situazione Lavorativa/Reddituale/Patrimoniale',
-      description: 'Changes in employment, income, or financial situation',
+      description: 'Variazioni della situazione lavorativa, reddituale o patrimoniale',
       fields: [
         {
           name: 'perdita_lavoro',
@@ -1630,7 +1630,7 @@ export const SERVICE_QUESTIONNAIRES: Record<string, any[]> = {
     {
       id: 'tipo_dichiarazione',
       title: 'Tipo di Dichiarazione',
-      description: 'Type of tax declaration',
+      description: 'Tipo di dichiarazione fiscale',
       fields: [
         {
           name: 'prima_dichiarazione',
@@ -1661,7 +1661,7 @@ export const SERVICE_QUESTIONNAIRES: Record<string, any[]> = {
     {
       id: 'sostituto_imposta',
       title: "Sostituto d'Imposta",
-      description: 'Tax withholding agent information',
+      description: 'Informazioni sul sostituto d\'imposta',
       fields: [
         {
           name: 'ha_sostituto',
@@ -1703,7 +1703,7 @@ export const SERVICE_QUESTIONNAIRES: Record<string, any[]> = {
     {
       id: 'familiari_carico',
       title: 'Familiari a Carico',
-      description: 'Dependents - repeatable section for each family member',
+      description: 'Familiari a carico - sezione ripetibile per ogni familiare',
       fields: [
         {
           name: 'familiari',
@@ -1767,7 +1767,7 @@ export const SERVICE_QUESTIONNAIRES: Record<string, any[]> = {
     {
       id: 'redditi_lavoro',
       title: "Redditi di lavoro / pensione (Anno d'Imposta di riferimento)",
-      description: 'Employment/pension income and other income',
+      description: 'Redditi da lavoro/pensione e altri redditi',
       fields: [
         {
           name: 'numero_cu',
@@ -1823,7 +1823,7 @@ export const SERVICE_QUESTIONNAIRES: Record<string, any[]> = {
     {
       id: 'abitazione_immobili',
       title: 'Abitazione Principale e Immobili',
-      description: 'Primary residence and additional properties',
+      description: 'Abitazione principale e immobili aggiuntivi',
       fields: [
         {
           name: 'abitazione_principale',
@@ -1890,7 +1890,7 @@ export const SERVICE_QUESTIONNAIRES: Record<string, any[]> = {
     {
       id: 'spese_detraibili',
       title: 'Spese Detraibili e Deducibili',
-      description: 'Deductible expenses',
+      description: 'Spese detraibili',
       fields: [
         {
           name: 'spese_sanitarie',
@@ -1941,7 +1941,7 @@ export const SERVICE_QUESTIONNAIRES: Record<string, any[]> = {
     {
       id: 'mutui_bonus',
       title: 'Mutui, Ristrutturazioni e Bonus',
-      description: 'Mortgages, renovations, and tax bonuses',
+      description: 'Mutui, ristrutturazioni e bonus fiscali',
       fields: [
         {
           name: 'mutuo_prima_casa',
@@ -1998,7 +1998,7 @@ export const SERVICE_QUESTIONNAIRES: Record<string, any[]> = {
     {
       id: 'integrazione_documenti',
       title: 'Documenti relativi',
-      description: 'Documents for 730 integration/corrections',
+      description: 'Documenti per integrazione/correzione 730',
       fields: [
         {
           name: 'documenti_integrazione',
@@ -2177,7 +2177,7 @@ export const SERVICE_QUESTIONNAIRES: Record<string, any[]> = {
     {
       id: 'motivo_consulenza',
       title: 'Motivo',
-      description: 'Reason for consultation',
+      description: 'Motivo della consulenza',
       fields: [
         {
           name: 'motivo',
@@ -2186,7 +2186,7 @@ export const SERVICE_QUESTIONNAIRES: Record<string, any[]> = {
           required: true,
           order: 1,
           maxLength: 500,
-          description: 'Max 500 parole',
+          description: 'Massimo 500 parole',
         },
       ],
     },
@@ -5420,7 +5420,7 @@ export const SERVICE_QUESTIONNAIRES: Record<string, any[]> = {
             '4+4 anni',
             '3+2 anni (canone concordato)',
             'Transitorio (max 18 mesi)',
-            'Student housing',
+            'Uso studenti',
             'Altro',
           ],
           required: true,
@@ -5681,7 +5681,7 @@ export const SERVICE_QUESTIONNAIRES: Record<string, any[]> = {
     {
       id: 'aggiornamento_figli',
       title: 'Aggiornamento Figli a Carico',
-      description: 'Repeatable for each child',
+      description: 'Ripetibile per ogni figlio',
       fields: [
         {
           name: 'figli',
@@ -5713,7 +5713,7 @@ export const SERVICE_QUESTIONNAIRES: Record<string, any[]> = {
               name: 'residenza_uguale',
               label: 'Residenza',
               type: 'radio',
-              options: ['Same as dichiarante', 'No'],
+              options: ['Uguale al dichiarante', 'No'],
               required: true,
             },
             {
@@ -5775,7 +5775,7 @@ export const SERVICE_QUESTIONNAIRES: Record<string, any[]> = {
     {
       id: 'componenti_nucleo_pad',
       title: 'Componenti del Nucleo e Situazioni Particolari',
-      description: 'Repeatable for each household member',
+      description: 'Ripetibile per ogni componente del nucleo',
       fields: [
         {
           name: 'componenti',
@@ -5807,7 +5807,7 @@ export const SERVICE_QUESTIONNAIRES: Record<string, any[]> = {
               name: 'residenza_uguale',
               label: 'Residenza',
               type: 'radio',
-              options: ['Same as dichiarante', 'No'],
+              options: ['Uguale al dichiarante', 'No'],
               required: true,
             },
             {

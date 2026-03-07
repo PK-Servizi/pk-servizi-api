@@ -34,7 +34,7 @@ const buildGenericFormSchema = (
 
   return {
     title: serviceName,
-    description: description || `Form for ${serviceName}`,
+    description: description || `Modulo per ${serviceName}`,
     sections,
   };
 };
