@@ -37,20 +37,13 @@ const DECLARATIONS_AUTHORIZATION_SECTION = {
     },
     {
       name: 'digital_signature',
-      label: 'Firma Digitale',
+      label: 'Nome Completo (firma digitale)',
       type: 'signature',
       required: true,
       order: 5,
       description: 'Please provide your digital signature',
     },
-    {
-      name: 'full_name_signature',
-      label: 'Nome Completo',
-      type: 'text',
-      required: true,
-      order: 6,
-      description: 'Full name for signature verification',
-    },
+
   ],
 };
 

@@ -120,7 +120,21 @@ const PERSONAL_INFORMATION_SECTION = {
           name: 'country_code',
           label: 'Prefisso',
           type: 'select',
-          options: ['+39', '+1', '+44', '+49', '+33', '+34', '+41', '+43', '+32', '+31', '+48', '+40', '+380'],
+          options: [
+            '+39',
+            '+1',
+            '+44',
+            '+49',
+            '+33',
+            '+34',
+            '+41',
+            '+43',
+            '+32',
+            '+31',
+            '+48',
+            '+40',
+            '+380',
+          ],
           required: true,
           defaultValue: '+39',
         },
@@ -150,7 +164,7 @@ const PERSONAL_INFORMATION_SECTION = {
       type: 'select',
       options: COUNTRY_OPTIONS,
       required: true,
-      order: 6,
+      order: 7,
       defaultValue: 'Italia',
     },
     // 7. Date of birth
@@ -159,7 +173,7 @@ const PERSONAL_INFORMATION_SECTION = {
       label: 'Data di nascita',
       type: 'date',
       required: true,
-      order: 7,
+      order: 8,
       placeholder: 'GG/MM/AAAA',
     },
     // 8. Place of birth (Italy/Another country + Country dropdown)
@@ -168,7 +182,7 @@ const PERSONAL_INFORMATION_SECTION = {
       label: 'Luogo di nascita',
       type: 'group',
       required: true,
-      order: 8,
+      order: 9,
       subFields: [
         {
           name: 'birth_country_type',
@@ -196,7 +210,7 @@ const PERSONAL_INFORMATION_SECTION = {
       type: 'select',
       options: COUNTRY_OPTIONS,
       required: true,
-      order: 9,
+      order: 10,
       defaultValue: 'Italia',
     },
     // 10. Provincia
@@ -205,7 +219,7 @@ const PERSONAL_INFORMATION_SECTION = {
       label: 'Provincia',
       type: 'text',
       required: true,
-      order: 10,
+      order: 11,
       placeholder: 'Inserisci la provincia',
     },
     // 11. Città
@@ -214,7 +228,7 @@ const PERSONAL_INFORMATION_SECTION = {
       label: 'Città',
       type: 'text',
       required: true,
-      order: 11,
+      order: 12,
       placeholder: 'Inserisci la città',
     },
     // 12. Indirizzo
@@ -223,8 +237,8 @@ const PERSONAL_INFORMATION_SECTION = {
       label: 'Indirizzo',
       type: 'text',
       required: true,
-      order: 12,
-      placeholder: 'Inserisci l\'indirizzo',
+      order: 13,
+      placeholder: "Inserisci l'indirizzo",
     },
     // 13. Numero civico
     {
@@ -232,7 +246,7 @@ const PERSONAL_INFORMATION_SECTION = {
       label: 'Numero civico',
       type: 'text',
       required: true,
-      order: 13,
+      order: 14,
       placeholder: 'Inserisci il numero civico',
     },
     // 14. Codice Postale (CAP)
@@ -241,17 +255,18 @@ const PERSONAL_INFORMATION_SECTION = {
       label: 'Codice Postale',
       type: 'text',
       required: true,
-      order: 14,
+      order: 15,
       maxLength: 5,
       placeholder: 'Inserisci il CAP',
     },
-    // 15. Identification document (file upload + expiration date)
+    // 16. Identification document (file upload + expiration date)
     {
       name: 'identification_document',
-      label: 'Documento di riconoscimento (Carta d\'identità fronte e retro / Passaporto / Patente)',
+      label:
+        "Documento di riconoscimento (Carta d'identità fronte e retro / Passaporto / Patente)",
       type: 'group',
       required: true,
-      order: 15,
+      order: 16,
       subFields: [
         {
           name: 'document_file',
@@ -270,13 +285,13 @@ const PERSONAL_INFORMATION_SECTION = {
         },
       ],
     },
-    // 16. Tax Code / Health Card (file + text input)
+    // 17. Tax Code / Health Card (file + text input)
     {
       name: 'tax_code_health_card',
       label: 'Codice Fiscale / Tessera Sanitaria',
       type: 'group',
       required: true,
-      order: 16,
+      order: 17,
       subFields: [
         {
           name: 'tax_card_file',
@@ -296,13 +311,13 @@ const PERSONAL_INFORMATION_SECTION = {
         },
       ],
     },
-    // 17. Residence permit (for non-EU citizens)
+    // 18. Residence permit (for non-EU citizens)
     {
       name: 'residence_permit',
       label: 'Permesso di soggiorno (se extracomunitario)',
       type: 'group',
       required: false,
-      order: 17,
+      order: 18,
       description: 'Obbligatorio per cittadini non UE',
       conditionalOn: {
         field: 'nationality',
@@ -346,14 +361,20 @@ const PERSONAL_INFORMATION_SECTION = {
         },
       ],
     },
-    // 18. Marital status
+    // 7. Marital status
     {
       name: 'marital_status',
       label: 'Stato civile',
       type: 'select',
-      options: ['Celibe/Nubile', 'Coniugato/a', 'Separato/a', 'Divorziato/a', 'Vedovo/a'],
+      options: [
+        'Celibe/Nubile',
+        'Coniugato/a',
+        'Separato/a',
+        'Divorziato/a',
+        'Vedovo/a',
+      ],
       required: true,
-      order: 18,
+      order: 7,
     },
   ],
 };
@@ -394,19 +415,11 @@ const DECLARATIONS_AUTHORIZATION_SECTION = {
     },
     {
       name: 'digital_signature',
-      label: 'Firma Digitale',
+      label: 'Nome Completo (firma digitale)',
       type: 'signature',
       required: true,
       order: 5,
       description: 'Inserisci la tua firma digitale',
-    },
-    {
-      name: 'full_name_signature',
-      label: 'Nome e Cognome',
-      type: 'text',
-      required: true,
-      order: 6,
-      description: 'Nome completo per la verifica della firma',
     },
   ],
 };
@@ -419,7 +432,8 @@ export const FORM_SCHEMAS = {
   // 1. ISEE Services
   ISEE_ORD_2026: {
     title: 'ISEE Ordinario 2026',
-    description: 'Indicatore della Situazione Economica Equivalente - Modulo Ordinario 2026',
+    description:
+      'Indicatore della Situazione Economica Equivalente - Modulo Ordinario 2026',
     sections: [
       PERSONAL_INFORMATION_SECTION,
       {
@@ -434,9 +448,25 @@ export const FORM_SCHEMAS = {
             order: 1,
             subFields: [
               { name: 'name', label: 'Name', type: 'text', required: true },
-              { name: 'tax_code', label: 'Tax Code', type: 'text', required: true },
-              { name: 'relationship', label: 'Relationship', type: 'select', options: ['Spouse', 'Child', 'Parent', 'Sibling', 'Other'], required: true },
-              { name: 'date_of_birth', label: 'Date of Birth', type: 'date', required: true },
+              {
+                name: 'tax_code',
+                label: 'Tax Code',
+                type: 'text',
+                required: true,
+              },
+              {
+                name: 'relationship',
+                label: 'Relationship',
+                type: 'select',
+                options: ['Spouse', 'Child', 'Parent', 'Sibling', 'Other'],
+                required: true,
+              },
+              {
+                name: 'date_of_birth',
+                label: 'Date of Birth',
+                type: 'date',
+                required: true,
+              },
             ],
           },
           {
@@ -467,11 +497,37 @@ export const FORM_SCHEMAS = {
             required: false,
             order: 1,
             subFields: [
-              { name: 'property_type', label: 'Type', type: 'select', options: ['House', 'Apartment', 'Land', 'Commercial'], required: true },
-              { name: 'property_value', label: 'Estimated Value (€)', type: 'number', required: true },
-              { name: 'ownership_percentage', label: 'Ownership %', type: 'number', required: true },
-              { name: 'mortgaged', label: 'Mortgaged', type: 'checkbox', required: false },
-              { name: 'mortgage_capital', label: 'Mortgage Capital (€)', type: 'number', required: false },
+              {
+                name: 'property_type',
+                label: 'Type',
+                type: 'select',
+                options: ['House', 'Apartment', 'Land', 'Commercial'],
+                required: true,
+              },
+              {
+                name: 'property_value',
+                label: 'Estimated Value (€)',
+                type: 'number',
+                required: true,
+              },
+              {
+                name: 'ownership_percentage',
+                label: 'Ownership %',
+                type: 'number',
+                required: true,
+              },
+              {
+                name: 'mortgaged',
+                label: 'Mortgaged',
+                type: 'checkbox',
+                required: false,
+              },
+              {
+                name: 'mortgage_capital',
+                label: 'Mortgage Capital (€)',
+                type: 'number',
+                required: false,
+              },
             ],
           },
           {
@@ -497,10 +553,31 @@ export const FORM_SCHEMAS = {
             required: false,
             order: 4,
             subFields: [
-              { name: 'bank_name', label: 'Bank Name', type: 'text', required: true },
-              { name: 'account_type', label: 'Account Type', type: 'select', options: ['Current', 'Savings', 'Investment'], required: true },
-              { name: 'balance', label: 'Balance (€)', type: 'number', required: true },
-              { name: 'average_balance', label: 'Average Balance (€)', type: 'number', required: false },
+              {
+                name: 'bank_name',
+                label: 'Bank Name',
+                type: 'text',
+                required: true,
+              },
+              {
+                name: 'account_type',
+                label: 'Account Type',
+                type: 'select',
+                options: ['Current', 'Savings', 'Investment'],
+                required: true,
+              },
+              {
+                name: 'balance',
+                label: 'Balance (€)',
+                type: 'number',
+                required: true,
+              },
+              {
+                name: 'average_balance',
+                label: 'Average Balance (€)',
+                type: 'number',
+                required: false,
+              },
             ],
           },
         ],
@@ -513,7 +590,12 @@ export const FORM_SCHEMAS = {
             name: 'housing_type',
             label: 'Housing Type',
             type: 'select',
-            options: ['Owner-occupied', 'Rented', 'Provided by employer', 'Other'],
+            options: [
+              'Owner-occupied',
+              'Rented',
+              'Provided by employer',
+              'Other',
+            ],
             required: true,
             order: 1,
           },
@@ -554,10 +636,31 @@ export const FORM_SCHEMAS = {
             required: false,
             order: 1,
             subFields: [
-              { name: 'vehicle_type', label: 'Type', type: 'select', options: ['Car', 'Motorcycle', 'Truck', 'Van', 'Other'], required: true },
-              { name: 'vehicle_value', label: 'Value (€)', type: 'number', required: true },
-              { name: 'purchase_year', label: 'Purchase Year', type: 'number', required: true },
-              { name: 'registration_number', label: 'Registration Number', type: 'text', required: false },
+              {
+                name: 'vehicle_type',
+                label: 'Type',
+                type: 'select',
+                options: ['Car', 'Motorcycle', 'Truck', 'Van', 'Other'],
+                required: true,
+              },
+              {
+                name: 'vehicle_value',
+                label: 'Value (€)',
+                type: 'number',
+                required: true,
+              },
+              {
+                name: 'purchase_year',
+                label: 'Purchase Year',
+                type: 'number',
+                required: true,
+              },
+              {
+                name: 'registration_number',
+                label: 'Registration Number',
+                type: 'text',
+                required: false,
+              },
             ],
           },
         ],
@@ -570,7 +673,15 @@ export const FORM_SCHEMAS = {
             name: 'employment_status',
             label: 'Employment Status',
             type: 'select',
-            options: ['Employed', 'Self-employed', 'Unemployed', 'Student', 'Retired', 'Disabled', 'Other'],
+            options: [
+              'Employed',
+              'Self-employed',
+              'Unemployed',
+              'Student',
+              'Retired',
+              'Disabled',
+              'Other',
+            ],
             required: true,
             order: 1,
           },
@@ -722,8 +833,19 @@ export const FORM_SCHEMAS = {
             order: 1,
             subFields: [
               { name: 'name', label: 'Name', type: 'text', required: true },
-              { name: 'tax_code', label: 'Tax Code', type: 'text', required: true },
-              { name: 'relationship', label: 'Relationship', type: 'select', options: ['Parent', 'Sibling', 'Spouse', 'Other'], required: true },
+              {
+                name: 'tax_code',
+                label: 'Tax Code',
+                type: 'text',
+                required: true,
+              },
+              {
+                name: 'relationship',
+                label: 'Relationship',
+                type: 'select',
+                options: ['Parent', 'Sibling', 'Spouse', 'Other'],
+                required: true,
+              },
             ],
           },
           {
@@ -826,8 +948,26 @@ export const FORM_SCHEMAS = {
             order: 1,
             subFields: [
               { name: 'name', label: 'Name', type: 'text', required: true },
-              { name: 'tax_code', label: 'Tax Code', type: 'text', required: true },
-              { name: 'relationship', label: 'Relationship', type: 'select', options: ['Parent', 'Sibling', 'Spouse', 'Child', 'Caregiver', 'Other'], required: true },
+              {
+                name: 'tax_code',
+                label: 'Tax Code',
+                type: 'text',
+                required: true,
+              },
+              {
+                name: 'relationship',
+                label: 'Relationship',
+                type: 'select',
+                options: [
+                  'Parent',
+                  'Sibling',
+                  'Spouse',
+                  'Child',
+                  'Caregiver',
+                  'Other',
+                ],
+                required: true,
+              },
             ],
           },
           {
@@ -994,7 +1134,14 @@ export const FORM_SCHEMAS = {
             name: 'reason_for_change',
             label: 'Reason for Application',
             type: 'select',
-            options: ['Employment change', 'Income change', 'Family structure change', 'Property sale/purchase', 'Separation/Divorce', 'Other'],
+            options: [
+              'Employment change',
+              'Income change',
+              'Family structure change',
+              'Property sale/purchase',
+              'Separation/Divorce',
+              'Other',
+            ],
             required: true,
             order: 1,
           },
@@ -1102,7 +1249,8 @@ export const FORM_SCHEMAS = {
   // Order: 1-NASPI, 2-Agricola, 3-Anticipo, 4-DID, 5-PAD, 6-NASPI-Com, 7-Ricorso
   NASP_2026: {
     title: 'Disoccupazione NASPI',
-    description: 'Domanda di Disoccupazione NASpI (Nuova Assicurazione Sociale per l\'Impiego)',
+    description:
+      "Domanda di Disoccupazione NASpI (Nuova Assicurazione Sociale per l'Impiego)",
     sections: [
       PERSONAL_INFORMATION_SECTION,
       {
@@ -1116,7 +1264,8 @@ export const FORM_SCHEMAS = {
             type: 'file',
             required: true,
             order: 1,
-            description: 'Carta d\'identità italiana, Carta d\'identità di un paese comunitario, Patente o Passaporto',
+            description:
+              "Carta d'identità italiana, Carta d'identità di un paese comunitario, Patente o Passaporto",
           },
           {
             name: 'codice_fiscale_tessera',
@@ -1140,7 +1289,7 @@ export const FORM_SCHEMAS = {
             type: 'file',
             required: true,
             order: 4,
-            description: 'Allega l\'ultima busta paga',
+            description: "Allega l'ultima busta paga",
           },
           {
             name: 'lettera_licenziamento',
@@ -1148,7 +1297,8 @@ export const FORM_SCHEMAS = {
             type: 'file',
             required: true,
             order: 5,
-            description: 'Allega la lettera di licenziamento o il contratto scaduto',
+            description:
+              'Allega la lettera di licenziamento o il contratto scaduto',
           },
         ],
       },
@@ -1164,11 +1314,12 @@ export const FORM_SCHEMAS = {
       {
         id: 'documenti_richiesti',
         title: 'Documenti Richiesti',
-        description: 'Carica i documenti necessari per la domanda di disoccupazione agricola',
+        description:
+          'Carica i documenti necessari per la domanda di disoccupazione agricola',
         fields: [
           {
             name: 'carta_identita',
-            label: 'Carta d\'identità richiedente',
+            label: "Carta d'identità richiedente",
             type: 'file',
             required: true,
             order: 1,
@@ -1198,13 +1349,15 @@ export const FORM_SCHEMAS = {
 
   ANTNAS_2026: {
     title: 'Anticipo NASPI',
-    description: 'Richiesta di liquidazione anticipata NASPI per avvio attività autonoma',
+    description:
+      'Richiesta di liquidazione anticipata NASPI per avvio attività autonoma',
     sections: [
       PERSONAL_INFORMATION_SECTION,
       {
         id: 'documenti_richiesti',
         title: 'Documenti Richiesti',
-        description: 'Carica i documenti necessari per la richiesta di anticipo NASPI',
+        description:
+          'Carica i documenti necessari per la richiesta di anticipo NASPI',
         fields: [
           {
             name: 'documento_riconoscimento',
@@ -1212,7 +1365,8 @@ export const FORM_SCHEMAS = {
             type: 'file',
             required: true,
             order: 1,
-            description: 'Carta d\'identità fronte e retro, Patente fronte e retro, o Passaporto',
+            description:
+              "Carta d'identità fronte e retro, Patente fronte e retro, o Passaporto",
           },
           {
             name: 'codice_fiscale',
@@ -1236,15 +1390,17 @@ export const FORM_SCHEMAS = {
             type: 'file',
             required: true,
             order: 4,
-            description: 'Allega il certificato di attribuzione della Partita IVA',
+            description:
+              'Allega il certificato di attribuzione della Partita IVA',
           },
           {
             name: 'certificato_inizio_attivita',
-            label: 'Certificato che attesta l\'inizio attività',
+            label: "Certificato che attesta l'inizio attività",
             type: 'file',
             required: true,
             order: 5,
-            description: 'Visura camerale attiva, iscrizione gestione separata INPS, ecc.',
+            description:
+              'Visura camerale attiva, iscrizione gestione separata INPS, ecc.',
           },
         ],
       },
@@ -1268,7 +1424,8 @@ export const FORM_SCHEMAS = {
             type: 'file',
             required: true,
             order: 1,
-            description: 'Carta d\'identità fronte e retro, Patente fronte e retro, o Passaporto',
+            description:
+              "Carta d'identità fronte e retro, Patente fronte e retro, o Passaporto",
           },
           {
             name: 'codice_fiscale',
@@ -1286,7 +1443,8 @@ export const FORM_SCHEMAS = {
 
   PAD_2026: {
     title: 'PAD NASPI/DIS-COLL',
-    description: 'Patto di Attivazione Digitale per beneficiari NASpI e DIS-COLL',
+    description:
+      'Patto di Attivazione Digitale per beneficiari NASpI e DIS-COLL',
     sections: [
       PERSONAL_INFORMATION_SECTION,
       {
@@ -1296,7 +1454,7 @@ export const FORM_SCHEMAS = {
         fields: [
           {
             name: 'carta_identita',
-            label: 'Carta d\'identità',
+            label: "Carta d'identità",
             type: 'file',
             required: true,
             order: 1,
@@ -1347,7 +1505,8 @@ export const FORM_SCHEMAS = {
             type: 'file',
             required: true,
             order: 1,
-            description: 'Carta d\'identità fronte e retro, Patente fronte e retro, o Passaporto',
+            description:
+              "Carta d'identità fronte e retro, Patente fronte e retro, o Passaporto",
           },
           {
             name: 'codice_fiscale',
@@ -1370,15 +1529,18 @@ export const FORM_SCHEMAS = {
       {
         id: 'variazione',
         title: 'Variazione',
-        description: 'Documentazione della variazione della situazione lavorativa',
+        description:
+          'Documentazione della variazione della situazione lavorativa',
         fields: [
           {
             name: 'documentazione_variazione',
-            label: 'UNILAV / Contratto di lavoro / Certificato di attività autonoma',
+            label:
+              'UNILAV / Contratto di lavoro / Certificato di attività autonoma',
             type: 'file',
             required: true,
             order: 1,
-            description: 'Allega il documento che attesta l\'inizio di attività lavorativa',
+            description:
+              "Allega il documento che attesta l'inizio di attività lavorativa",
           },
         ],
       },
@@ -1402,7 +1564,7 @@ export const FORM_SCHEMAS = {
             type: 'file',
             required: true,
             order: 1,
-            description: 'Allega la lettera di rigetto ricevuta dall\'INPS',
+            description: "Allega la lettera di rigetto ricevuta dall'INPS",
           },
           {
             name: 'lettera_licenziamento',
@@ -1410,7 +1572,7 @@ export const FORM_SCHEMAS = {
             type: 'file',
             required: true,
             order: 2,
-            description: 'Allega l\'ultima lettera di licenziamento',
+            description: "Allega l'ultima lettera di licenziamento",
           },
         ],
       },
