@@ -835,6 +835,55 @@ export class EmailService {
     });
   }
 
+  // ============= CONTACT FORM EMAILS =============
+
+  async sendContactFormToAdmin(
+    name: string,
+    email: string,
+    phone: string | undefined,
+    subject: string,
+    message: string,
+    contactId: string,
+  ): Promise<boolean> {
+    const details: { label: string; value: string }[] = [
+      { label: 'Name', value: name },
+      { label: 'Email', value: email },
+      { label: 'Subject', value: subject },
+      { label: 'Message', value: message },
+      { label: 'Submission ID', value: `#${contactId}` },
+    ];
+    if (phone) {
+      details.splice(2, 0, { label: 'Phone', value: phone });
+    }
+    return this.sendEmail({
+      to: this.getAdminEmail(),
+      subject: `📬 New Contact Message: ${subject}`,
+      title: 'New Contact Form Submission',
+      message: `A visitor has sent a message through the contact form. Details below:`,
+      details,
+      actionUrl: `${this.getFrontendUrl()}/admin/contacts/${contactId}`,
+      actionText: 'View Submission',
+    });
+  }
+
+  async sendContactFormAutoReply(
+    email: string,
+    name: string,
+    subject: string,
+  ): Promise<boolean> {
+    return this.sendEmail({
+      to: email,
+      subject: `✅ We received your message — PK SERVIZI`,
+      title: `Thank you, ${name}!`,
+      message:
+        `We have received your message regarding "${subject}" and will get back to you as soon as possible. ` +
+        `Our team typically responds within 1–2 business days.`,
+      details: [{ label: 'Subject', value: subject }],
+      actionUrl: `${this.getFrontendUrl()}/contact`,
+      actionText: 'Visit our website',
+    });
+  }
+
   private stripHtml(html: string): string {
     return html.replace(/<[^>]*>/g, '');
   }

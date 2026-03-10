@@ -54,7 +54,7 @@ async function seed() {
     }
 
     // Seed admin user...
-    const adminEmail = 'admin@pkservizi.com';
+    const adminEmail = 'hamzaiftikhardar@gmail.com';
     let adminUser = await userRepo.findOne({ where: { email: adminEmail } });
     if (!adminUser) {
       const adminRole = await roleRepo.findOne({
