@@ -330,7 +330,7 @@ export class StripeService {
 
     try {
       return await this.stripe.paymentIntents.create({
-        amount: amount * 100, // Convert to cents
+        amount: parseInt((amount * 100).toFixed(0), 10), // Convert to cents (avoid float precision)
         currency,
         metadata,
       });
@@ -367,8 +367,12 @@ export class StripeService {
       );
     }
 
+    // Convert to cents with proper rounding to avoid float precision issues
+    // e.g., 19.99 * 100 = 1998.9999999999998 (float precision error)
+    // Using toFixed first ensures we get a clean integer
+    const amountCents = parseInt((amount * 100).toFixed(0), 10);
+    
     // Validate amount — Stripe minimum is €0.50 (50 cents)
-    const amountCents = Math.round(amount * 100);
     if (amountCents < 50) {
       throw new BadRequestException(
         `Invalid payment amount: €${amount.toFixed(2)}. Minimum is €0.50.`,

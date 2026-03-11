@@ -382,7 +382,7 @@ export class PaymentsService {
       try {
         stripeRefund = await this.stripeService.createRefund(
           paymentIntentId,
-          partialAmount ? Math.round(partialAmount * 100) : undefined, // Convert to cents
+          partialAmount ? parseInt((partialAmount * 100).toFixed(0), 10) : undefined, // Convert to cents (avoid float precision)
         );
       } catch (stripeError) {
         this.logger.error(
