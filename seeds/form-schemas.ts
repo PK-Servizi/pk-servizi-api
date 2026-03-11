@@ -213,14 +213,14 @@ const PERSONAL_INFORMATION_SECTION: FormSection = {
       required: true,
       order: 9,
       subFields: [
-        {
-          name: 'birth_country_type',
-          label: 'Paese',
-          type: 'radio',
-          options: ['Italia', 'Altro paese'],
-          required: true,
-          defaultValue: 'Italia',
-        },
+        // {
+        //   name: 'birth_country_type',
+        //   label: 'Paese',
+        //   type: 'radio',
+        //   options: ['Italia', 'Altro paese'],
+        //   required: true,
+        //   defaultValue: 'Italia',
+        // },
         {
           name: 'birth_country',
           label: 'Paese di nascita',
