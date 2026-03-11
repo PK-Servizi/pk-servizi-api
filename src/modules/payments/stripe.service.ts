@@ -359,11 +359,19 @@ export class StripeService {
       );
     }
 
-    // Validate amount — Stripe minimum is €0.50 (50 cents)
-    const amountCents = Math.round(params.amount * 100);
-    if (!amountCents || amountCents < 50) {
+    // Ensure amount is a proper number (TypeORM may return decimal as string)
+    const amount = Number(params.amount);
+    if (!Number.isFinite(amount) || amount <= 0) {
       throw new BadRequestException(
-        `Invalid payment amount: €${params.amount}. Minimum is €0.50.`,
+        `Invalid payment amount: €${params.amount}. Amount must be a positive number.`,
+      );
+    }
+
+    // Validate amount — Stripe minimum is €0.50 (50 cents)
+    const amountCents = Math.round(amount * 100);
+    if (amountCents < 50) {
+      throw new BadRequestException(
+        `Invalid payment amount: €${amount.toFixed(2)}. Minimum is €0.50.`,
       );
     }
 
@@ -409,13 +417,14 @@ export class StripeService {
       return session;
     } catch (error) {
       // Surface the real Stripe error so it's debuggable
+      const errorDetail = error?.message || error?.raw?.message || 'Unknown Stripe error';
       this.logger.error(
-        `Stripe checkout session failed for service request ${params.serviceRequestId}: [${error.type || error.code}] ${error.message}`,
-        error.stack,
+        `Stripe checkout session failed for service request ${params.serviceRequestId}: [${error?.type || error?.code || 'UNKNOWN'}] ${errorDetail}`,
+        error?.stack,
       );
       // Pass through Stripe's own message so frontend/admin can see it
       throw new BadRequestException(
-        error.message || 'Failed to create payment checkout session',
+        `Failed to create payment checkout session: ${errorDetail}`,
       );
     }
   }

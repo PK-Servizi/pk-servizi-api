@@ -109,8 +109,11 @@ export class ServiceRequestsService {
       throw new NotFoundException('User not found');
     }
 
+    // TypeORM returns decimal columns as strings — ensure basePrice is a number
+    const basePrice = service.basePrice != null ? Number(service.basePrice) : 0;
+
     // Check if service is FREE (basePrice = 0)
-    const isFreeService = !service.basePrice || service.basePrice <= 0;
+    const isFreeService = !basePrice || basePrice <= 0;
 
     if (isFreeService) {
       // FREE SERVICE: Skip payment, go directly to questionnaire
@@ -163,7 +166,7 @@ export class ServiceRequestsService {
 
     // PAID SERVICE: Proceed with payment workflow
     // Validate amount before touching the database
-    if (!service.basePrice || service.basePrice <= 0) {
+    if (!Number.isFinite(basePrice) || basePrice <= 0) {
       throw new BadRequestException(
         `Service "${service.name}" has an invalid price (${service.basePrice}). Please contact support.`,
       );
@@ -184,7 +187,7 @@ export class ServiceRequestsService {
     let checkoutSession: any;
     try {
       checkoutSession = await this.stripeService.createPaymentCheckoutSession({
-        amount: service.basePrice,
+        amount: basePrice,
         currency: 'eur',
         serviceRequestId: serviceRequest.id,
         userId,
@@ -212,7 +215,7 @@ export class ServiceRequestsService {
     const payment = this.paymentRepository.create({
       userId,
       serviceRequestId: serviceRequest.id,
-      amount: service.basePrice,
+      amount: basePrice,
       currency: 'EUR',
       status: 'pending',
       stripePaymentIntentId:
@@ -236,7 +239,7 @@ export class ServiceRequestsService {
     await this.notificationsService.send({
       userId,
       title: '💳 Payment Required',
-      message: `Please complete payment of €${service.basePrice} for ${service.name}`,
+      message: `Please complete payment of €${basePrice} for ${service.name}`,
       type: 'info',
       actionUrl: `/service-requests/${serviceRequest.id}/payment`,
     });
@@ -251,7 +254,7 @@ export class ServiceRequestsService {
       data: {
         serviceRequestId: serviceRequest.id,
         paymentId: payment.id,
-        amount: service.basePrice,
+        amount: basePrice,
         currency: 'EUR',
         status: 'payment_pending',
         checkoutSessionId: checkoutSession.id,

@@ -39,6 +39,11 @@ export class Service {
     scale: 2,
     nullable: true,
     name: 'base_price',
+    transformer: {
+      to: (value: number) => value,
+      from: (value: string | null) =>
+        value === null ? null : parseFloat(value),
+    },
   })
   basePrice: number;
 
