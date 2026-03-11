@@ -39,7 +39,7 @@ export class CoursesService extends BaseService<
     const { skip = 0, take = 20 } = options || {};
     this.logger.debug('Fetching active courses');
     const [data, total] = await this.courseRepository.findAndCount({
-      where: { status: 'published' },
+      where: { isActive: true },
       skip,
       take,
       order: { createdAt: 'DESC' },

@@ -2,9 +2,7 @@ import {
   IsString,
   IsOptional,
   IsNumber,
-  IsDateString,
-  IsIn,
-  IsUUID,
+  IsBoolean,
   MinLength,
   MaxLength,
   Min,
@@ -21,59 +19,36 @@ export class CreateCourseDto {
   @ApiPropertyOptional({ description: 'Course description' })
   @IsOptional()
   @IsString({ message: 'Description must be a string' })
-  @MaxLength(2000, { message: 'Description cannot exceed 2000 characters' })
   description?: string;
 
-  @ApiPropertyOptional({ description: 'Course content' })
+  @ApiPropertyOptional({ description: 'Instructor name' })
   @IsOptional()
-  @IsString({ message: 'Content must be a string' })
-  content?: string;
+  @IsString({ message: 'Instructor must be a string' })
+  @MaxLength(255, { message: 'Instructor name cannot exceed 255 characters' })
+  instructor?: string;
 
-  @ApiPropertyOptional({ description: 'Instructor ID' })
+  @ApiPropertyOptional({ description: 'Course duration in hours' })
   @IsOptional()
-  @IsUUID(4, { message: 'Instructor ID must be a valid UUID' })
-  instructorId?: string;
+  @IsNumber({}, { message: 'Duration hours must be a number' })
+  @Min(1, { message: 'Duration must be at least 1 hour' })
+  durationHours?: number;
 
-  @ApiPropertyOptional({ description: 'Maximum number of participants' })
-  @IsOptional()
-  @IsNumber({}, { message: 'Max participants must be a number' })
-  @Min(1, { message: 'Max participants must be at least 1' })
-  maxParticipants?: number;
-
-  @ApiPropertyOptional({ description: 'Course start date' })
-  @IsOptional()
-  @IsDateString({}, { message: 'Start date must be a valid ISO date string' })
-  startDate?: string;
-
-  @ApiPropertyOptional({ description: 'Course end date' })
-  @IsOptional()
-  @IsDateString({}, { message: 'End date must be a valid ISO date string' })
-  endDate?: string;
-
-  @ApiPropertyOptional({ description: 'Course location' })
-  @IsOptional()
-  @IsString({ message: 'Location must be a string' })
-  @MaxLength(255, { message: 'Location cannot exceed 255 characters' })
-  location?: string;
-
-  @ApiPropertyOptional({ description: 'Course price in EUR' })
-  @IsOptional()
+  @ApiProperty({ description: 'Course price in EUR' })
   @IsNumber(
     { maxDecimalPlaces: 2 },
     { message: 'Price must be a valid number with max 2 decimal places' },
   )
   @Min(0, { message: 'Price cannot be negative' })
-  price?: number;
+  price: number;
 
-  @ApiPropertyOptional({
-    description: 'Course status',
-    enum: ['draft', 'published', 'active', 'completed', 'cancelled'],
-    default: 'draft',
-  })
+  @ApiPropertyOptional({ description: 'Is the course active?', default: true })
   @IsOptional()
-  @IsIn(['draft', 'published', 'active', 'completed', 'cancelled'], {
-    message:
-      'Status must be one of: draft, published, active, completed, cancelled',
-  })
-  status?: string;
+  @IsBoolean({ message: 'isActive must be a boolean' })
+  isActive?: boolean;
+
+  @ApiPropertyOptional({ description: 'Course thumbnail URL' })
+  @IsOptional()
+  @IsString({ message: 'Thumbnail URL must be a string' })
+  @MaxLength(255, { message: 'Thumbnail URL cannot exceed 255 characters' })
+  thumbnailUrl?: string;
 }

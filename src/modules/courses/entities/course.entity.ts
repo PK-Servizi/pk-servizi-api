@@ -22,33 +22,20 @@ export class Course {
   @Column({ type: 'text', nullable: true })
   description: string;
 
-  @Column({ type: 'text', nullable: true })
-  content: string;
-
-  @Column({ nullable: true, name: 'instructor_id' })
-  instructorId: string;
-
-  @Column({ nullable: true, name: 'max_participants' })
-  maxParticipants: number;
-
-  @Column({ nullable: true, name: 'start_date' })
-  startDate: Date;
-
-  @Column({ nullable: true, name: 'end_date' })
-  endDate: Date;
-
   @Column({ length: 255, nullable: true })
-  location: string;
+  instructor: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'int', nullable: true, name: 'duration_hours' })
+  durationHours: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
   price: number;
 
-  @Column({ length: 20, default: 'draft' })
-  status: string;
+  @Column({ name: 'is_active', default: true })
+  isActive: boolean;
 
-  @ManyToOne(() => User, (user) => user.instructedCourses)
-  @JoinColumn({ name: 'instructor_id' })
-  instructor: User;
+  @Column({ length: 255, nullable: true, name: 'thumbnail_url' })
+  thumbnailUrl: string;
 
   @OneToMany(() => CourseEnrollment, (enrollment) => enrollment.course)
   enrollments: CourseEnrollment[];
