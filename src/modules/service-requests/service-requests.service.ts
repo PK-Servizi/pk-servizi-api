@@ -162,7 +162,15 @@ export class ServiceRequestsService {
     }
 
     // PAID SERVICE: Proceed with payment workflow
-    // Create service request with payment_pending status
+    // Validate amount before touching the database
+    if (!service.basePrice || service.basePrice <= 0) {
+      throw new BadRequestException(
+        `Service "${service.name}" has an invalid price (${service.basePrice}). Please contact support.`,
+      );
+    }
+
+    // Create a temporary ID placeholder so Stripe metadata can reference it,
+    // but only persist the service request AFTER Stripe succeeds.
     const serviceRequest = this.serviceRequestRepository.create({
       userId,
       serviceId: service.id,
@@ -172,18 +180,29 @@ export class ServiceRequestsService {
 
     await this.serviceRequestRepository.save(serviceRequest);
 
-    // Create Stripe Checkout Session for hosted payment page
-    const checkoutSession =
-      await this.stripeService.createPaymentCheckoutSession({
+    // Create Stripe Checkout Session — if this fails, clean up the saved record
+    let checkoutSession: any;
+    try {
+      checkoutSession = await this.stripeService.createPaymentCheckoutSession({
         amount: service.basePrice,
-        currency: 'EUR',
+        currency: 'eur',
         serviceRequestId: serviceRequest.id,
         userId,
         userEmail: user.email,
         description: `Payment for ${service.name}`,
-        successUrl: undefined, // Uses default
-        cancelUrl: undefined, // Uses default
+        successUrl: undefined,
+        cancelUrl: undefined,
       });
+    } catch (stripeError) {
+      // Stripe failed — delete the orphaned service request so user can retry
+      await this.serviceRequestRepository.remove(serviceRequest).catch((e) =>
+        this.logger.error(`Cleanup failed for orphaned request ${serviceRequest.id}: ${e.message}`),
+      );
+      this.logger.error(
+        `Stripe error for service "${service.name}" (price: ${service.basePrice}): ${stripeError.message}`,
+      );
+      throw stripeError; // re-throw the real error (already a BadRequestException)
+    }
 
     this.logger.log(
       `Created Stripe Checkout Session: ${checkoutSession.id} for service request ${serviceRequest.id}`,

@@ -69,7 +69,7 @@ export class StripeService {
 
     try {
       const session = await this.stripe.checkout.sessions.create({
-        payment_method_types: ['card'],
+        // No payment_method_types: Stripe uses all methods enabled in the Dashboard
         line_items: [
           {
             price: priceId,
@@ -100,8 +100,13 @@ export class StripeService {
       );
       return session;
     } catch (error) {
-      this.logger.error(`Failed to create checkout session: ${error.message}`);
-      throw new BadRequestException('Failed to create checkout session');
+      this.logger.error(
+        `Failed to create checkout session: [${error.type || error.code}] ${error.message}`,
+        error.stack,
+      );
+      throw new BadRequestException(
+        error.message || 'Failed to create checkout session',
+      );
     }
   }
 
@@ -278,11 +283,11 @@ export class StripeService {
 
     try {
       const session = await this.stripe.checkout.sessions.create({
-        payment_method_types: ['card'],
+        // No payment_method_types: Stripe uses all methods enabled in the Dashboard
         line_items: [
           {
             price_data: {
-              currency: params.currency,
+              currency: params.currency.toLowerCase(),
               unit_amount: params.amount,
               product_data: {
                 name: params.description,
@@ -302,9 +307,12 @@ export class StripeService {
       return session;
     } catch (error) {
       this.logger.error(
-        `Failed to create one-time payment session: ${error.message}`,
+        `Failed to create one-time payment session: [${error.type || error.code}] ${error.message}`,
+        error.stack,
       );
-      throw new BadRequestException('Failed to create payment session');
+      throw new BadRequestException(
+        error.message || 'Failed to create payment session',
+      );
     }
   }
 
@@ -346,7 +354,17 @@ export class StripeService {
     cancelUrl?: string;
   }): Promise<Stripe.Checkout.Session> {
     if (!this.stripe) {
-      throw new Error('Stripe not configured');
+      throw new BadRequestException(
+        'Payment service is not configured. Please contact support.',
+      );
+    }
+
+    // Validate amount — Stripe minimum is €0.50 (50 cents)
+    const amountCents = Math.round(params.amount * 100);
+    if (!amountCents || amountCents < 50) {
+      throw new BadRequestException(
+        `Invalid payment amount: €${params.amount}. Minimum is €0.50.`,
+      );
     }
 
     const frontendUrl =
@@ -360,12 +378,12 @@ export class StripeService {
 
     try {
       const session = await this.stripe.checkout.sessions.create({
-        payment_method_types: ['card'],
+        // No payment_method_types: Stripe uses all methods enabled in the Dashboard
         line_items: [
           {
             price_data: {
-              currency: params.currency,
-              unit_amount: params.amount * 100, // Convert to cents
+              currency: params.currency.toLowerCase(), // Stripe requires lowercase currency
+              unit_amount: amountCents,
               product_data: {
                 name: params.description || 'Service Request Payment',
                 description: `Payment for service request ${params.serviceRequestId}`,
@@ -390,11 +408,14 @@ export class StripeService {
       );
       return session;
     } catch (error) {
+      // Surface the real Stripe error so it's debuggable
       this.logger.error(
-        `Failed to create payment checkout session: ${error.message}`,
+        `Stripe checkout session failed for service request ${params.serviceRequestId}: [${error.type || error.code}] ${error.message}`,
+        error.stack,
       );
+      // Pass through Stripe's own message so frontend/admin can see it
       throw new BadRequestException(
-        'Failed to create payment checkout session',
+        error.message || 'Failed to create payment checkout session',
       );
     }
   }
