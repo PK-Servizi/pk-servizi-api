@@ -379,6 +379,11 @@ export class StripeService {
       );
     }
 
+    // Log the conversion for debugging
+    this.logger.debug(
+      `Payment amount conversion: €${params.amount} (${typeof params.amount}) -> €${amount} -> ${amountCents} cents`,
+    );
+
     const frontendUrl =
       this.configService.get('FRONTEND_URL') || 'http://localhost:3001';
     const successUrl =
@@ -422,10 +427,20 @@ export class StripeService {
     } catch (error) {
       // Surface the real Stripe error so it's debuggable
       const errorDetail = error?.message || error?.raw?.message || 'Unknown Stripe error';
+      const errorType = error?.type || error?.code || 'UNKNOWN';
+      
       this.logger.error(
-        `Stripe checkout session failed for service request ${params.serviceRequestId}: [${error?.type || error?.code || 'UNKNOWN'}] ${errorDetail}`,
-        error?.stack,
+        `Stripe checkout session failed for service request ${params.serviceRequestId}`,
       );
+      this.logger.error(`Error Type: ${errorType}`);
+      this.logger.error(`Error Message: ${errorDetail}`);
+      this.logger.error(`Amount: €${params.amount} -> ${Math.round(params.amount * 100)} cents (before fix)`);
+      this.logger.error(`Amount After Fix: ${parseInt((Number(params.amount) * 100).toFixed(0), 10)} cents`);
+      
+      if (error?.stack) {
+        this.logger.error(`Stack: ${error.stack}`);
+      }
+      
       // Pass through Stripe's own message so frontend/admin can see it
       throw new BadRequestException(
         `Failed to create payment checkout session: ${errorDetail}`,

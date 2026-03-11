@@ -186,6 +186,10 @@ export class ServiceRequestsService {
     // Create Stripe Checkout Session — if this fails, clean up the saved record
     let checkoutSession: any;
     try {
+      this.logger.debug(
+        `Creating Stripe checkout for service "${service.name}": basePrice=${basePrice} (type: ${typeof basePrice}), service.basePrice=${service.basePrice} (type: ${typeof service.basePrice})`,
+      );
+      
       checkoutSession = await this.stripeService.createPaymentCheckoutSession({
         amount: basePrice,
         currency: 'eur',
