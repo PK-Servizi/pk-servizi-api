@@ -103,8 +103,7 @@ const PERSONAL_INFORMATION_SECTION = {
         {
           name: 'country',
           label: 'Country',
-          type: 'select',
-          options: ['Italy', 'EU Member', 'Other'],
+          type: 'text',
           required: true,
         },
         {
@@ -148,7 +147,8 @@ const DEFAULT_FORM_SCHEMAS: { [key: string]: any } = {
   // ISEE Services
   ISEE_ORD_2026: {
     title: 'ISEE Ordinario 2026',
-    description: 'Indicatore della Situazione Economica Equivalente - Ordinary Income Indicator Form 2026',
+    description:
+      'Indicatore della Situazione Economica Equivalente - Ordinary Income Indicator Form 2026',
     sections: [
       PERSONAL_INFORMATION_SECTION,
       {
@@ -163,8 +163,19 @@ const DEFAULT_FORM_SCHEMAS: { [key: string]: any } = {
             order: 1,
             subFields: [
               { name: 'name', label: 'Name', type: 'text', required: true },
-              { name: 'tax_code', label: 'Tax Code', type: 'text', required: true },
-              { name: 'relationship', label: 'Relationship', type: 'select', options: ['Spouse', 'Child', 'Parent', 'Sibling', 'Other'], required: true },
+              {
+                name: 'tax_code',
+                label: 'Tax Code',
+                type: 'text',
+                required: true,
+              },
+              {
+                name: 'relationship',
+                label: 'Relationship',
+                type: 'select',
+                options: ['Spouse', 'Child', 'Parent', 'Sibling', 'Other'],
+                required: true,
+              },
             ],
           },
         ],
@@ -265,7 +276,13 @@ const DEFAULT_FORM_SCHEMAS: { [key: string]: any } = {
             name: 'reason_for_change',
             label: 'Reason for Change',
             type: 'select',
-            options: ['Employment', 'Income', 'Family Structure', 'Property', 'Other'],
+            options: [
+              'Employment',
+              'Income',
+              'Family Structure',
+              'Property',
+              'Other',
+            ],
             required: true,
             order: 1,
           },
@@ -275,7 +292,8 @@ const DEFAULT_FORM_SCHEMAS: { [key: string]: any } = {
   },
   NASPI: {
     title: 'NASPI 2026',
-    description: 'Application for New Social Safety Net (Nuova Assicurazione Sociale per l\'Disoccupazione)',
+    description:
+      "Application for New Social Safety Net (Nuova Assicurazione Sociale per l'Disoccupazione)",
     sections: [
       PERSONAL_INFORMATION_SECTION,
       {
@@ -389,7 +407,9 @@ async function populateAllFormSchemas() {
       service.formSchema = formSchema;
       await serviceRepo.save(service);
 
-      console.log(`✅ ${service.code} - Form schema added (${formSchema.sections.length} sections)`);
+      console.log(
+        `✅ ${service.code} - Form schema added (${formSchema.sections.length} sections)`,
+      );
       updatedCount++;
     }
 

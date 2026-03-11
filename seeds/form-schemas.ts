@@ -236,8 +236,7 @@ const PERSONAL_INFORMATION_SECTION: FormSection = {
     {
       name: 'paese',
       label: 'Paese',
-      type: 'select',
-      options: COUNTRY_OPTIONS,
+      type: 'text',
       required: true,
       order: 10,
       defaultValue: 'Italia',
