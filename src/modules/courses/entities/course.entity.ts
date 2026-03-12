@@ -34,6 +34,9 @@ export class Course {
   @Column({ name: 'is_active', default: true })
   isActive: boolean;
 
+  @Column({ length: 50, default: 'draft' })
+  status: string;
+
   @Column({ length: 255, nullable: true, name: 'thumbnail_url' })
   thumbnailUrl: string;
 

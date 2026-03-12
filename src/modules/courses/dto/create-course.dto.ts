@@ -6,6 +6,7 @@ import {
   MinLength,
   MaxLength,
   Min,
+  IsIn,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -45,6 +46,16 @@ export class CreateCourseDto {
   @IsOptional()
   @IsBoolean({ message: 'isActive must be a boolean' })
   isActive?: boolean;
+
+  @ApiPropertyOptional({ 
+    description: 'Course status', 
+    enum: ['draft', 'published'], 
+    default: 'draft' 
+  })
+  @IsOptional()
+  @IsString({ message: 'Status must be a string' })
+  @IsIn(['draft', 'published'], { message: 'Status must be either draft or published' })
+  status?: string;
 
   @ApiPropertyOptional({ description: 'Course thumbnail URL' })
   @IsOptional()
