@@ -196,7 +196,22 @@ const PERSONAL_INFORMATION_SECTION: FormSection = {
       order: 7,
       defaultValue: 'Italia',
     },
-    // 7. Date of birth
+    // 7. Marital status
+    {
+      name: 'marital_status',
+      label: 'Stato civile',
+      type: 'select',
+      options: [
+        'Celibe/Nubile',
+        'Coniugato/a',
+        'Separato/a',
+        'Divorziato/a',
+        'Vedovo/a',
+      ],
+      required: true,
+      order: 7,
+    },
+    // 8. Date of birth
     {
       name: 'date_of_birth',
       label: 'Data di nascita',
@@ -205,7 +220,7 @@ const PERSONAL_INFORMATION_SECTION: FormSection = {
       order: 8,
       placeholder: 'GG/MM/AAAA',
     },
-    // 8. Place of birth (Italy/Another country + Country dropdown)
+    // 9. Place of birth (Italy/Another country + Country dropdown)
     {
       name: 'place_of_birth',
       label: 'Luogo di nascita',
@@ -232,7 +247,7 @@ const PERSONAL_INFORMATION_SECTION: FormSection = {
         },
       ],
     },
-    // 9. Paese (Country)
+    // 10. Paese (Country)
     {
       name: 'paese',
       label: 'Paese',
@@ -241,7 +256,7 @@ const PERSONAL_INFORMATION_SECTION: FormSection = {
       order: 10,
       defaultValue: 'Italia',
     },
-    // 10. Provincia
+    // 11. Provincia
     {
       name: 'provincia',
       label: 'Provincia',
@@ -250,7 +265,7 @@ const PERSONAL_INFORMATION_SECTION: FormSection = {
       order: 11,
       placeholder: 'Inserisci la provincia',
     },
-    // 11. Città
+    // 12. Città
     {
       name: 'citta',
       label: 'Città',
@@ -259,7 +274,7 @@ const PERSONAL_INFORMATION_SECTION: FormSection = {
       order: 12,
       placeholder: 'Inserisci la città',
     },
-    // 12. Indirizzo
+    // 13. Indirizzo
     {
       name: 'indirizzo',
       label: 'Indirizzo',
@@ -268,7 +283,7 @@ const PERSONAL_INFORMATION_SECTION: FormSection = {
       order: 13,
       placeholder: "Inserisci l'indirizzo",
     },
-    // 13. Numero civico
+    // 14. Numero civico
     {
       name: 'numero_civico',
       label: 'Numero civico',
@@ -277,7 +292,7 @@ const PERSONAL_INFORMATION_SECTION: FormSection = {
       order: 14,
       placeholder: 'Inserisci il numero civico',
     },
-    // 14. Codice Postale (CAP)
+    // 15. Codice Postale (CAP)
     {
       name: 'codice_postale',
       label: 'Codice Postale',
@@ -388,21 +403,6 @@ const PERSONAL_INFORMATION_SECTION: FormSection = {
           },
         },
       ],
-    },
-    // 7. Marital status
-    {
-      name: 'marital_status',
-      label: 'Stato civile',
-      type: 'select',
-      options: [
-        'Celibe/Nubile',
-        'Coniugato/a',
-        'Separato/a',
-        'Divorziato/a',
-        'Vedovo/a',
-      ],
-      required: true,
-      order: 7,
     },
   ],
 };
