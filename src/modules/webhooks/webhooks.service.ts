@@ -130,16 +130,21 @@ export class WebhooksService {
 
       this.logger.log(`Upgrading subscription ${subscriptionId} from plan ${oldPlanId} to ${newPlanId}`);
 
-      // Update subscription to new plan
-      subscription.planId = newPlanId;
-      const updatedSubscription = await this.userSubscriptionRepository.save(subscription);
+      // Update subscription using direct update query to ensure persistence
+      await this.userSubscriptionRepository.update(
+        { id: subscriptionId },
+        { planId: newPlanId }
+      );
       
-      this.logger.log(`Subscription plan updated successfully. New planId: ${updatedSubscription.planId}`);
+      this.logger.log(`Subscription plan updated successfully to planId: ${newPlanId}`);
 
-      // Reload subscription with new plan details
+      // Clear cache and reload subscription with new plan details
+      await this.userSubscriptionRepository.manager.connection.queryResultCache?.remove(['user_subscriptions']);
+      
       const reloadedSubscription = await this.userSubscriptionRepository.findOne({
         where: { id: subscriptionId },
         relations: ['plan', 'user'],
+        cache: false, // Bypass cache
       });
 
       if (!reloadedSubscription || reloadedSubscription.planId !== newPlanId) {

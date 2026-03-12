@@ -382,17 +382,23 @@ export class SubscriptionsService {
         `Downgrade: ${currentPlan.name} -> ${newPlan.name}, Credit: €${creditAmount}, Days: ${daysRemaining}`,
       );
 
-      // Update subscription immediately
+      // Update subscription immediately using direct update query to ensure persistence
       const oldPlanId = currentSubscription.planId;
-      currentSubscription.planId = newPlan.id;
-      const savedSubscription = await this.userSubscriptionRepository.save(currentSubscription);
       
-      this.logger.log(`Downgrade: Updated subscription ${savedSubscription.id} from plan ${oldPlanId} to ${savedSubscription.planId}`);
+      await this.userSubscriptionRepository.update(
+        { id: currentSubscription.id },
+        { planId: newPlan.id }
+      );
+      
+      this.logger.log(`Downgrade: Updated subscription ${currentSubscription.id} from plan ${oldPlanId} to ${newPlan.id}`);
 
-      // Reload subscription to get fresh plan relation
+      // Clear cache and reload subscription to verify and get fresh plan relation
+      await this.userSubscriptionRepository.manager.connection.queryResultCache?.remove(['user_subscriptions']);
+      
       const reloadedSubscription = await this.userSubscriptionRepository.findOne({
         where: { id: currentSubscription.id },
         relations: ['plan'],
+        cache: false, // Bypass cache
       });
 
       if (!reloadedSubscription || reloadedSubscription.planId !== newPlan.id) {
@@ -401,6 +407,10 @@ export class SubscriptionsService {
       }
 
       this.logger.log(`Downgrade verified: Plan is now ${reloadedSubscription.plan.name}`);
+      
+      // Update the current subscription object to use reloaded data
+      currentSubscription.planId = reloadedSubscription.planId;
+      currentSubscription.plan = reloadedSubscription.plan;
 
       // Create credit record (store credit, not refund)
       const user = await this.userRepository.findOne({ where: { id: userId } });
