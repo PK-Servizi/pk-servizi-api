@@ -256,7 +256,11 @@ export class SubscriptionsService {
       const currentPlan = currentSubscription.plan;
 
       // Check if it's actually an upgrade (higher price)
-      if (newPlan.priceMonthly <= currentPlan.priceMonthly) {
+      // Convert to numbers to ensure proper comparison
+      const currentPrice = Number(currentPlan.priceMonthly);
+      const newPrice = Number(newPlan.priceMonthly);
+      
+      if (newPrice <= currentPrice) {
         throw new BadRequestException(
           'This is not an upgrade - use downgrade instead',
         );
@@ -354,7 +358,11 @@ export class SubscriptionsService {
       const currentPlan = currentSubscription.plan;
 
       // Check if it's actually a downgrade (lower price)
-      if (newPlan.priceMonthly >= currentPlan.priceMonthly) {
+      // Convert to numbers to ensure proper comparison
+      const currentPrice = Number(currentPlan.priceMonthly);
+      const newPrice = Number(newPlan.priceMonthly);
+      
+      if (newPrice >= currentPrice) {
         throw new BadRequestException(
           'This is not a downgrade - use upgrade instead',
         );
@@ -445,7 +453,10 @@ export class SubscriptionsService {
     newPrice: number,
     daysRemaining: number,
   ): number {
-    const dailyDifference = (currentPrice - newPrice) / 30; // Assuming 30-day month
+    // Ensure numeric values
+    const currentPriceNum = Number(currentPrice);
+    const newPriceNum = Number(newPrice);
+    const dailyDifference = (currentPriceNum - newPriceNum) / 30; // Assuming 30-day month
     return Math.max(0, dailyDifference * daysRemaining);
   }
 
@@ -454,7 +465,10 @@ export class SubscriptionsService {
     newPrice: number,
     daysRemaining: number,
   ): number {
-    const dailyDifference = (newPrice - currentPrice) / 30; // Assuming 30-day month
+    // Ensure numeric values
+    const currentPriceNum = Number(currentPrice);
+    const newPriceNum = Number(newPrice);
+    const dailyDifference = (newPriceNum - currentPriceNum) / 30; // Assuming 30-day month
     return dailyDifference * daysRemaining;
   }
 

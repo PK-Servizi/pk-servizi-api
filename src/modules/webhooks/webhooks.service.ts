@@ -127,15 +127,25 @@ export class WebhooksService {
 
       const oldPlan = subscription.plan;
 
+      this.logger.log(`Upgrading subscription ${subscriptionId} from plan ${oldPlan.id} to ${newPlanId}`);
+
       // Update subscription to new plan
       subscription.planId = newPlanId;
-      await this.userSubscriptionRepository.save(subscription);
+      const updatedSubscription = await this.userSubscriptionRepository.save(subscription);
+      
+      this.logger.log(`Subscription plan updated successfully. New planId: ${updatedSubscription.planId}`);
 
-      // Get new plan details
-      const newPlan = await this.userSubscriptionRepository.findOne({
+      // Reload subscription with new plan details
+      const reloadedSubscription = await this.userSubscriptionRepository.findOne({
         where: { id: subscriptionId },
-        relations: ['plan'],
+        relations: ['plan', 'user'],
       });
+
+      if (!reloadedSubscription) {
+        throw new Error('Failed to reload updated subscription');
+      }
+
+      const newPlanDetails = reloadedSubscription.plan;
 
       // Create payment record for the upgrade
       const payment = this.paymentRepository.create({
@@ -145,7 +155,7 @@ export class WebhooksService {
         currency: session.currency.toUpperCase(),
         status: 'completed',
         stripePaymentIntentId: session.payment_intent as string,
-        description: `Upgrade from ${oldPlan.name} to ${newPlan.plan.name} (Prorated)`,
+        description: `Upgrade from ${oldPlan.name} to ${newPlanDetails.name} (Prorated)`,
         paidAt: new Date(),
         metadata: {
           type: 'subscription_upgrade',
@@ -160,17 +170,17 @@ export class WebhooksService {
 
       // Send upgrade confirmation email
       try {
-        const user = subscription.user;
+        const user = reloadedSubscription.user;
         if (user) {
           await this.notificationsService.send({
             userId: user.id,
             userEmail: user.email,
             title: '🚀 Subscription Upgraded Successfully',
-            message: `Your subscription has been upgraded from ${oldPlan.name} to ${newPlan.plan.name}. The prorated amount of €${proratedAmount} has been charged.`,
+            message: `Your subscription has been upgraded from ${oldPlan.name} to ${newPlanDetails.name}. The prorated amount of €${proratedAmount} has been charged.`,
             type: 'success',
             data: {
               oldPlan: oldPlan.name,
-              newPlan: newPlan.plan.name,
+              newPlan: newPlanDetails.name,
               proratedAmount,
               paymentId: savedPayment.id,
             },
