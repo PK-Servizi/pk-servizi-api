@@ -383,8 +383,24 @@ export class SubscriptionsService {
       );
 
       // Update subscription immediately
+      const oldPlanId = currentSubscription.planId;
       currentSubscription.planId = newPlan.id;
-      await this.userSubscriptionRepository.save(currentSubscription);
+      const savedSubscription = await this.userSubscriptionRepository.save(currentSubscription);
+      
+      this.logger.log(`Downgrade: Updated subscription ${savedSubscription.id} from plan ${oldPlanId} to ${savedSubscription.planId}`);
+
+      // Reload subscription to get fresh plan relation
+      const reloadedSubscription = await this.userSubscriptionRepository.findOne({
+        where: { id: currentSubscription.id },
+        relations: ['plan'],
+      });
+
+      if (!reloadedSubscription || reloadedSubscription.planId !== newPlan.id) {
+        this.logger.error(`Failed to verify plan update. Expected: ${newPlan.id}, Got: ${reloadedSubscription?.planId}`);
+        throw new Error('Subscription plan update verification failed');
+      }
+
+      this.logger.log(`Downgrade verified: Plan is now ${reloadedSubscription.plan.name}`);
 
       // Create credit record (store credit, not refund)
       const user = await this.userRepository.findOne({ where: { id: userId } });
@@ -432,6 +448,12 @@ export class SubscriptionsService {
         success: true,
         message: 'Subscription downgraded successfully',
         data: {
+          subscription: {
+            id: reloadedSubscription.id,
+            planId: reloadedSubscription.planId,
+            planName: reloadedSubscription.plan.name,
+            status: reloadedSubscription.status,
+          },
           oldPlan: currentPlan.name,
           newPlan: newPlan.name,
           creditAmount,

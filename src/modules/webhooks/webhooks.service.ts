@@ -126,8 +126,9 @@ export class WebhooksService {
       }
 
       const oldPlan = subscription.plan;
+      const oldPlanId = subscription.planId;
 
-      this.logger.log(`Upgrading subscription ${subscriptionId} from plan ${oldPlan.id} to ${newPlanId}`);
+      this.logger.log(`Upgrading subscription ${subscriptionId} from plan ${oldPlanId} to ${newPlanId}`);
 
       // Update subscription to new plan
       subscription.planId = newPlanId;
@@ -141,11 +142,14 @@ export class WebhooksService {
         relations: ['plan', 'user'],
       });
 
-      if (!reloadedSubscription) {
-        throw new Error('Failed to reload updated subscription');
+      if (!reloadedSubscription || reloadedSubscription.planId !== newPlanId) {
+        this.logger.error(`Failed to verify plan update. Expected: ${newPlanId}, Got: ${reloadedSubscription?.planId}`);
+        throw new Error('Subscription plan update verification failed');
       }
 
       const newPlanDetails = reloadedSubscription.plan;
+      
+      this.logger.log(`Upgrade verified: Plan is now ${newPlanDetails.name} (planId: ${reloadedSubscription.planId})`);
 
       // Create payment record for the upgrade
       const payment = this.paymentRepository.create({
