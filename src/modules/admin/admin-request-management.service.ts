@@ -63,7 +63,7 @@ export class AdminRequestManagementService {
       }
 
       if (filters.serviceTypeId) {
-        query.andWhere('sr.serviceTypeId = :serviceTypeId', {
+        query.andWhere('sr.serviceId = :serviceTypeId', {
           serviceTypeId: filters.serviceTypeId,
         });
       }
