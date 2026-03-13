@@ -769,46 +769,37 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
-    // Get or create profile
-    let profile = await this.userProfileRepository.findOne({
-      where: { userId },
-    });
-
-    if (!profile) {
-      profile = this.userProfileRepository.create({ userId });
-    }
-
-    // Update consent flags and auto-populate dates
+    // Update consent flags and auto-populate dates on the user record
     if (dto.gdprConsent !== undefined) {
-      profile.gdprConsent = dto.gdprConsent;
+      user.gdprConsent = dto.gdprConsent;
       if (dto.gdprConsent === true) {
-        profile.gdprConsentDate = new Date();
+        user.gdprConsentDate = new Date();
       }
     }
 
     if (dto.privacyConsent !== undefined) {
-      profile.privacyConsent = dto.privacyConsent;
+      user.privacyConsent = dto.privacyConsent;
       if (dto.privacyConsent === true) {
-        profile.privacyConsentDate = new Date();
+        user.privacyConsentDate = new Date();
       }
     }
 
     // Default privacy consent to true
-    if (!profile.privacyConsent) {
-      profile.privacyConsent = true;
-      profile.privacyConsentDate = new Date();
+    if (!user.privacyConsent) {
+      user.privacyConsent = true;
+      user.privacyConsentDate = new Date();
     }
 
-    await this.userProfileRepository.save(profile);
+    await this.userRepository.save(user);
 
     return {
       success: true,
       message: 'Consent preferences updated',
       data: {
-        gdprConsent: profile.gdprConsent,
-        gdprConsentDate: profile.gdprConsentDate,
-        privacyConsent: profile.privacyConsent,
-        privacyConsentDate: profile.privacyConsentDate,
+        gdprConsent: user.gdprConsent,
+        gdprConsentDate: user.gdprConsentDate,
+        privacyConsent: user.privacyConsent,
+        privacyConsentDate: user.privacyConsentDate,
       },
     };
   }
@@ -866,34 +857,27 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
-    // Get user profile for consent data
-    const profile = await this.userProfileRepository.findOne({
-      where: { userId },
-    });
-
-    // Build consent history from profile's consent dates
+    // Build consent history from user's consent dates
     const consentHistory = [];
 
-    if (profile) {
-      // Add GDPR consent record
-      if (profile.gdprConsentDate) {
-        consentHistory.push({
-          type: 'GDPR Data Processing',
-          consent: profile.gdprConsent,
-          date: profile.gdprConsentDate,
-          timestamp: profile.gdprConsentDate.toISOString(),
-        });
-      }
+    // Add GDPR consent record
+    if (user.gdprConsentDate) {
+      consentHistory.push({
+        type: 'GDPR Data Processing',
+        consent: user.gdprConsent,
+        date: user.gdprConsentDate,
+        timestamp: user.gdprConsentDate.toISOString(),
+      });
+    }
 
-      // Add Privacy consent record
-      if (profile.privacyConsentDate) {
-        consentHistory.push({
-          type: 'Privacy Policy',
-          consent: profile.privacyConsent,
-          date: profile.privacyConsentDate,
-          timestamp: profile.privacyConsentDate.toISOString(),
-        });
-      }
+    // Add Privacy consent record
+    if (user.privacyConsentDate) {
+      consentHistory.push({
+        type: 'Privacy Policy',
+        consent: user.privacyConsent,
+        date: user.privacyConsentDate,
+        timestamp: user.privacyConsentDate.toISOString(),
+      });
     }
 
     // Sort by date descending (most recent first)
@@ -910,13 +894,13 @@ export class UsersService {
           : [
               {
                 type: 'GDPR Data Processing',
-                consent: profile?.gdprConsent || false,
-                date: profile?.gdprConsentDate || null,
+                consent: user.gdprConsent || false,
+                date: user.gdprConsentDate || null,
               },
               {
                 type: 'Privacy Policy',
-                consent: profile?.privacyConsent || false,
-                date: profile?.privacyConsentDate || null,
+                consent: user.privacyConsent || false,
+                date: user.privacyConsentDate || null,
               },
             ],
     };

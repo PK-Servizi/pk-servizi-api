@@ -48,12 +48,46 @@ export class PaymentsService {
   /**
    * Find all payments (wrapper for BaseService)
    */
-  async findAll(page: number = 1, limit: number = 20) {
+  async findAll(
+    page: number = 1,
+    limit: number = 20,
+    filters?: {
+      status?: string;
+      search?: string;
+      paymentMethod?: string;
+      startDate?: string;
+      endDate?: string;
+    },
+  ) {
     const qb = this.paymentRepository
       .createQueryBuilder('payment')
       .leftJoinAndSelect('payment.user', 'user')
-      .leftJoinAndSelect('payment.serviceRequest', 'serviceRequest')
-      .skip((page - 1) * limit)
+      .leftJoinAndSelect('payment.serviceRequest', 'serviceRequest');
+
+    if (filters?.status) {
+      qb.andWhere('payment.status = :status', { status: filters.status });
+    }
+
+    if (filters?.paymentMethod) {
+      qb.andWhere('payment.paymentMethod = :paymentMethod', { paymentMethod: filters.paymentMethod });
+    }
+
+    if (filters?.startDate) {
+      qb.andWhere('payment.createdAt >= :startDate', { startDate: filters.startDate });
+    }
+
+    if (filters?.endDate) {
+      qb.andWhere('payment.createdAt <= :endDate', { endDate: filters.endDate });
+    }
+
+    if (filters?.search) {
+      qb.andWhere(
+        '(payment.stripePaymentIntentId ILIKE :search OR user.email ILIKE :search OR user.firstName ILIKE :search OR user.lastName ILIKE :search)',
+        { search: `%${filters.search}%` },
+      );
+    }
+
+    qb.skip((page - 1) * limit)
       .take(limit)
       .orderBy('payment.createdAt', 'DESC');
 

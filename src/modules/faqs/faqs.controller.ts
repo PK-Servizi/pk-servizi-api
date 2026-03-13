@@ -71,7 +71,20 @@ export class FaqsController {
     return this.faqsService.findAll();
   }
 
-  // 5. ADMIN: Update FAQ
+  // 5. ADMIN: Get single FAQ
+  @Get(':id')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('faqs:read')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: '[Admin] Get FAQ by ID',
+    description: 'Get a single FAQ by its ID',
+  })
+  async findOne(@Param('id') id: string) {
+    return this.faqsService.findOne(id);
+  }
+
+  // 6. ADMIN: Update FAQ
   @Patch(':id')
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Permissions('faqs:update')

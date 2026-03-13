@@ -16,7 +16,7 @@ describe('Admin All Routes E2E Test - Real Data', () => {
   let adminToken: string;
   let adminId: string;
   // Remove unused variables
-  // let customerToken: string;
+  let customerToken: string;
   let createdUserId: string;
   let createdCustomerId: string;
   let serviceTypeId: string;

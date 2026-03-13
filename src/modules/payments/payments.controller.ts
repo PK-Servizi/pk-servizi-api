@@ -108,11 +108,27 @@ export class PaymentsController {
   @ApiOperation({ summary: '[Admin] List all payments' })
   @ApiQuery({ name: 'page', required: false, example: 1 })
   @ApiQuery({ name: 'limit', required: false, example: 20 })
+  @ApiQuery({ name: 'status', required: false })
+  @ApiQuery({ name: 'search', required: false })
+  @ApiQuery({ name: 'paymentMethod', required: false })
+  @ApiQuery({ name: 'startDate', required: false })
+  @ApiQuery({ name: 'endDate', required: false })
   getAllPayments(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 20,
+    @Query('status') status?: string,
+    @Query('search') search?: string,
+    @Query('paymentMethod') paymentMethod?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
   ) {
-    return this.paymentsService.findAll(page, limit);
+    return this.paymentsService.findAll(page, limit, {
+      status,
+      search,
+      paymentMethod,
+      startDate,
+      endDate,
+    });
   }
 
   @Post(':id/refund')

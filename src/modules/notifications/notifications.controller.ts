@@ -90,6 +90,15 @@ export class NotificationsController {
   }
 
   @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Get(':id')
+  @Permissions('notifications:read')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: '[Admin] Get notification by ID' })
+  findOne(@Param('id') id: string) {
+    return this.notificationsService.findOne(id);
+  }
+
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Delete(':id')
   @Permissions('notifications:delete_own')
   @ApiBearerAuth('JWT-auth')

@@ -28,39 +28,66 @@ export class UserProfile {
   @Column({ type: 'text', nullable: true })
   bio: string;
 
-  @Column({ length: 16, nullable: true, name: 'fiscal_code' })
-  fiscalCode: string;
+  @Column({ type: 'date', nullable: true, name: 'date_of_birth' })
+  dateOfBirth: Date;
 
-  @Column({ type: 'text', nullable: true })
-  address: string;
+  @Column({ nullable: true })
+  gender: string;
 
-  @Column({ length: 100, nullable: true })
-  city: string;
+  @Column({ nullable: true })
+  nationality: string;
 
-  @Column({ length: 10, nullable: true, name: 'postal_code' })
-  postalCode: string;
+  // Identity Documents
+  @Column({ nullable: true, name: 'id_card_number' })
+  idCardNumber: string;
 
-  @Column({ length: 2, nullable: true })
-  province: string;
+  @Column({ type: 'date', nullable: true, name: 'id_card_expiry' })
+  idCardExpiry: Date;
 
-  @Column({ type: 'date', nullable: true, name: 'birth_date' })
-  birthDate: Date;
+  @Column({ nullable: true, name: 'passport_number' })
+  passportNumber: string;
 
-  @Column({ length: 100, nullable: true, name: 'birth_place' })
-  birthPlace: string;
+  @Column({ type: 'date', nullable: true, name: 'passport_expiry' })
+  passportExpiry: Date;
 
-  // GDPR and Privacy
-  @Column({ default: false, name: 'gdpr_consent' })
-  gdprConsent: boolean;
+  // Employment & Financial
+  @Column({ nullable: true, name: 'marital_status' })
+  maritalStatus: string;
 
-  @Column({ nullable: true, name: 'gdpr_consent_date' })
-  gdprConsentDate: Date;
+  @Column({ nullable: true })
+  occupation: string;
 
-  @Column({ default: false, name: 'privacy_consent' })
-  privacyConsent: boolean;
+  @Column({ nullable: true })
+  employer: string;
 
-  @Column({ nullable: true, name: 'privacy_consent_date' })
-  privacyConsentDate: Date;
+  @Column({ type: 'numeric', nullable: true, name: 'monthly_income' })
+  monthlyIncome: number;
+
+  // Emergency Contact
+  @Column({ nullable: true, name: 'emergency_contact_name' })
+  emergencyContactName: string;
+
+  @Column({ nullable: true, name: 'emergency_contact_phone' })
+  emergencyContactPhone: string;
+
+  @Column({ nullable: true, name: 'emergency_contact_relationship' })
+  emergencyContactRelationship: string;
+
+  // Preferences
+  @Column({ name: 'preferred_language', default: 'it' })
+  preferredLanguage: string;
+
+  @Column({ name: 'preferred_communication', default: 'email' })
+  preferredCommunication: string;
+
+  @Column({ name: 'notifications_enabled', default: true })
+  notificationsEnabled: boolean;
+
+  @Column({ name: 'email_notifications', default: true })
+  emailNotifications: boolean;
+
+  @Column({ name: 'sms_notifications', default: false })
+  smsNotifications: boolean;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
