@@ -3,7 +3,6 @@ import {
   IsString,
   IsBoolean,
   IsDateString,
-  IsNumber,
   MaxLength,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
@@ -22,96 +21,51 @@ export class CreateUserProfileDto {
 
   @ApiProperty({ required: false })
   @IsOptional()
+  @IsString()
+  @MaxLength(16)
+  fiscalCode?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  address?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  city?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  @MaxLength(10)
+  postalCode?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  @MaxLength(2)
+  province?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
   @IsDateString()
-  dateOfBirth?: string;
+  birthDate?: string;
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  gender?: string;
+  @MaxLength(100)
+  birthPlace?: string;
 
   @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  nationality?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  idCardNumber?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsDateString()
-  idCardExpiry?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  passportNumber?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsDateString()
-  passportExpiry?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  maritalStatus?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  occupation?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  employer?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsNumber()
-  monthlyIncome?: number;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  emergencyContactName?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  emergencyContactPhone?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  emergencyContactRelationship?: string;
-
-  @ApiProperty({ required: false, default: 'it' })
-  @IsOptional()
-  @IsString()
-  preferredLanguage?: string;
-
-  @ApiProperty({ required: false, default: 'email' })
-  @IsOptional()
-  @IsString()
-  preferredCommunication?: string;
-
-  @ApiProperty({ required: false, default: true })
   @IsOptional()
   @IsBoolean()
-  notificationsEnabled?: boolean;
+  gdprConsent?: boolean;
 
-  @ApiProperty({ required: false, default: true })
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsBoolean()
-  emailNotifications?: boolean;
-
-  @ApiProperty({ required: false, default: false })
-  @IsOptional()
-  @IsBoolean()
-  smsNotifications?: boolean;
+  privacyConsent?: boolean;
 }

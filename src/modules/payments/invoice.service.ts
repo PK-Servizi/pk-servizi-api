@@ -89,15 +89,15 @@ export class InvoiceService {
       invoice.paidAt = payment.paidAt || new Date();
       invoice.stripeInvoiceId = payment.metadata?.stripeInvoiceId || null;
 
-      // Set billing info from user
+      // Set billing info from user profile
       invoice.billing = {
         name: user.fullName,
         email: user.email,
-        address: userWithProfile?.address || '',
-        city: userWithProfile?.city || '',
-        postalCode: userWithProfile?.postalCode || '',
+        address: profile?.address || '',
+        city: profile?.city || '',
+        postalCode: profile?.postalCode || '',
         country: 'IT',
-        fiscalCode: userWithProfile?.fiscalCode || '',
+        fiscalCode: profile?.fiscalCode || '',
       };
 
       // Create line items
