@@ -21,7 +21,6 @@ export class UserProfile {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  // Personal Information
   @Column({ name: 'avatar_url', length: 500, nullable: true })
   avatarUrl: string;
 
@@ -49,7 +48,6 @@ export class UserProfile {
   @Column({ length: 100, nullable: true, name: 'birth_place' })
   birthPlace: string;
 
-  // GDPR and Privacy
   @Column({ default: false, name: 'gdpr_consent' })
   gdprConsent: boolean;
 

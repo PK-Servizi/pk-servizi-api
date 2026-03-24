@@ -4,7 +4,6 @@ import {
   IsBoolean,
   IsDateString,
   MaxLength,
-  Length,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -23,7 +22,7 @@ export class CreateUserProfileDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  @Length(16, 16)
+  @MaxLength(16)
   fiscalCode?: string;
 
   @ApiProperty({ required: false })
@@ -60,12 +59,12 @@ export class CreateUserProfileDto {
   @MaxLength(100)
   birthPlace?: string;
 
-  @ApiProperty({ required: false, default: false })
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsBoolean()
   gdprConsent?: boolean;
 
-  @ApiProperty({ required: false, default: false })
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsBoolean()
   privacyConsent?: boolean;

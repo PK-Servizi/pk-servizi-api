@@ -769,16 +769,13 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
-    // Get or create profile
-    let profile = await this.userProfileRepository.findOne({
-      where: { userId },
-    });
-
+    // Get or create user profile (consent fields live on user_profiles table)
+    let profile = await this.userProfileRepository.findOne({ where: { userId } });
     if (!profile) {
       profile = this.userProfileRepository.create({ userId });
     }
 
-    // Update consent flags and auto-populate dates
+    // Update consent flags and auto-populate dates on the profile record
     if (dto.gdprConsent !== undefined) {
       profile.gdprConsent = dto.gdprConsent;
       if (dto.gdprConsent === true) {
@@ -866,34 +863,30 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
-    // Get user profile for consent data
-    const profile = await this.userProfileRepository.findOne({
-      where: { userId },
-    });
+    // Consent fields live on user_profiles table
+    const profile = await this.userProfileRepository.findOne({ where: { userId } });
 
     // Build consent history from profile's consent dates
     const consentHistory = [];
 
-    if (profile) {
-      // Add GDPR consent record
-      if (profile.gdprConsentDate) {
-        consentHistory.push({
-          type: 'GDPR Data Processing',
-          consent: profile.gdprConsent,
-          date: profile.gdprConsentDate,
-          timestamp: profile.gdprConsentDate.toISOString(),
-        });
-      }
+    // Add GDPR consent record
+    if (profile?.gdprConsentDate) {
+      consentHistory.push({
+        type: 'GDPR Data Processing',
+        consent: profile.gdprConsent,
+        date: profile.gdprConsentDate,
+        timestamp: profile.gdprConsentDate.toISOString(),
+      });
+    }
 
-      // Add Privacy consent record
-      if (profile.privacyConsentDate) {
-        consentHistory.push({
-          type: 'Privacy Policy',
-          consent: profile.privacyConsent,
-          date: profile.privacyConsentDate,
-          timestamp: profile.privacyConsentDate.toISOString(),
-        });
-      }
+    // Add Privacy consent record
+    if (profile?.privacyConsentDate) {
+      consentHistory.push({
+        type: 'Privacy Policy',
+        consent: profile.privacyConsent,
+        date: profile.privacyConsentDate,
+        timestamp: profile.privacyConsentDate.toISOString(),
+      });
     }
 
     // Sort by date descending (most recent first)

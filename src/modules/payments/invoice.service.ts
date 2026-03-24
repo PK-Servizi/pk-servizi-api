@@ -89,7 +89,7 @@ export class InvoiceService {
       invoice.paidAt = payment.paidAt || new Date();
       invoice.stripeInvoiceId = payment.metadata?.stripeInvoiceId || null;
 
-      // Set billing info from profile
+      // Set billing info from user profile
       invoice.billing = {
         name: user.fullName,
         email: user.email,
