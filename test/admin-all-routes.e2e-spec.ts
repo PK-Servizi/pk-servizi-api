@@ -27,7 +27,7 @@ describe('Admin All Routes E2E Test - Real Data', () => {
   let permissionId: string;
 
   const adminData = {
-    email: 'admin@pkservizi.com', // Use seeded admin user
+    email: 'admin@tuocaf.com', // Use seeded admin user
     password: 'Admin@123',
   };
 

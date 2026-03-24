@@ -81,13 +81,13 @@ async function runAllSeeds() {
     const adminRole = await roleRepo.findOne({ where: { name: RoleEnum.ADMIN } });
     const password = await bcrypt.hash('Admin@123', 10);
     const adminUser = userRepo.create({
-      email: 'admin@pkservizi.com',
+      email: 'admin@tuocaf.com',
       password,
       fullName: 'Super Admin',
       roleId: adminRole.id,
     });
     await userRepo.save(adminUser);
-    console.log('   ✅ Admin user "admin@pkservizi.com" created (password: Admin@123)');
+    console.log('   ✅ Admin user "admin@tuocaf.com" created (password: Admin@123)');
 
     // ── 4. SEED ROLE PERMISSIONS ───────────────────────────────────
     console.log('\n📦 Seeding role permissions...');
