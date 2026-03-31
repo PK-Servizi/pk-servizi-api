@@ -182,7 +182,7 @@ export class UsersService {
     return user;
   }
 
-  async findAll(page: number = 1, limit: number = 20, search?: string) {
+  async findAll(page: number = 1, limit: number = 20, search?: string, role?: string) {
     const query = this.userRepository
       .createQueryBuilder('user')
       .leftJoin('user.role', 'role')
@@ -204,7 +204,11 @@ export class UsersService {
       });
     }
 
-    const _cacheKey = `users-list-${page}-${limit}-${search || 'all'}`;
+    if (role) {
+      query.andWhere('role.name = :role', { role });
+    }
+
+    const _cacheKey = `users-list-${page}-${limit}-${search || 'all'}-${role || 'all'}`;
 
     const [users, total] = await query
       .orderBy('user.createdAt', 'DESC')

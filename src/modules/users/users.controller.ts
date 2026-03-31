@@ -192,12 +192,14 @@ export class UsersController {
   @ApiQuery({ name: 'page', required: false, example: 1 })
   @ApiQuery({ name: 'limit', required: false, example: 20 })
   @ApiQuery({ name: 'search', required: false })
+  @ApiQuery({ name: 'role', required: false, description: 'Filter by role name' })
   findAll(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 20,
     @Query('search') search?: string,
+    @Query('role') role?: string,
   ) {
-    return this.usersService.findAll(page, limit, search);
+    return this.usersService.findAll(page, limit, search, role);
   }
 
   @Get(':id')

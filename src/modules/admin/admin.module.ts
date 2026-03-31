@@ -9,6 +9,7 @@ import { ServiceRequest } from '../service-requests/entities/service-request.ent
 import { Payment } from '../payments/entities/payment.entity';
 import { Document } from '../documents/entities/document.entity';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { StorageService } from '../../common/services/storage.service';
 import { AdminDashboardService } from './admin-dashboard.service';
 import { AdminUserManagementService } from './admin-user-management.service';
 import { Appointment } from '../appointments/entities/appointment.entity';
@@ -34,6 +35,7 @@ import { SubscriptionPlan } from '../subscriptions/entities/subscription-plan.en
     AdminDashboardService,
     AdminUserManagementService,
     AdminRequestManagementService,
+    StorageService,
   ],
   exports: [AdminService, AdminDashboardService, AdminRequestManagementService],
 })

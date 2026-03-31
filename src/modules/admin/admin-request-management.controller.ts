@@ -17,6 +17,7 @@ import {
   ApiParam,
   ApiProperty,
 } from '@nestjs/swagger';
+import { IsString, IsNotEmpty, IsArray, IsOptional } from 'class-validator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { Permissions } from '../../common/decorators/permissions.decorator';
@@ -30,6 +31,8 @@ class AddInternalNoteDto {
     description: 'The internal note to add',
     example: 'Customer called and verified details.',
   })
+  @IsString()
+  @IsNotEmpty()
   note: string;
 }
 
@@ -39,6 +42,8 @@ class RequestDocumentsDto {
     type: [String],
     example: ['ID Card', 'Tax Return'],
   })
+  @IsArray()
+  @IsString({ each: true })
   categories: string[];
 
   @ApiProperty({
@@ -46,6 +51,8 @@ class RequestDocumentsDto {
     example: 'Uploaded documents were blurry',
     required: false,
   })
+  @IsString()
+  @IsOptional()
   reason: string;
 }
 
@@ -55,9 +62,13 @@ class BulkUpdateStatusDto {
     type: [String],
     example: ['req_123', 'req_456'],
   })
+  @IsArray()
+  @IsString({ each: true })
   requestIds: string[];
 
   @ApiProperty({ description: 'New status to apply', example: 'in_review' })
+  @IsString()
+  @IsNotEmpty()
   status: string;
 }
 
@@ -101,6 +112,14 @@ export class AdminRequestManagementController {
   @ApiQuery({ name: 'sortOrder', required: false, enum: ['ASC', 'DESC'] })
   getAllRequests(@Query() query: any) {
     return this.adminRequestService.getAllRequests(query);
+  }
+
+  @Get('documents/:docId/view-url')
+  @Permissions('service_requests:read')
+  @ApiOperation({ summary: 'Get document view URL' })
+  @ApiParam({ name: 'docId', description: 'Document ID' })
+  getDocumentViewUrl(@Param('docId') docId: string) {
+    return this.adminRequestService.getDocumentViewUrl(docId);
   }
 
   /**

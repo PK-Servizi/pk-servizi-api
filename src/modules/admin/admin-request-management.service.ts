@@ -10,6 +10,7 @@ import { ServiceRequest } from '../service-requests/entities/service-request.ent
 import { User } from '../users/entities/user.entity';
 import { Document } from '../documents/entities/document.entity';
 import { NotificationsService } from '../notifications/notifications.service';
+import { StorageService } from '../../common/services/storage.service';
 
 @Injectable()
 export class AdminRequestManagementService {
@@ -23,6 +24,7 @@ export class AdminRequestManagementService {
     @InjectRepository(Document)
     private documentRepository: Repository<Document>,
     private notificationsService: NotificationsService,
+    private storageService: StorageService,
   ) {}
 
   /**
@@ -59,7 +61,7 @@ export class AdminRequestManagementService {
       // Apply filters
       if (filters.status) {
         const statuses = filters.status.split(',');
-        query.andWhere('sr.status IN (:statuses)', { statuses });
+        query.andWhere('sr.status IN (:...statuses)', { statuses });
       }
 
       if (filters.serviceTypeId) {
@@ -170,7 +172,7 @@ export class AdminRequestManagementService {
 
       if (filters?.status) {
         const statuses = filters.status.split(',');
-        query.andWhere('sr.status IN (:statuses)', { statuses });
+        query.andWhere('sr.status IN (:...statuses)', { statuses });
       }
 
       if (filters?.priority) {
@@ -481,14 +483,14 @@ export class AdminRequestManagementService {
       // Get by service type
       const byServiceType = await this.serviceRequestRepository
         .createQueryBuilder('sr')
-        .leftJoin('sr.serviceType', 'st')
-        .select('st.code', 'code')
+        .leftJoin('sr.service', 'svc')
+        .select('svc.name', 'name')
         .addSelect('COUNT(*)', 'count')
         .where('sr.createdAt BETWEEN :start AND :end', {
           start: startDate,
           end: endDate,
         })
-        .groupBy('st.code')
+        .groupBy('svc.name')
         .getRawMany();
 
       // Get by priority
@@ -589,5 +591,25 @@ export class AdminRequestManagementService {
       this.logger.error(`Failed to export: ${error.message}`);
       throw error;
     }
+  }
+
+  async getDocumentViewUrl(documentId: string): Promise<any> {
+    const document = await this.documentRepository.findOne({
+      where: { id: documentId },
+    });
+    if (!document) {
+      throw new NotFoundException('Document not found');
+    }
+
+    const filePath = document.filePath;
+
+    // If filePath is already a full URL, return it directly
+    if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
+      return { success: true, data: { url: filePath } };
+    }
+
+    // Otherwise generate a signed URL from S3
+    const signedUrl = await this.storageService.getSignedUrl(filePath, 3600);
+    return { success: true, data: { url: signedUrl } };
   }
 }
