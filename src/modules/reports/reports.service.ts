@@ -59,7 +59,7 @@ export class ReportsService {
         .getRawMany(),
       this.serviceRequestRepository
         .createQueryBuilder('sr')
-        .leftJoinAndSelect('sr.serviceType', 'st')
+        .leftJoinAndSelect('sr.service', 'st')
         .select('st.name', 'type')
         .addSelect('COUNT(sr.id)', 'count')
         .groupBy('st.name')
@@ -198,14 +198,14 @@ export class ReportsService {
       this.serviceRequestRepository
         .createQueryBuilder('request')
         .leftJoin('request.user', 'user')
-        .leftJoin('request.serviceType', 'serviceType')
+        .leftJoin('request.service', 'service')
         .select([
           'request.id',
           'request.status',
           'request.priority',
           'request.createdAt',
           'user.fullName',
-          'serviceType.name',
+          'service.name',
         ])
         .getMany(),
       this.appointmentRepository
@@ -372,7 +372,7 @@ export class ReportsService {
         .getRawMany(),
       this.serviceRequestRepository
         .createQueryBuilder('sr')
-        .leftJoinAndSelect('sr.serviceType', 'st')
+        .leftJoinAndSelect('sr.service', 'st')
         .select('st.name', 'type')
         .addSelect('COUNT(sr.id)', 'count')
         .where('sr.status IN (:...statuses)', {

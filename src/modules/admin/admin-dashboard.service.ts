@@ -691,7 +691,7 @@ export class AdminDashboardService {
   private async getAvgProcessingTime(serviceCode: string): Promise<string> {
     const result = await this.serviceRequestRepository
       .createQueryBuilder('sr')
-      .leftJoinAndSelect('sr.serviceType', 'st')
+      .leftJoinAndSelect('sr.service', 'st')
       .select(
         'AVG(EXTRACT(EPOCH FROM (sr.updatedAt - sr.createdAt)))',
         'avgSeconds',
