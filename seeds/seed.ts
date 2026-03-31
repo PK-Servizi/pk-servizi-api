@@ -33,6 +33,7 @@ async function seed() {
         name: RoleEnum.CUSTOMER,
         description: 'End user/Customer of the platform',
       },
+      
       {
         name: RoleEnum.OPERATOR,
         description: 'CAF Consultant/Operator handling requests',
