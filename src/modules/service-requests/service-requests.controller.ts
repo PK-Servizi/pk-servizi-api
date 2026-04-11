@@ -19,7 +19,7 @@ import {
   ApiBody,
   ApiConsumes,
 } from '@nestjs/swagger';
-import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { AnyFilesInterceptor, FileFieldsInterceptor } from '@nestjs/platform-express';
 import { ServiceRequestsService } from './service-requests.service';
 import { CreateServiceRequestDto } from './dto/create-service-request.dto';
 import { UpdateServiceRequestDto } from './dto/update-service-request.dto';
@@ -150,21 +150,9 @@ export class ServiceRequestsController {
     resourceType: 'service_request',
   })
   @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: 'identityDocument', maxCount: 1 },
-      { name: 'fiscalCode', maxCount: 1 },
-      { name: 'incomeCertificate', maxCount: 1 },
-      { name: 'bankStatement', maxCount: 1 },
-      { name: 'propertyDocument', maxCount: 1 },
-      { name: 'visuraCatastale', maxCount: 1 },
-      { name: 'cuCertificate', maxCount: 1 },
-      { name: 'propertyDeed', maxCount: 1 },
-      { name: 'medicalReceipts', maxCount: 5 },
-      { name: 'expenseReceipts', maxCount: 5 },
-      { name: 'incomeDocuments', maxCount: 5 },
-      { name: 'familyDocuments', maxCount: 5 },
-      { name: 'otherDocument', maxCount: 10 },
-    ]),
+    AnyFilesInterceptor({
+      limits: { files: 30, fileSize: 10 * 1024 * 1024 },
+    }),
   )
   @ApiConsumes('multipart/form-data')
   @ApiOperation({
@@ -172,12 +160,14 @@ export class ServiceRequestsController {
       '[Customer] Step 2: Submit questionnaire with optional documents',
     description:
       'Submit questionnaire answers and optionally upload documents in a single request. ' +
+      'Accepts any file field name from the questionnaire schema (e.g., certificato_disabilita, giacenza_media_file). ' +
       'FREE SERVICES: Submit immediately after initiation. PAID SERVICES: Submit after payment completed. ' +
       'Status: awaiting_form → draft. After this, call /submit to finalize.',
   })
   @ApiBody({
     description:
-      'Submit questionnaire with optional documents. formData must be a JSON string when uploading files.',
+      'Submit questionnaire with optional documents. formData must be a JSON string when uploading files. ' +
+      'File fields use dynamic names from the questionnaire schema (e.g., certificato_disabilita, giacenza_media_file, codice_fiscale_tessera).',
     schema: {
       type: 'object',
       properties: {
@@ -187,71 +177,6 @@ export class ServiceRequestsController {
             'Questionnaire answers as JSON string (e.g., {"familyMembers":4,"income":25000})',
           example: '{"familyMembers":4,"hasDisabledMembers":true,"income":25000}',
         },
-        identityDocument: {
-          type: 'string',
-          format: 'binary',
-          description: 'Identity Document (optional)',
-        },
-        fiscalCode: {
-          type: 'string',
-          format: 'binary',
-          description: 'Fiscal Code (optional)',
-        },
-        incomeCertificate: {
-          type: 'string',
-          format: 'binary',
-          description: 'Income Certificate (optional)',
-        },
-        bankStatement: {
-          type: 'string',
-          format: 'binary',
-          description: 'Bank Statement (optional)',
-        },
-        propertyDocument: {
-          type: 'string',
-          format: 'binary',
-          description: 'Property Document (optional)',
-        },
-        visuraCatastale: {
-          type: 'string',
-          format: 'binary',
-          description: 'Visura Catastale (optional)',
-        },
-        cuCertificate: {
-          type: 'string',
-          format: 'binary',
-          description: 'CU Certificate (optional)',
-        },
-        propertyDeed: {
-          type: 'string',
-          format: 'binary',
-          description: 'Property Deed (optional)',
-        },
-        medicalReceipts: {
-          type: 'array',
-          items: { type: 'string', format: 'binary' },
-          description: 'Medical Receipts (up to 5 files, optional)',
-        },
-        expenseReceipts: {
-          type: 'array',
-          items: { type: 'string', format: 'binary' },
-          description: 'Expense Receipts (up to 5 files, optional)',
-        },
-        incomeDocuments: {
-          type: 'array',
-          items: { type: 'string', format: 'binary' },
-          description: 'Income Documents (up to 5 files, optional)',
-        },
-        familyDocuments: {
-          type: 'array',
-          items: { type: 'string', format: 'binary' },
-          description: 'Family Documents (up to 5 files, optional)',
-        },
-        otherDocument: {
-          type: 'array',
-          items: { type: 'string', format: 'binary' },
-          description: 'Other Documents (up to 10 files, optional)',
-        },
       },
       required: ['formData'],
     },
@@ -260,28 +185,15 @@ export class ServiceRequestsController {
     @Param('id') id: string,
     @Body('formData') formData: any,
     @CurrentUser() user: UserRequest,
-    @UploadedFiles()
-    files?: {
-      identityDocument?: Express.Multer.File[];
-      fiscalCode?: Express.Multer.File[];
-      incomeCertificate?: Express.Multer.File[];
-      bankStatement?: Express.Multer.File[];
-      propertyDocument?: Express.Multer.File[];
-      visuraCatastale?: Express.Multer.File[];
-      cuCertificate?: Express.Multer.File[];
-      propertyDeed?: Express.Multer.File[];
-      medicalReceipts?: Express.Multer.File[];
-      expenseReceipts?: Express.Multer.File[];
-      incomeDocuments?: Express.Multer.File[];
-      familyDocuments?: Express.Multer.File[];
-      otherDocument?: Express.Multer.File[];
-    },
+    @UploadedFiles() rawFiles?: Express.Multer.File[],
   ) {
+    // Group flat file array by fieldname into Record<string, File[]>
+    const files = this.groupFilesByFieldname(rawFiles);
     return this.serviceRequestsService.submitQuestionnaire(
       id,
       user.id,
       formData,
-      files,
+      Object.keys(files).length > 0 ? files : undefined,
     );
   }
 
@@ -297,141 +209,33 @@ export class ServiceRequestsController {
   @ApiBearerAuth('JWT-auth')
   @AuditLog({ action: 'DOCUMENTS_UPLOADED', resourceType: 'service_request' })
   @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: 'identityDocument', maxCount: 1 },
-      { name: 'fiscalCode', maxCount: 1 },
-      { name: 'incomeCertificate', maxCount: 1 },
-      { name: 'bankStatement', maxCount: 1 },
-      { name: 'propertyDocument', maxCount: 1 },
-      { name: 'visuraCatastale', maxCount: 1 },
-      { name: 'cuCertificate', maxCount: 1 },
-      { name: 'propertyDeed', maxCount: 1 },
-      { name: 'medicalReceipts', maxCount: 5 },
-      { name: 'expenseReceipts', maxCount: 5 },
-      { name: 'incomeDocuments', maxCount: 5 },
-      { name: 'familyDocuments', maxCount: 5 },
-      { name: 'otherDocument', maxCount: 10 },
-    ]),
+    AnyFilesInterceptor({
+      limits: { files: 30, fileSize: 10 * 1024 * 1024 },
+    }),
   )
   @ApiConsumes('multipart/form-data')
   @ApiOperation({
     summary: '[Customer] Optional: Upload additional documents',
     description:
-      'Upload additional documents after questionnaire submission. Documents can also be uploaded with the questionnaire in Step 2. Use this endpoint to add missing or supplementary documents.',
+      'Upload additional documents after questionnaire submission. ' +
+      'Accepts any file field name from the questionnaire schema. ' +
+      'Use this endpoint to add missing or supplementary documents.',
   })
   @ApiBody({
     description:
-      'Upload required documents. Only upload the documents needed for your specific service type.',
-    schema: {
-      type: 'object',
-      properties: {
-        identityDocument: {
-          type: 'string',
-          format: 'binary',
-          description: 'Identity Document',
-        },
-        fiscalCode: {
-          type: 'string',
-          format: 'binary',
-          description: 'Fiscal Code',
-        },
-        incomeCertificate: {
-          type: 'string',
-          format: 'binary',
-          description: 'Income Certificate',
-        },
-        bankStatement: {
-          type: 'string',
-          format: 'binary',
-          description: 'Bank Statement',
-        },
-        propertyDocument: {
-          type: 'string',
-          format: 'binary',
-          description: 'Property Document',
-        },
-        visuraCatastale: {
-          type: 'string',
-          format: 'binary',
-          description: 'Visura Catastale',
-        },
-        cuCertificate: {
-          type: 'string',
-          format: 'binary',
-          description: 'CU Certificate',
-        },
-        propertyDeed: {
-          type: 'string',
-          format: 'binary',
-          description: 'Property Deed',
-        },
-        medicalReceipts: {
-          type: 'array',
-          items: {
-            type: 'string',
-            format: 'binary',
-          },
-          description: 'Medical Receipts (up to 5 files)',
-        },
-        expenseReceipts: {
-          type: 'array',
-          items: {
-            type: 'string',
-            format: 'binary',
-          },
-          description: 'Expense Receipts (up to 5 files)',
-        },
-        incomeDocuments: {
-          type: 'array',
-          items: {
-            type: 'string',
-            format: 'binary',
-          },
-          description: 'Income Documents (up to 5 files)',
-        },
-        familyDocuments: {
-          type: 'array',
-          items: {
-            type: 'string',
-            format: 'binary',
-          },
-          description: 'Family Documents (up to 5 files)',
-        },
-        otherDocument: {
-          type: 'array',
-          items: {
-            type: 'string',
-            format: 'binary',
-          },
-          description: 'Other Documents (up to 10 files)',
-        },
-      },
-    },
+      'Upload documents using dynamic field names from the questionnaire schema. ' +
+      'Each file field name should match the schema field name (e.g., certificato_disabilita, giacenza_media_file).',
   })
   uploadRequiredDocuments(
     @Param('id') id: string,
     @CurrentUser() user: UserRequest,
-    @UploadedFiles()
-    files?: {
-      identityDocument?: Express.Multer.File[];
-      fiscalCode?: Express.Multer.File[];
-      incomeCertificate?: Express.Multer.File[];
-      bankStatement?: Express.Multer.File[];
-      propertyDocument?: Express.Multer.File[];
-      visuraCatastale?: Express.Multer.File[];
-      cuCertificate?: Express.Multer.File[];
-      propertyDeed?: Express.Multer.File[];
-      medicalReceipts?: Express.Multer.File[];
-      expenseReceipts?: Express.Multer.File[];
-      incomeDocuments?: Express.Multer.File[];
-      familyDocuments?: Express.Multer.File[];
-      otherDocument?: Express.Multer.File[];
-    },
+    @UploadedFiles() rawFiles?: Express.Multer.File[],
   ) {
+    const files = this.groupFilesByFieldname(rawFiles);
     return this.serviceRequestsService.uploadRequiredDocuments(
       id,
       user.id,
-      files || {},
+      files,
     );
   }
 
@@ -827,5 +631,21 @@ export class ServiceRequestsController {
   ) {
     // Implement document request
     return { success: true, message: 'Document request sent' };
+  }
+
+  /**
+   * Group flat file array from AnyFilesInterceptor into Record<fieldname, File[]>
+   */
+  private groupFilesByFieldname(
+    files?: Express.Multer.File[],
+  ): Record<string, Express.Multer.File[]> {
+    if (!files || files.length === 0) return {};
+    const grouped: Record<string, Express.Multer.File[]> = {};
+    for (const file of files) {
+      const key = file.fieldname;
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(file);
+    }
+    return grouped;
   }
 }

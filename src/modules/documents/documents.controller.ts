@@ -10,7 +10,7 @@ import {
   UseInterceptors,
   UploadedFiles,
 } from '@nestjs/common';
-import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import {
   ApiTags,
   ApiOperation,
@@ -55,25 +55,24 @@ export class DocumentsController {
   @ApiBody({ type: UploadMultipleDocumentsDto })
   @AuditLog({ action: 'DOCUMENTS_UPLOADED', resourceType: 'document' })
   @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: 'identityDocument', maxCount: 1 },
-      { name: 'fiscalCode', maxCount: 1 },
-      { name: 'incomeCertificate', maxCount: 1 },
-      { name: 'bankStatement', maxCount: 1 },
-      { name: 'propertyDocument', maxCount: 1 },
-      { name: 'visuraCatastale', maxCount: 1 },
-      { name: 'propertyDeed', maxCount: 1 },
-      { name: 'cuCertificate', maxCount: 1 },
-      { name: 'medicalReceipts', maxCount: 1 },
-      { name: 'expenseReceipts', maxCount: 1 },
-      { name: 'otherDocument', maxCount: 1 },
-    ]),
+    AnyFilesInterceptor({
+      limits: { files: 30, fileSize: 10 * 1024 * 1024 },
+    }),
   )
   uploadMultiple(
-    @UploadedFiles() files: { [key: string]: Express.Multer.File[] },
+    @UploadedFiles() rawFiles: Express.Multer.File[],
     @Body() dto: UploadMultipleDocumentsDto,
     @CurrentUser() user: any,
   ) {
+    // Group flat file array by fieldname into Record<string, File[]>
+    const files: Record<string, Express.Multer.File[]> = {};
+    if (rawFiles) {
+      for (const file of rawFiles) {
+        const key = file.fieldname;
+        if (!files[key]) files[key] = [];
+        files[key].push(file);
+      }
+    }
     return this.documentsService.uploadMultiple(files, dto, user.id);
   }
 
@@ -127,26 +126,24 @@ export class DocumentsController {
   @ApiBody({ type: UploadMultipleDocumentsDto })
   @AuditLog({ action: 'DOCUMENT_REPLACED', resourceType: 'document' })
   @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: 'identityDocument', maxCount: 1 },
-      { name: 'fiscalCode', maxCount: 1 },
-      { name: 'incomeCertificate', maxCount: 1 },
-      { name: 'bankStatement', maxCount: 1 },
-      { name: 'propertyDocument', maxCount: 1 },
-      { name: 'visuraCatastale', maxCount: 1 },
-      { name: 'propertyDeed', maxCount: 1 },
-      { name: 'cuCertificate', maxCount: 1 },
-      { name: 'medicalReceipts', maxCount: 1 },
-      { name: 'expenseReceipts', maxCount: 1 },
-      { name: 'otherDocument', maxCount: 1 },
-    ]),
+    AnyFilesInterceptor({
+      limits: { files: 10, fileSize: 10 * 1024 * 1024 },
+    }),
   )
   replace(
     @Param('id') id: string,
-    @UploadedFiles() files: { [key: string]: Express.Multer.File[] },
+    @UploadedFiles() rawFiles: Express.Multer.File[],
     @Body() dto: UploadMultipleDocumentsDto,
     @CurrentUser() user: any,
   ) {
+    const files: Record<string, Express.Multer.File[]> = {};
+    if (rawFiles) {
+      for (const file of rawFiles) {
+        const key = file.fieldname;
+        if (!files[key]) files[key] = [];
+        files[key].push(file);
+      }
+    }
     return this.documentsService.replaceMultiple(id, files, dto, user.id);
   }
 

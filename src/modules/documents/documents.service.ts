@@ -335,27 +335,28 @@ export class DocumentsService {
 
     for (const [fieldName, fileArray] of Object.entries(files)) {
       if (fileArray && fileArray.length > 0) {
-        const file = fileArray[0];
+        // Upload ALL files in each field, not just the first one
+        for (const file of fileArray) {
+          // Upload to S3
+          const uploadResult = await this.storageService.uploadFile(
+            file,
+            s3PathPrefix,
+          );
 
-        // Upload to S3
-        const uploadResult = await this.storageService.uploadFile(
-          file,
-          s3PathPrefix,
-        );
-
-        const document = this.documentRepository.create({
-          serviceRequestId: dto.serviceRequestId,
-          category: documentTypeMapping[fieldName] || 'OTHER',
-          filename: uploadResult.path.split('/').pop(),
-          originalFilename: file.originalname,
-          filePath: uploadResult.publicUrl, // Use full S3 URL instead of relative path
-          fileSize: file.size,
-          mimeType: file.mimetype,
-          status: 'pending',
-          isRequired: true,
-          version: 1,
-        });
-        documents.push(document);
+          const document = this.documentRepository.create({
+            serviceRequestId: dto.serviceRequestId,
+            category: documentTypeMapping[fieldName] || 'OTHER',
+            filename: uploadResult.path.split('/').pop(),
+            originalFilename: file.originalname,
+            filePath: uploadResult.publicUrl,
+            fileSize: file.size,
+            mimeType: file.mimetype,
+            status: 'pending',
+            isRequired: true,
+            version: 1,
+          });
+          documents.push(document);
+        }
       }
     }
 
